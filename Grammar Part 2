@@ -1,0 +1,19 @@
+---Operators---
+
+logical_op		-> "!" | "&&" | "||" | "XOR" | "NOR" | "XNOR" | "NAND" | "<" | ">" | "<=" | ">=" | "=="		(return a boolean value)
+math_op			-> "+" | "-" | "/" | "*" | "%" | "^"											(return a numeric value)
+assignment_op	-> "=" | "+=" | "-=" | "/=" | "*=" | "%=" | "^="									(assign a value)
+operator		-> logical_op | math_op | assignment_op
+
+non-zero_digits -> "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+digits			-> "0" | non-zero_digits
+
+integer			-> "0" | ["-"] {digits}
+double			-> [integer] "." digits {digits} | integer "." {digits}
+
+expression		-> (expression | term) operator (expression | term)
+declaration		-> type (id ";" | assignment)
+assignment		-> id assignment_op (expression | term) ";"
+statement		-> assignment | function | declaration | flow_control;
+block			-> "{" {statement} "}"
+flow_control	-> if | while | for | break | return | continue

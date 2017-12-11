@@ -1,0 +1,47 @@
+Grammar:
+
+E 			-> Epsilon
+
+block_body  -> stat
+			-> "{" stats "}"
+
+------	IF STATEMENT  ----------
+
+if_stat 	-> if_head block_body optional_else
+if_head		-> "if" "(" bool_exp ")"
+
+else_stat 	-> "else" block_body
+else_if_stat-> "else" if_stat
+optional_if -> if_head
+			-> E
+			
+optional_else -> else_if_stat optional_else
+			  -> else_stat
+			  -> E
+			  
+------	IF STATEMENT  ----------
+
+------   WHILE LOOP   ----------
+while_stat	-> while_head block_body
+while_head 	-> "while" "(" bool_exp ")"
+------   WHILE LOOP   ----------
+
+------   DO WHILE LOOP   ----------
+do_whil_stat-> "do" block_body while_head
+------   DO WHILE LOOP   ----------
+
+------   FOR LOOP   ----------
+for_stat	-> "for" "(" for_head ")" block_body
+for_head	-> assignment ";" bool_exp ";" optional_stat
+for_head	-> bool_exp ";" optional_stat
+optional_stat -> stat
+			  -> E
+------   FOR LOOP   ----------
+
+------  SWITCH -------
+switch_stat	-> "switch" "(" switch_param ")" switch_body
+switch_param-> id
+			-> literal
+switch_body -> "case" "(" switch_param ")" block_body switch_body
+switch_body -> "default" block_body
+------  SWITCH -------

@@ -1,0 +1,74 @@
+Exhaustive Syntax:
+
+for(int i = 0; i < 10; i++){
+	
+}
+
+for(i < 10; i++){
+	
+}
+
+for(int i = 0; i < 10){
+	
+}
+
+for(int i = 0 -> 9){
+	
+}
+
+foreach(int x : array){
+	break;
+	continue;
+	repeat; //repeats the current iteration without the incrementation
+	redo: //repeats the loop from the beginning
+}
+
+forever(){	//infinite loop
+
+}
+
+while(i < 3){
+
+}
+
+do {
+
+} while (x < 3);
+
+var cat, hamster;
+switch(cat){
+	case (12) :
+		x = 3;
+		break;
+	case ("dog") :
+		x = 4;
+		break;
+	case (hamster) :
+		x = 6;
+		break;
+	case (12 | "dog" | hamster) :	//executes if any of them are  true
+		x = 7;
+		break;		
+	default: 
+		x = 5;
+}
+
+if (x < 3) {
+	x = 3;
+} else if (x < 4){
+	x = 4;
+} else {
+	x = 5;
+}
+
+
+int x;
+double y;
+string z;
+
+//casting
+int(22.4) //returns 22
+
+double cat = 22.4;
+>int(cat) //cat is now an int of value 22
+
