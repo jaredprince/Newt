@@ -1,18 +1,27 @@
-import java.util.ArrayList;
+
 
 public class ASTNode {
+	
+//	String type;
+	Token token;
 
-	static final int BLOCK = 1;
-	static final int STATEMENT = 2;
-	static final int ID = 3;
-	static final int EXPRESSION = 4;
-	static final int TERM = 5;
-	static final int PROGRAM = 6;
+	public ASTNode(){
+		
+	}
 	
-	String type;	
-	ArrayList<ASTNode> nodes = new ArrayList<ASTNode>();
+	public ASTNode(Token t){
+		token = t;
+	}
 	
-	public ASTNode(String t){
-		type = t;
+	public void setToken(Token t){
+		this.token = t;
+	}
+	
+	public String toString(int depth){
+		String str = "";
+		for(int i = 0; i < depth; i++){
+			str = str + "  ";
+		}
+		return str + "Token: " + token.value;
 	}
 }
