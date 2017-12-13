@@ -17,13 +17,13 @@ public class Parser {
 //			System.out.println(lex.consume());
 //		}
 		
-		parseProgram();
+//		parseProgram();
 		
-		root = parseAssignment();
+		root = parseProgram();
 
 		ASTNode r = root;
 		
-		System.out.println(r.toString(1));
+		System.out.println(r.toString(0));
 	}
 	
 	//this will replace the many operator parsing methods
@@ -36,8 +36,14 @@ public class Parser {
 		}
 	}
 	
-	public static void parseProgram(){
-
+	public static ASTNode parseProgram(){
+		NaryAST node = new NaryAST(new Token("program", Token.GROUPING));
+		
+		while(lex.hasNextToken()){
+			node.addNode(parseStatement());
+		}
+		
+		return node;
 	}
 	
 	public static ASTNode parseStatement(){
@@ -99,6 +105,7 @@ public class Parser {
 		expect("{");
 		
 		NaryAST block = new NaryAST();
+		block.token = new Token("switch-body", Token.GROUPING);
 		
 		while(lex.read().value.equals("case")){
 			block.addNode(parseCase());
@@ -126,10 +133,10 @@ public class Parser {
 		return node;
 	}
 	
-	public static BinaryAST parseDefault(){
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	public static UnaryAST parseDefault(){
+		UnaryAST node = new UnaryAST(null, lex.consume());
 
-		node.right = parseBlock();
+		node.child = parseBlock();
 		
 		return node;
 	}
@@ -197,8 +204,8 @@ public class Parser {
 	}
 	
 	//an if statement has three children - condition, if body, and optional else
-	public static TernaryAST parseIf(){
-		TernaryAST node = new TernaryAST(null, null, null, lex.consume());
+	public static ASTNode parseIf(){
+		BinaryAST node = new BinaryAST(null, lex.consume(), null);
 		
 		//get condition
 		expect("(");
@@ -207,25 +214,29 @@ public class Parser {
 		
 		//get the body as a block or a single statement
 		if(lex.read().value.equals("{")){
-			node.center = parseBlock();
+			node.right = parseBlock();
 		} else {
-			node.center = parseStatement();
+			node.right = parseStatement();
 		}
 		
 		//the optional else
 		if(lex.read().value.equals("else")){
 			lex.consume();
 			
+			TernaryAST elseNode = new TernaryAST(node.left, node.right, null, node.token);
+			
 			//the else can be another if
 			if(lex.read().value.equals("if")){
-				node.right = parseIf();
+				elseNode.right = parseIf();
 			} else {
 				if(lex.read().value.equals("{")){
-					node.right = parseBlock();
+					elseNode.right = parseBlock();
 				} else {
-					node.right = parseStatement();
+					elseNode.right = parseStatement();
 				}
 			}
+			
+			return elseNode;
 		}
 		
 		return node;
@@ -236,6 +247,8 @@ public class Parser {
 		expect("{");
 		
 		NaryAST node = new NaryAST();
+		
+		node.token = new Token("block", Token.GROUPING);
 		
 		//read statements until the block closes
 		while(!lex.read().value.equals("}")){
@@ -285,7 +298,7 @@ public class Parser {
 	
 	public static ASTNode parseConditional(){
 		
-		ASTNode node = parseEquality();
+		ASTNode node = parseAND();
 		
 		if(lex.nextValueIs("?")){
 			Token t = lex.consume();
@@ -293,6 +306,26 @@ public class Parser {
 			expect(":");
 			
 			((TernaryAST)node).right = parseExpression();
+		}
+		
+		return node;
+	}
+	
+	public static ASTNode parseAND(){
+		ASTNode node = parseOR();
+		
+		while(lex.nextValueIs("&&", "~NAND")){
+			node = new BinaryAST(node, lex.consume(), parseOR());
+		}
+		
+		return node;
+	}
+	
+	public static ASTNode parseOR(){
+		ASTNode node = parseEquality();
+		
+		while(lex.nextValueIs("||", "~NOR")){
+			node = new BinaryAST(node, lex.consume(), parseEquality());
 		}
 		
 		return node;

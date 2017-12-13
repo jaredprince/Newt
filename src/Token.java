@@ -12,9 +12,15 @@ public class Token {
 	static final int STRUCTURE = 6;
 	static final int IDENTIFIER = 7;
 	static final int STRING = 8;
+	static final int GROUPING = 9;
 	
 	int char_loc;
 	int line_loc;
+	
+	public Token(String v, int t){
+		value = v;
+		type = t;
+	}
 	
 	public Token(int cl, int ll){
 		char_loc = cl;

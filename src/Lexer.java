@@ -9,19 +9,19 @@ public class Lexer {
 	int line_loc = 0;
 	
 	static String[] keywords = {
-		"do", "if", "else", "while", "for", "func",  //structures
+		"do", "if", "else", "while", "for", "func", "switch", "case", "default", //structures
 		"void", //modifiers
 		"goto", "return", "break" //actions	
 	};
 	
 	static String[] types = {
-		"int", "String", "char", "float", "boolean"
+		"int", "string", "char", "float", "boolean"
 	};
 	
 	static String[] operators = {
 		"+", "=", "-", "*", "/", "%", "++", "--", "^",	//arithmetic
 		"==", "!=", "<", ">", "<=", ">=",  //comparison
-		"!", "&&", "||", "XNOR", "XOR", "NAND", "NOR", "->",  //logical
+		"!", "&&", "||", "~NAND", "~NOR", "->",  //logical
 		"+=", "-=", "*=", "/=", "%=", "^=",  //compound
 		".",  //member
 		"?.", //safe navigator
