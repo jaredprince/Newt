@@ -1,3 +1,19 @@
+for(int i = 0; i < 2; j=3){
+
+}
+
+for(i = 0; i < 2; j=3){
+
+}
+
+for(i < 2; j=3){
+
+}
+
+for(i < 2){
+
+}
+
 switch(cat){
 	case (23) {
 		a = b;

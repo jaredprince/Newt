@@ -10,14 +10,12 @@ public class Parser {
 	static LinkedList<String[]> operators;
 	
 	public static void main(String[] args) throws IOException {
-
+		
 		lex = new Lexer(new File("ParserTest1.txt"));
 		
 //		while(lex.hasNextToken()){
 //			System.out.println(lex.consume());
 //		}
-		
-//		parseProgram();
 		
 		root = parseProgram();
 
@@ -49,7 +47,9 @@ public class Parser {
 	public static ASTNode parseStatement(){
 		
 		if(lex.read().type == Token.STATEMENT){
-			return new ASTNode(lex.consume());
+			ASTNode node = new ASTNode(lex.consume());
+			expect(";");
+			return node;
 		}
 		
 		else if(lex.read().type == Token.STRUCTURE) {
@@ -57,11 +57,15 @@ public class Parser {
 		}
 
 		else if(lex.read().type == Token.TYPE){
-			return parseDeclaration();
+			ASTNode node = parseDeclaration();
+			expect(";");
+			return node;
 		}
 		
 		else if(lex.read().type == Token.IDENTIFIER){
-			return parseAssignment();
+			ASTNode node = parseAssignment();
+			expect(";");
+			return node;
 		}
 		
 		error("Keyword or identifier");
@@ -141,24 +145,62 @@ public class Parser {
 		return node;
 	}
 	
-	public static BinaryAST parseFor(){
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	//not quite LL(1)
+	public static TernaryAST parseFor(){
+		TernaryAST node = new TernaryAST(null, null, null, lex.consume());
 		
-//		//read the condition
-//		expect("(");
-//
-//		if(){
-//			
-//		}
-//		
-//		expect(")");
-//		
-//		//the body can be a block starting with '{' or a single statement
-//		if(lex.read().value.equals("{")){
-//			node.right = parseBlock();
-//		} else {
-//			node.right = parseStatement();
-//		}
+		//read the condition
+		expect("(");
+		
+		//get a declaration
+		if(lex.nextTypeIs(Token.TYPE)){
+			node.left = parseDeclaration();
+			expect(";");
+		} else if(lex.nextTypeIs(Token.IDENTIFIER)) {
+			Token t = lex.consume();
+			
+			//check for assignment
+			if(lex.nextValueIs("=", "+=", "-=", "*=", "/=", "^=", "%=")){
+				node.left = new BinaryAST(new ASTNode(t), lex.consume(), parseExpression());
+				expect(";");
+			} else {
+				lex.returnToken(t);
+			}
+		}
+		
+		//get the condition
+		node.center = parseExpression();
+		
+		//need to push this into the right block
+		ASTNode statement = null;
+		
+		//get the optional final statement
+		if(!lex.nextValueIs(")")){
+			expect(";");
+			
+			if(lex.nextTypeIs(Token.IDENTIFIER)){
+				statement = parseAssignment();
+			} else if (lex.nextTypeIs(Token.STRUCTURE)){
+				statement = parseStructure();
+			} else if (lex.nextTypeIs(Token.STATEMENT)) {
+				statement = new ASTNode(lex.consume());
+			} else {
+				error("statement");
+			}
+		}
+		
+		expect(")");
+		
+		//the body can be a block starting with '{' or a single statement
+		if(lex.read().value.equals("{")){
+			node.right = parseBlock();
+		} else {
+			node.right = parseStatement();
+		}
+		
+		if(statement != null){
+			((NaryAST) node.right).addNode(statement);
+		}
 		
 		return node;
 	}
@@ -286,8 +328,6 @@ public class Parser {
 		}
 		
 		node.right = parseExpression();
-		
-		expect(";");
 		
 		return node;
 	}
@@ -477,7 +517,7 @@ public class Parser {
 			System.err.println("  Expected : " + str);
 			System.err.println("  Recieved : Nothing");
 		} else {
-			System.err.println("Error on line " + t.line_loc + " :");
+			System.err.println("Error on line " + t.line_loc + ", character " + t.char_loc + " :");
 			System.err.println("  Expected : " + str);
 			System.err.println("  Recieved : " + t.value);
 		}

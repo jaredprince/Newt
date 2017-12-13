@@ -49,6 +49,7 @@ public class Lexer {
 		
 		//go through each line
 		while(in.hasNextLine()){
+			char_loc = 0;
 			String line = in.nextLine();
 			
 			//go through each character
@@ -174,6 +175,8 @@ public class Lexer {
 					tokens.add(t);
 				}
 			}
+			
+			line_loc++;
 		}
 	}
 	
@@ -260,6 +263,10 @@ public class Lexer {
 		}
 		
 		return false;
+	}
+	
+	public void returnToken(Token t){
+		tokens.add(0, t);
 	}
 	
 	public Token consume(){
