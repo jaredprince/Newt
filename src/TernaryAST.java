@@ -1,6 +1,3 @@
-
-
-
 public class TernaryAST extends ASTNode {
 
 	ASTNode left;

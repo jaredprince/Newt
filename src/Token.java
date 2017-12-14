@@ -1,7 +1,5 @@
 
 public class Token {
-	String value;
-	int type;
 	
 	static final int LITERAL = 0;
 	static final int TYPE = 1;
@@ -13,9 +11,16 @@ public class Token {
 	static final int IDENTIFIER = 7;
 	static final int STRING = 8;
 	static final int GROUPING = 9;
+	static final int BLANK = 10;
 	
+	String value;
+	int type;
 	int char_loc;
 	int line_loc;
+	
+	public Token(int t){
+		type = t;
+	}
 	
 	public Token(String v, int t){
 		value = v;

@@ -146,8 +146,8 @@ public class Parser {
 	}
 	
 	//not quite LL(1)
-	public static TernaryAST parseFor(){
-		TernaryAST node = new TernaryAST(null, null, null, lex.consume());
+	public static QuaternaryAST parseFor(){
+		QuaternaryAST node = new QuaternaryAST(lex.consume());
 		
 		//read the condition
 		expect("(");
@@ -165,28 +165,28 @@ public class Parser {
 				expect(";");
 			} else {
 				lex.returnToken(t);
+				node.left = new ASTNode(new Token(Token.BLANK));
 			}
 		}
 		
 		//get the condition
-		node.center = parseExpression();
-		
-		//need to push this into the right block
-		ASTNode statement = null;
+		node.left_center = parseExpression();
 		
 		//get the optional final statement
 		if(!lex.nextValueIs(")")){
 			expect(";");
 			
 			if(lex.nextTypeIs(Token.IDENTIFIER)){
-				statement = parseAssignment();
+				node.right_center = parseAssignment();
 			} else if (lex.nextTypeIs(Token.STRUCTURE)){
-				statement = parseStructure();
+				node.right_center = parseStructure();
 			} else if (lex.nextTypeIs(Token.STATEMENT)) {
-				statement = new ASTNode(lex.consume());
+				node.right_center = new ASTNode(lex.consume());
 			} else {
 				error("statement");
 			}
+		} else {
+			node.right_center = new ASTNode(new Token(Token.BLANK));
 		}
 		
 		expect(")");
@@ -196,10 +196,6 @@ public class Parser {
 			node.right = parseBlock();
 		} else {
 			node.right = parseStatement();
-		}
-		
-		if(statement != null){
-			((NaryAST) node.right).addNode(statement);
 		}
 		
 		return node;
