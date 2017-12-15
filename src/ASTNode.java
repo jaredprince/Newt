@@ -24,4 +24,28 @@ public class ASTNode {
 		}
 		return str + "Token: " + token.value;
 	}
+	
+	public Object visitNode(){
+		if(token.type != Token.LITERAL){
+			System.err.println("Expected literal, but no literal found.");
+			System.exit(0);
+		}
+		
+		String val = token.value;
+		int stype = token.subtype;
+		
+		if(stype == Token.STRING){
+			return val.substring(1, val.length() - 1);
+		} else if(stype == Token.BOOLEAN) {
+			return new Boolean(val);
+		} else if(stype == Token.CHARACTER) {
+			return new Character(val.charAt(0));
+		} else if(stype == Token.DOUBLE){
+			return new Double(val);
+		} else if(stype == Token.INTEGER){
+			return new Integer(val);
+		}
+		
+		return null;
+	}
 }

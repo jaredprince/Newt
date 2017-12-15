@@ -8,14 +8,16 @@ public class Lexer {
 	int char_loc = 0;
 	int line_loc = 0;
 	
-	static String[] keywords = {
-		"do", "if", "else", "while", "for", "func", "switch", "case", "default", //structures
-		"void", //modifiers
-		"goto", "return", "break" //actions	
+	static String[] structures = {
+		"do", "if", "else", "while", "for", "func", "switch", "case", "default" //structures
+	};
+	
+	static String[] statements = {
+		"goto", "return", "break"
 	};
 	
 	static String[] types = {
-		"int", "string", "char", "float", "boolean"
+		"short", "long", "int", "string", "char", "double", "boolean", "var"
 	};
 	
 	static String[] operators = {
@@ -71,7 +73,7 @@ public class Lexer {
 				
 				//handle strings
 				else if(c == '"'){
-					t.type = 8;
+					t.type = Token.LITERAL;
 					value = stringToken(c, line);
 					
 					line = line.substring(value.length() - 1);
@@ -83,26 +85,28 @@ public class Lexer {
 					value = identifierToken(c, line);
 					line = line.substring(value.length() - 1);
 					
-					if(contains(keywords, value)){
-						t.type = 6;	
+					if(contains(structures, value)){
+						t.type = Token.STRUCTURE;	
 					} else if (contains(types, value)){
-						t.type = 1;
+						t.type = Token.TYPE;
+					} else if (contains(statements, value)){
+						t.type = Token.STATEMENT;
 					} else if (value.equals("true") || value.equals("false")){
-						t.type = 0;
+						t.type = Token.LITERAL;
 					} else {
-						t.type = 7;
+						t.type = Token.IDENTIFIER;
 					}
 				}
 				
 				else if(contains(delineators, c)) {
-					t.type = 3;
+					t.type = Token.DELINEATOR;
 				}
 				
 				else if (c == '/'){
 					
 					//handles //comments
 					if(line.charAt(0) == '/'){
-						t.type = 4;
+						t.type = Token.COMMENT;
 						value += line;
 						line = "";
 						
@@ -116,7 +120,7 @@ public class Lexer {
 						
 						char_loc++;
 						
-						t.type = 4;
+						t.type = Token.COMMENT;
 						//continue until the comment closes
 						while(!value.substring(value.length() - 2).equals("*/")){
 							value += line.charAt(0);
@@ -128,13 +132,13 @@ public class Lexer {
 					
 					//handles division op
 					else {
-						t.type = 5;
+						t.type = Token.OPERATOR;
 					}
 				}
 
 				//handles number literals
 				else if (Character.isDigit(c)){
-					t.type = 0;
+					t.type = Token.LITERAL;
 					boolean period = false;
 					
 					while(Character.isDigit(line.charAt(0)) || (!period && line.charAt(0) == '.')){
@@ -155,7 +159,7 @@ public class Lexer {
 					
 					char_loc += 2;
 					
-					t.type = 0;
+					t.type = Token.LITERAL;
 				}
 				
 				//handles operators (including ones like + and ++)
@@ -164,7 +168,7 @@ public class Lexer {
 					value = operatorToken(c, line);
 					line = line.substring(value.length() - 1);
 					
-					t.type = 5;
+					t.type = Token.OPERATOR;
 				}
 				
 				t.value = value;

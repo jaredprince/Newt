@@ -17,4 +17,54 @@ public class UnaryAST extends ASTNode {
 		}
 		return str + "Token: " + token.value + "\n" + child.toString(depth + 1);
 	}
+	
+	@Override
+	public Object visitNode(){
+		Object child = this.child.visitNode();
+		
+		if(token.type == Token.TYPE){
+			//add this variable to the master list
+		}
+		
+		String val = token.value;
+
+		if(val.equals("!")){
+			if(child instanceof Boolean){
+				return new Boolean(!((Boolean)child).booleanValue());
+			}
+			
+			else {
+				System.err.println("Expect a boolean.");
+				System.exit(0);
+			}
+		}
+		
+		if(val.equals("|")){
+			if(child instanceof Double){
+				return new Double(Math.abs(( (Double)child).doubleValue() ));
+			}
+			
+			if(child instanceof Integer){
+				return new Integer(Math.abs(( (Integer)child).intValue() ));
+			}
+			
+			System.err.println("Expect a numeric value.");
+			System.exit(0);
+		}
+		
+		if(val.equals("-")) {
+			if(child instanceof Double){
+				return new Double( -((Double)child).doubleValue() );
+			}
+			
+			if(child instanceof Integer){
+				return new Integer( -((Integer)child).intValue() );
+			}
+			
+			System.err.println("Expect a numeric value.");
+			System.exit(0);
+		}
+		
+		return null;
+	}
 }

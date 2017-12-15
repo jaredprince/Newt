@@ -18,4 +18,24 @@ public class TernaryAST extends ASTNode {
 		}
 		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + center.toString(depth + 1) + "\n" + right.toString(depth + 1);
 	}
+	
+	@Override
+	public Object visitNode(){
+		
+		Object condition = left.visitNode();
+		
+		if(token.type == Token.STRUCTURE){
+			//handle if statements
+		}
+		
+		if(token.type == Token.OPERATOR){
+			if(token.value.equals("?")){
+				
+				//handle condtional operator using conditional operator
+				return (Boolean)condition ? center.visitNode() : right.visitNode();
+			}
+		}
+		
+		return null;
+	}
 }
