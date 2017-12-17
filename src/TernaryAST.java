@@ -24,14 +24,15 @@ public class TernaryAST extends ASTNode {
 		
 		Object condition = left.visitNode();
 		
+		//TODO: handle if statements
 		if(token.type == Token.STRUCTURE){
-			//handle if statements
+			
 		}
 		
 		if(token.type == Token.OPERATOR){
 			if(token.value.equals("?")){
 				
-				//handle condtional operator using conditional operator
+				//handle conditional operator using conditional operator
 				return (Boolean)condition ? center.visitNode() : right.visitNode();
 			}
 		}

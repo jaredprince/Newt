@@ -10,7 +10,7 @@ public class Parser {
 	static LinkedList<String[]> operators;
 
 	public static void main(String[] args) throws IOException {
-
+		
 		lex = new Lexer(new File("Parser Test.txt"));
 
 //		 while(lex.hasNextToken()){
@@ -28,7 +28,7 @@ public class Parser {
 //		System.out.println(r.toString(0));
 	}
 
-	// this will replace the many operator parsing methods
+	//TODO: replace multiple operator methods with a list of string[]
 	public static void operatorsPrecedence() {
 		String[][] ops = { { "==", "!=" }, { ">=", "<=", "<", ">" }, { "+", "-" }, { "*", "/", "%" }, { "^" },
 				{ "-", "!" } };
@@ -226,6 +226,7 @@ public class Parser {
 		return new BinaryAST(params, new Token("function", Token.STRUCTURE), body);
 	}
 
+	//TODO: Make for loops LL(1)
 	// not quite LL(1)
 	public static QuaternaryAST parseFor() {
 		QuaternaryAST node = new QuaternaryAST(lex.consume());
@@ -405,6 +406,8 @@ public class Parser {
 		// a declaration begins with a type
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
+			
+			
 			
 			return new UnaryAST(parseAssignment(), t);
 		}
@@ -612,6 +615,8 @@ public class Parser {
 
 		//handles casting
 		//TODO: rethink if unary node of type TYPE will work when used for both casting and declarations
+		/*I think it will. If the identifier exists, cast it. If it doesn't, declare it. However, what if you are trying to
+		declare a local version of a global variable? It will try to cast the global instead.*/
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
 			expect("(");
@@ -649,7 +654,6 @@ public class Parser {
 	/**
 	 * Consumes the next token if it matches the given string, prints an error otherwise.
 	 * @param str The expected value.
-	 * @return The token consumed.
 	 */
 	public static void expect(String str) {
 		if (lex.hasNextToken()) {

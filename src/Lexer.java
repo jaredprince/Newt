@@ -293,7 +293,9 @@ public class Lexer {
 		
 		//return a literal token or an error token
 		if(val.endsWith("\"") && val.length() > 1){
-			return new Token(char_loc, line_loc, val, Token.LITERAL);
+			Token t = new Token(char_loc, line_loc, val, Token.LITERAL);
+			t.subtype = Token.STRING;
+			return t;
 		} else {
 			return new Token(char_loc, line_loc, val, Token.ERROR);
 		}
