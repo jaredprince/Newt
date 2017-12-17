@@ -5,6 +5,10 @@ public class UnaryAST extends ASTNode {
 
 	ASTNode child;
 	
+	public UnaryAST(Token t){
+		token = t;
+	}
+	
 	public UnaryAST(ASTNode c, Token t){
 		child = c;
 		token = t;

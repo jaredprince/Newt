@@ -1,33 +1,40 @@
 
 public class Token {
 	
+	static final String[] names = {
+		"ERROR", "TYPE", "STATEMENT", "DELINEATOR", "COMMENT", "OPERATOR", "STRUCTURE", "IDENTIFIER", "GROUPING", "BLANK", "LITERAL",
+		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL", "ASSIGNMENT"
+	};
+	
 	//basic types
-	static final int LITERAL = 0;
-	static final int TYPE = 1;
-	static final int STATEMENT = 2;
-	static final int DELINEATOR = 3;
-	static final int COMMENT = 4;
-	static final int OPERATOR = 5;
-	static final int STRUCTURE = 6;
-	static final int IDENTIFIER = 7;
-	static final int GROUPING = 8;
-	static final int BLANK = 9;
+	static final int ERROR = 0; //an unidentifiable sequence
+	static final int TYPE = 1; //a type keyword (int, char, string, etc.)
+	static final int STATEMENT = 2; //a statement keyword (break, return, continue, etc.)
+	static final int DELINEATOR = 3; //a separating punctuation mark ({, (, :, etc.)
+	static final int COMMENT = 4; //a comment (// or /**/)
+	static final int OPERATOR = 5; //an operator (logical, mathematical, assignment, comparative)
+	static final int STRUCTURE = 6; //a structure keyword (for, whil, switch, case, etc.)
+	static final int IDENTIFIER = 7; //a variable name
+	static final int GROUPING = 8; //used by parser to denote a block node
+	static final int BLANK = 9; //used by the parser when a blank token is needed
+	static final int LITERAL = 10; //a literal value (number, string, char, etc.)
 	
 	//subtypes
 	
 	//literals
-	static final int STRING = 10;
-	static final int BOOLEAN = 11;
-	static final int CHARACTER = 12;
-	static final int DOUBLE = 13;
-	static final int INTEGER = 14;
-	static final int OBJECT = 15;
+	static final int BOOLEAN = 11; //true or false
+	static final int CHARACTER = 12; //'c'
+	static final int DOUBLE = 13; //123.123, .0123, 123., 0.123
+	static final int INTEGER = 14; //123
+	static final int OBJECT = 15; //currently unused
+	static final int STRING = 16; //"string"
 	
 	//operators
-	static final int ASSIGNMENT = 16;
-	static final int MATHMATICAL = 17;
-	static final int LOGICAL = 18;	
-	static final int COMPARATIVE = 19;
+	static final int MATHEMATICAL = 17; // +, -, *, /, %, etc.
+	static final int LOGICAL = 18; // &&, ||, ~NOR, etc.
+	static final int COMPARATIVE = 19; // <, ==, !=, >=, etc.
+	static final int SPECIAL = 20;
+	static final int ASSIGNMENT = 21; // =, *=, +=, etc.
 	
 	String value;
 	
@@ -59,6 +66,8 @@ public class Token {
 	}
 	
 	public String toString(){
-		return "type: " + type + "\t\tValue: " + value + "\t\tCharacter: " + char_loc + "\t\tLine: " + line_loc;
+		String out = String.format("(%3d,%3d)  %10s : %s", char_loc, line_loc, names[type], value);
+//		return "type: " + names[type] + "\t\tValue: " + value + "\t\tCharacter: " + char_loc + "\t\tLine: " + line_loc;
+		return out;
 	}
 }

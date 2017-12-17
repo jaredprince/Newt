@@ -81,7 +81,7 @@ public class BinaryAST extends ASTNode {
 			}
 
 			//TODO: concatenate strings with "+"
-			if (token.subtype == Token.MATHMATICAL) {
+			if (token.subtype == Token.MATHEMATICAL) {
 				if ((left instanceof Double || left instanceof Integer)
 						&& (right instanceof Double || right instanceof Integer)) {
 

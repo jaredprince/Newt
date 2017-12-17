@@ -11,19 +11,21 @@ public class Parser {
 
 	public static void main(String[] args) throws IOException {
 
-		lex = new Lexer(new File("ParserTest1.txt"));
+		lex = new Lexer(new File("Parser Test.txt"));
 
-		// while(lex.hasNextToken()){
-		// System.out.println(lex.consume());
-		// }
+//		 while(lex.hasNextToken()){
+//			 System.out.println(lex.consume());
+//		 }
 		
 //		System.out.println((Double)(new Integer(2)));
 		
-		root = parseProgram();
+//		root = parseProgram();
 
-		ASTNode r = root;
+//		ASTNode r = root;
+		
+		System.out.println(parseExpression().visitNode());
 
-		System.out.println(r.toString(0));
+//		System.out.println(r.toString(0));
 	}
 
 	// this will replace the many operator parsing methods
@@ -37,9 +39,15 @@ public class Parser {
 		}
 	}
 
+	
+	/**
+	 * Parses the entire program.
+	 * @return An ASTNode node representing the program.
+	 */
 	public static ASTNode parseProgram() {
 		NaryAST node = new NaryAST(new Token("program", Token.GROUPING));
 
+		//parse statements until there is no next token
 		while (lex.hasNextToken()) {
 			node.addNode(parseStatement());
 		}
@@ -47,77 +55,104 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses a single statement (declaration, assignment, structure, or keyword statement).
+	 * @return An ASTNode representing the statement.
+	 */
 	public static ASTNode parseStatement() {
 
-		if (lex.read().type == Token.STATEMENT) {
+		//parse keyword statements
+		if (lex.nextTypeIs(Token.STATEMENT)) {
 			ASTNode node = new ASTNode(lex.consume());
 			expect(";");
 			return node;
 		}
 
-		else if (lex.read().type == Token.STRUCTURE) {
+		//parse structures
+		else if (lex.nextTypeIs(Token.STRUCTURE)) {
 			return parseStructure();
 		}
 
-		else if (lex.read().type == Token.TYPE) {
+		//parse declarations
+		else if (lex.nextTypeIs(Token.TYPE)) {
 			ASTNode node = parseDeclaration();
 			expect(";");
 			return node;
 		}
 
-		else if (lex.read().type == Token.IDENTIFIER) {
+		//parse assignments
+		else if (lex.nextTypeIs(Token.IDENTIFIER)) {
 			ASTNode node = parseAssignment();
 			expect(";");
 			return node;
 		}
 
-		error("Keyword or identifier");
+		//give an error if no statment was found
+		error("keyword or identifier");
 
 		return null;
 	}
 
+	/**
+	 * Parses the appropriate structure.
+	 * @return An ASTNode representing the structure.
+	 */
 	public static ASTNode parseStructure() {
 
-		if (lex.read().value.equals("while")) {
+		//parse a while loop
+		if (lex.nextValueIs("while")) {
 			return parseWhile();
 		}
 
-		if (lex.read().value.equals("for")) {
+		//parse a for loop
+		if (lex.nextValueIs("for")) {
 			return parseFor();
 		}
 
-		if (lex.read().value.equals("if")) {
+		//parse an if statement
+		if (lex.nextValueIs("if")) {
 			return parseIf();
 		}
 
-		if (lex.read().value.equals("do")) {
+		//parse a do-while loop
+		if (lex.nextValueIs("do")) {
 			return parseDo();
 		}
 
-		if (lex.read().value.equals("switch")) {
+		//parse a switch statement
+		if (lex.nextValueIs("switch")) {
 			return parseSwitch();
 		}
 
+		//giev an error if no structure is found
 		error("structure");
 
 		return null;
 	}
 
+	/**
+	 * Parses a switch statement.
+	 * @return A BinaryAST node representing the statement
+	 */
 	public static BinaryAST parseSwitch() {
 		BinaryAST node = new BinaryAST(null, lex.consume(), null);
 
+		//get the rest of the head
 		expect("(");
 		node.left = parseExpression();
 		expect(")");
 		expect("{");
 
+		//hold the case statements
 		NaryAST block = new NaryAST();
 		block.token = new Token("switch-body", Token.GROUPING);
 
+		//add cases to the block
 		while (lex.read().value.equals("case")) {
 			block.addNode(parseCase());
 		}
 
+		//optional default statement
 		if (lex.read().value.equals("default")) {
 			block.addNode(parseDefault());
 		}
@@ -129,23 +164,66 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses a case statement.
+	 * @return A BinaryAST node representing the case.
+	 */
 	public static BinaryAST parseCase() {
 		BinaryAST node = new BinaryAST(null, lex.consume(), null);
 
+		//get the expression
 		expect("(");
 		node.left = parseExpression();
 		expect(")");
+		
+		//get the following statements
 		node.right = parseBlock();
 
 		return node;
 	}
 
+	/**
+	 * Parses a default statement.
+	 * @return A UnaryAST node representing the default.
+	 */
 	public static UnaryAST parseDefault() {
 		UnaryAST node = new UnaryAST(null, lex.consume());
 
 		node.child = parseBlock();
 
 		return node;
+	}
+	
+	public static UnaryAST parseFunction(){
+		Token funcToken = lex.consume();
+		BinaryAST node = new BinaryAST(new UnaryAST(expect(Token.IDENTIFIER)), new Token("=", Token.ASSIGNMENT), parseFunctionBody());
+		UnaryAST function = new UnaryAST(node, funcToken);
+		return function;
+	}
+	
+	public static BinaryAST parseFunctionBody(){
+		
+		NaryAST params = new NaryAST(new Token("params", Token.GROUPING));
+		
+		expect("(");
+		
+		//collect the params
+		while(!lex.nextValueIs(")")){
+			Token type = expect(Token.TYPE);
+			Token identifier = expect(Token.IDENTIFIER);
+			UnaryAST param = new UnaryAST(new ASTNode(type), identifier);
+			
+			params.addNode(param);
+			
+			//need a comma if there is a next param
+			if(!lex.nextValueIs(")")){
+				expect(",");
+			}
+		}
+		
+		NaryAST body = parseBlock();
+		
+		return new BinaryAST(params, new Token("function", Token.STRUCTURE), body);
 	}
 
 	// not quite LL(1)
@@ -204,7 +282,10 @@ public class Parser {
 		return node;
 	}
 
-	// the same as while, but in a different order
+	/**
+	 * Parses a do-while loop.
+	 * @return A BinaryAST node representing the loop.
+	 */
 	public static BinaryAST parseDo() {
 		BinaryAST node = new BinaryAST(null, lex.consume(), null);
 
@@ -226,8 +307,8 @@ public class Parser {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Parses a while loop.
+	 * @return A BinaryAST node representing the while.
 	 */
 	public static BinaryAST parseWhile() {
 		BinaryAST node = new BinaryAST(null, lex.consume(), null);
@@ -319,9 +400,12 @@ public class Parser {
 	 */
 	public static UnaryAST parseDeclaration() {
 
+		//TODO: Allow declarations without assignments (eg. int x;)
+		
 		// a declaration begins with a type
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
+			
 			return new UnaryAST(parseAssignment(), t);
 		}
 
@@ -365,6 +449,10 @@ public class Parser {
 		return parseConditional();
 	}
 
+	/**
+	 * Parses the conditional operator. Precedence: 2
+	 * @return An ASTNode representing the expression parsed to level 2.
+	 */
 	public static ASTNode parseConditional() {
 
 		ASTNode node = parseAND();
@@ -380,6 +468,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses && and ~NAND. Precedence: 3
+	 * @return An ASTNode representing the expression parsed to level 3.
+	 */
 	public static ASTNode parseAND() {
 		ASTNode node = parseOR();
 
@@ -390,6 +482,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Pares || and ~NOR. Precedence: 4
+	 * @return An ASTNode representing the expression parsed to level 4.
+	 */
 	public static ASTNode parseOR() {
 		ASTNode node = parseEquality();
 
@@ -400,6 +496,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses == and !=. Precedence: 5
+	 * @return An ASTNode representing the expression parsed to level 5.
+	 */
 	public static ASTNode parseEquality() {
 		ASTNode node = parseComparison();
 
@@ -410,6 +510,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses comparison operators. Precedence: 6
+	 * @return An ASTNode representing the expression parsed to level 6.
+	 */
 	public static ASTNode parseComparison() {
 		ASTNode node = parseAddition();
 
@@ -420,6 +524,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses addition and subtraction. Precedence: 7
+	 * @return An ASTNode representing the expression parsed to level 7.
+	 */
 	public static ASTNode parseAddition() {
 		ASTNode node = parseMultiplication();
 
@@ -430,6 +538,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses multiplication and division. Precedence: 8
+	 * @return An ASTNode representing the expression parsed to level 8.
+	 */
 	public static ASTNode parseMultiplication() {
 		ASTNode node = parseExponentiation();
 
@@ -440,6 +552,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses exponentiation. Precedence: 9
+	 * @return An ASTNode representing the expression parsed to level 9.
+	 */
 	public static ASTNode parseExponentiation() {
 		ASTNode node = parseUnary();
 
@@ -450,6 +566,10 @@ public class Parser {
 		return node;
 	}
 
+	/**
+	 * Parses the unary operators - and !. Precedence: 10
+	 * @return An ASTNode representing the expression parsed to level 10.
+	 */
 	public static ASTNode parseUnary() {
 
 		while (lex.nextValueIs("-", "!")) {
@@ -460,6 +580,10 @@ public class Parser {
 		return parseMember();
 	}
 
+	/**
+	 * Parses membership. Precedence: 11
+	 * @return An ASTNode representing the expression parsed to level 11.
+	 */
 	public static ASTNode parseMember() {
 		ASTNode node = parsePrimary();
 
@@ -471,18 +595,23 @@ public class Parser {
 	}
 
 	/**
-	 * Parses a primary value (literal, identifier, or expression).
-	 * @return An ASTNode containing the value.
+	 * Parses a primary value (literal, identifier, or expression). Precedence: 12
+	 * @return An ASTNode representing the expression parsed to level 12.
 	 */
 	public static ASTNode parsePrimary() {
+		
+		//handles literals
 		if (lex.nextTypeIs(Token.LITERAL)) {
 			return new ASTNode(lex.consume());
 		}
 
+		//handles variables
 		if (lex.nextTypeIs(Token.IDENTIFIER)) {
 			return new ASTNode(lex.consume());
 		}
 
+		//handles casting
+		//TODO: rethink if unary node of type TYPE will work when used for both casting and declarations
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
 			expect("(");
@@ -492,6 +621,7 @@ public class Parser {
 			return node;
 		}
 
+		//handles subexpressions
 		if (lex.nextValueIs("(")) {
 			lex.consume();
 			ASTNode node = parseExpression();
@@ -519,6 +649,7 @@ public class Parser {
 	/**
 	 * Consumes the next token if it matches the given string, prints an error otherwise.
 	 * @param str The expected value.
+	 * @return The token consumed.
 	 */
 	public static void expect(String str) {
 		if (lex.hasNextToken()) {
@@ -531,6 +662,16 @@ public class Parser {
 		error(str);
 
 		return;
+	}
+	
+	public static Token expect(int i){
+		if(lex.nextTypeIs(i)){
+			return lex.consume();
+		}
+		
+		error("");
+		
+		return null;
 	}
 
 	/**
