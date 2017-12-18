@@ -28,10 +28,13 @@ public class TernaryAST extends ASTNode {
 		
 		//TODO: handle if statements
 		if(token.value.equals("if")){
-			
+			if((Boolean)left.visitNode()){
+				center.visitNode();
+			} else if(right.token.type != Token.BLANK){
+				right.visitNode();
+			}
 		}
 		
-		//TODO: handle declarations
 		if(token.value.equals("declaration")){
 			Parser.environment.define(left.token, center.token, (right.token.type == Token.BLANK ? null : right.visitNode()));
 			return null;

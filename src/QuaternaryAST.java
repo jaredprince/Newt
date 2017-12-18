@@ -28,7 +28,16 @@ public class QuaternaryAST extends ASTNode {
 	public Object visitNode(){
 		//TODO: handle for loops
 		
-		
+		//should declare a variable or do nothing
+		left.visitNode();
+
+		while((Boolean) left_center.visitNode()){
+			//executes the body
+			right.visitNode();
+			
+			//executes the incrementor
+			right_center.visitNode();
+		}
 		
 		return null;
 	}

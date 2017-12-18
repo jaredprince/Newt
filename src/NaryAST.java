@@ -41,11 +41,15 @@ public class NaryAST extends ASTNode {
 	}
 	
 	public Object visitNode(){
+		Parser.environment.enterScope();
+		
 		if(token.type == Token.GROUPING){
 			for(int i = 0; i < nodes.size(); i++){
 				nodes.get(i).visitNode();
 			}
 		}
+		
+		Parser.environment.exitScope();
 		
 		return null;
 	}

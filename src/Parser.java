@@ -4,6 +4,8 @@ import java.util.LinkedList;
 
 public class Parser {
 
+	//TODO: Make 1 == 1.0 be true
+	
 	static Lexer lex;
 	static ASTNode root;
 
@@ -13,7 +15,7 @@ public class Parser {
 
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
-
+		
 //		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());
 //		}
@@ -89,6 +91,10 @@ public class Parser {
 			expect(";");
 			return node;
 		}
+		
+		else if (lex.nextValueIs("{")){
+			return parseBlock();
+		}
 
 		//give an error if no statment was found
 		error("keyword or identifier");
@@ -102,6 +108,10 @@ public class Parser {
 	 */
 	public static ASTNode parseStructure() {
 
+		if(lex.nextValueIs("func")) {
+			return parseFunction();
+		}
+		
 		//parse a while loop
 		if (lex.nextValueIs("while")) {
 			return parseWhile();
@@ -223,7 +233,7 @@ public class Parser {
 	
 	public static UnaryAST parseFunction(){
 		Token funcToken = lex.consume();
-		BinaryAST node = new BinaryAST(new UnaryAST(expect(Token.IDENTIFIER)), new Token("=", Token.ASSIGNMENT), parseFunctionBody());
+		BinaryAST node = new BinaryAST(new ASTNode(expect(Token.IDENTIFIER)), new Token("=", Token.ASSIGNMENT), parseFunctionBody());
 		UnaryAST function = new UnaryAST(node, funcToken);
 		return function;
 	}
@@ -248,13 +258,14 @@ public class Parser {
 			}
 		}
 		
+		expect(")");
+		
 		NaryAST body = parseBlock();
 		
 		return new BinaryAST(params, new Token("function", Token.STRUCTURE), body);
 	}
 
 	//TODO: Make for loops LL(1)
-	// not quite LL(1)
 	public static QuaternaryAST parseFor() {
 		QuaternaryAST node = new QuaternaryAST(lex.consume());
 
@@ -269,6 +280,7 @@ public class Parser {
 			Token t = lex.consume();
 
 			// check for assignment
+			//TODO: Decide if I want to allow compound assignments in the for loop head
 			if (lex.nextValueIs("=", "+=", "-=", "*=", "/=", "^=", "%=")) {
 				node.left = new BinaryAST(new ASTNode(t), lex.consume(), parseExpression());
 				expect(";");
@@ -435,12 +447,11 @@ public class Parser {
 			node.left = new ASTNode(t); //get the type
 			node.center = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
 			
-			expect("="); //only the simple assignment is acceptable
-			
 			//the right node is either blank or an expression
 			if(lex.nextValueIs(";")){
 				node.right = new ASTNode(new Token(Token.BLANK));
 			} else {
+				expect("="); //only the simple assignment is acceptable
 				node.right = parseExpression();
 			}
 			

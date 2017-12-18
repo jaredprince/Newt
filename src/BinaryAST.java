@@ -17,13 +17,12 @@ public class BinaryAST extends ASTNode {
 	}
 
 	public Object visitNode() {
-
-		Object left = this.left.visitNode();
-		Object right = this.right.visitNode();
-
+		
 		// handles expressions and assignments
 		if (token.type == Token.OPERATOR) {
-
+			Object left = this.left.visitNode();
+			Object right = this.right.visitNode();
+			
 			// handles assignments
 			if (token.subtype == Token.ASSIGNMENT) {
 				Parser.environment.assign(this.left.token, right);
@@ -52,6 +51,10 @@ public class BinaryAST extends ASTNode {
 
 			//TODO: Handle objects using "=="
 			if (token.subtype == Token.COMPARATIVE) {
+				
+				if(token.value.equals("==")){
+					return new Boolean(left.equals(right));
+				}
 
 				if ((left instanceof Double || left instanceof Integer)
 						&& (right instanceof Double || right instanceof Integer)) {
@@ -60,9 +63,6 @@ public class BinaryAST extends ASTNode {
 
 					case "<":
 						return new Boolean(toDouble(left) < toDouble(right));
-
-					case "==":
-						return new Boolean(toDouble(left) == toDouble(right));
 
 					case "<=":
 						return new Boolean(toDouble(left) <= toDouble(right));
@@ -119,9 +119,44 @@ public class BinaryAST extends ASTNode {
 
 		}
 
-		//TODO: Handle while, do, switch, etc.
 		if (token.type == Token.STRUCTURE) {
 
+			Parser.environment.enterScope();
+			
+			if(token.value.equals("do")){
+				
+				right.visitNode();
+				
+				while((Boolean) left.visitNode()){
+					right.visitNode();
+				}
+			}
+			
+			else if(token.value.equals("while")){				
+				while((Boolean) left.visitNode()){
+					right.visitNode();
+				}
+			}
+
+			else if(token.value.equals("switch")){
+				int size = ((NaryAST)right).nodes.size() - 1;
+				
+				for(int i = 0; i < size; i++){
+					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(i)).left){
+						((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
+					}
+				}
+				
+				if(((NaryAST)right).nodes.get(size).token.value.equals("case")){
+					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(size)).left){
+						((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+					}
+				} else {
+					((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+				}
+			}
+			
+			Parser.environment.exitScope();
 		}
 
 		return null;
