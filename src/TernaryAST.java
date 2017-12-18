@@ -4,6 +4,10 @@ public class TernaryAST extends ASTNode {
 	ASTNode center;
 	ASTNode right;
 	
+	public TernaryAST(Token t){
+		token = t;
+	}
+	
 	public TernaryAST(ASTNode l, ASTNode c, ASTNode r, Token t){
 		left = l;
 		center = c;
@@ -22,18 +26,24 @@ public class TernaryAST extends ASTNode {
 	@Override
 	public Object visitNode(){
 		
-		Object condition = left.visitNode();
-		
 		//TODO: handle if statements
-		if(token.type == Token.STRUCTURE){
+		if(token.value.equals("if")){
 			
 		}
 		
+		//TODO: handle declarations
+		if(token.value.equals("declaration")){
+			Parser.environment.define(left.token, center.token, (right.token.type == Token.BLANK ? null : right.visitNode()));
+			return null;
+		}
+		
 		if(token.type == Token.OPERATOR){
+			Object left = this.left.visitNode();
+			
 			if(token.value.equals("?")){
 				
 				//handle conditional operator using conditional operator
-				return (Boolean)condition ? center.visitNode() : right.visitNode();
+				return (Boolean)left ? center.visitNode() : right.visitNode();
 			}
 		}
 		

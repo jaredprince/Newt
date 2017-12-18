@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Lexer {
 
 	static String[] structures = { "do", "if", "else", "while", "for", "func", "switch", "case", "default", "try",
-			"catch" // structures
+			"catch", "print" // structures
 	};
 
 	static String[] statements = { "goto", "return", "break" };
@@ -122,11 +122,15 @@ public class Lexer {
 					t = operatorToken();
 				}
 				
-				tokens.add(t);
+				//remove comments for now
+				if(t.type != Token.COMMENT)
+					tokens.add(t);
 			}
 			
 			line_loc++;
 		}
+		
+		tokens.add(new Token("EOF", Token.EOF));
 	}
 	
 	public Token blockCommentToken(){

@@ -1,0 +1,6 @@
+int a = 34;
+print a; //34
+int b = a + 1;
+print b; //35
+b = "cat";
+print b;

@@ -24,4 +24,12 @@ public class QuaternaryAST extends ASTNode {
 		}
 		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + left_center.toString(depth + 1) + "\n" + right_center.toString(depth + 1) + "\n" + right.toString(depth + 1);
 	}
+	
+	public Object visitNode(){
+		//TODO: handle for loops
+		
+		
+		
+		return null;
+	}
 }

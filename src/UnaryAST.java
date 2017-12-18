@@ -26,11 +26,12 @@ public class UnaryAST extends ASTNode {
 	public Object visitNode(){
 		Object child = this.child.visitNode();
 		
-		if(token.type == Token.TYPE){
-			//add this variable to the master list
-		}
-		
 		String val = token.value;
+		
+		if(val.equals("print")){
+			System.out.println(child);
+			return null;
+		}
 
 		if(val.equals("!")){
 			if(child instanceof Boolean){

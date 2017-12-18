@@ -3,7 +3,7 @@ public class Token {
 	
 	static final String[] names = {
 		"ERROR", "TYPE", "STATEMENT", "DELINEATOR", "COMMENT", "OPERATOR", "STRUCTURE", "IDENTIFIER", "GROUPING", "BLANK", "LITERAL",
-		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL", "ASSIGNMENT"
+		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL", "ASSIGNMENT", "EOF"
 	};
 	
 	//basic types
@@ -35,6 +35,8 @@ public class Token {
 	static final int COMPARATIVE = 19; // <, ==, !=, >=, etc.
 	static final int SPECIAL = 20;
 	static final int ASSIGNMENT = 21; // =, *=, +=, etc.
+	
+	static final int EOF = 22;
 	
 	String value;
 	

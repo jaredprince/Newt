@@ -26,7 +26,7 @@ public class BinaryAST extends ASTNode {
 
 			// handles assignments
 			if (token.subtype == Token.ASSIGNMENT) {
-				// change the master value of this variable
+				Parser.environment.assign(this.left.token, right);
 			}
 
 			if (token.subtype == Token.LOGICAL) {
@@ -82,8 +82,9 @@ public class BinaryAST extends ASTNode {
 
 			if (token.subtype == Token.MATHEMATICAL) {
 				
-				if(token.value.equals("+") && left instanceof String && right instanceof String){
-					return (String)left + (String)right;
+				//TODO: account for non-literal returns
+				if(token.value.equals("+") && (left instanceof String || right instanceof String)){					
+					return left.toString() + right.toString();
 				}
 				
 				if ((left instanceof Double || left instanceof Integer)

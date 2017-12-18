@@ -8,14 +8,15 @@ public class Parser {
 	static ASTNode root;
 
 	static LinkedList<String[]> operators;
+	
+	static Environment environment = new Environment();
 
 	public static void main(String[] args) throws IOException {
-		
 		lex = new Lexer(new File("Parser Test.txt"));
 
-//		 while(lex.hasNextToken()){
+//		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());
-//		 }
+//		}
 		
 //		System.out.println((Double)(new Integer(2)));
 		
@@ -23,8 +24,10 @@ public class Parser {
 
 //		ASTNode r = root;
 		
-		System.out.println(parseExpression().visitNode());
-
+//		System.out.println(parseStatement().visitNode());
+		
+		parseProgram().visitNode();
+		 
 //		System.out.println(r.toString(0));
 	}
 
@@ -44,11 +47,11 @@ public class Parser {
 	 * Parses the entire program.
 	 * @return An ASTNode node representing the program.
 	 */
-	public static ASTNode parseProgram() {
+	public static NaryAST parseProgram() {
 		NaryAST node = new NaryAST(new Token("program", Token.GROUPING));
-
+		
 		//parse statements until there is no next token
-		while (lex.hasNextToken()) {
+		while (lex.hasNextToken() && !lex.nextTypeIs(Token.EOF)) {
 			node.addNode(parseStatement());
 		}
 
@@ -123,11 +126,35 @@ public class Parser {
 		if (lex.nextValueIs("switch")) {
 			return parseSwitch();
 		}
+		
+		if(lex.nextValueIs("print")){
+			return parsePrint();
+		}
 
 		//giev an error if no structure is found
 		error("structure");
 
 		return null;
+	}
+	
+	public static UnaryAST parsePrint(){
+		UnaryAST node = new UnaryAST(lex.consume());
+		
+		//compound expressions must be in parentheses
+		if(lex.nextValueIs("(")){
+			expect("(");
+			node.child = parseExpression();
+			expect(")");
+		}
+		
+		//single elements can be alone
+		else {
+			node.child = parsePrimary();
+		}
+		
+		expect(";");
+		
+		return node;
 	}
 
 	/**
@@ -397,19 +424,27 @@ public class Parser {
 	 * Parses a declaration statement. A declaration consists of a data 
 	 * type and an assignment.
 	 * 
-	 * @return A UnaryAST node representing the declaration.
+	 * @return A TernaryAST node representing the declaration.
 	 */
-	public static UnaryAST parseDeclaration() {
-
-		//TODO: Allow declarations without assignments (eg. int x;)
+	public static TernaryAST parseDeclaration() {
 		
 		// a declaration begins with a type
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
+			TernaryAST node = new TernaryAST(new Token("declaration", Token.TYPE));
+			node.left = new ASTNode(t); //get the type
+			node.center = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
 			
+			expect("="); //only the simple assignment is acceptable
 			
+			//the right node is either blank or an expression
+			if(lex.nextValueIs(";")){
+				node.right = new ASTNode(new Token(Token.BLANK));
+			} else {
+				node.right = parseExpression();
+			}
 			
-			return new UnaryAST(parseAssignment(), t);
+			return node;
 		}
 
 		error("type");
@@ -613,10 +648,7 @@ public class Parser {
 			return new ASTNode(lex.consume());
 		}
 
-		//handles casting
-		//TODO: rethink if unary node of type TYPE will work when used for both casting and declarations
-		/*I think it will. If the identifier exists, cast it. If it doesn't, declare it. However, what if you are trying to
-		declare a local version of a global variable? It will try to cast the global instead.*/
+		//a type in an expression must be a cast
 		if (lex.nextTypeIs(Token.TYPE)) {
 			Token t = lex.consume();
 			expect("(");
