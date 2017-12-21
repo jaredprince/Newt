@@ -1,6 +1,9 @@
+create(1);
 
-print(1==1.0);
-
-for(int i = 0; i < 10; i = i + 1){
-	print(i%2 == 0 ? "even" : "odd");
+func create(int day){
+	string pronouncement = "Let there be Light!";
+	
+	print("Day: " + day);
+	print(pronouncement);
+	return 73;
 }

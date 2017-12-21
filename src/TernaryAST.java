@@ -26,7 +26,6 @@ public class TernaryAST extends ASTNode {
 	@Override
 	public Object visitNode(){
 		
-		//TODO: handle if statements
 		if(token.value.equals("if")){
 			if((Boolean)left.visitNode()){
 				center.visitNode();

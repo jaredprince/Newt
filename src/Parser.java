@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Parser {
 
@@ -15,6 +16,21 @@ public class Parser {
 
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
+		
+		environment.define(new Token("func", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
+
+			@Override
+			public Object call(Parser parser, List<Object> arguments) {
+				System.out.println("this is test one");
+				return "this is test two";
+			}
+
+			@Override
+			public int arity() {
+				return 0;
+			}
+			
+		});
 		
 //		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());
@@ -43,7 +59,6 @@ public class Parser {
 			operators.add(ops[i]);
 		}
 	}
-
 	
 	/**
 	 * Parses the entire program.
@@ -55,6 +70,13 @@ public class Parser {
 		//parse statements until there is no next token
 		while (lex.hasNextToken() && !lex.nextTypeIs(Token.EOF)) {
 			node.addNode(parseStatement());
+			
+			ASTNode subNode = node.nodes.get(node.nodes.size() - 1);
+			
+			//functions get declared immediately so they can be used
+			if(subNode.token.value.equals("func")){
+				subNode.visitNode();
+			}
 		}
 
 		return node;
@@ -68,9 +90,26 @@ public class Parser {
 
 		//parse keyword statements
 		if (lex.nextTypeIs(Token.STATEMENT)) {
-			ASTNode node = new ASTNode(lex.consume());
-			expect(";");
-			return node;
+			if(lex.nextValueIs("return")){
+				UnaryAST node = new UnaryAST(lex.consume());
+				
+				if(!lex.nextValueIs(";")){
+					node.child = parseExpression();
+				} else {
+					node.child = new ASTNode(new Token("void", Token.BLANK));
+				}
+				
+				expect(";");
+				
+				return node;
+			}
+			
+			else {
+				ASTNode node = new ASTNode(lex.consume());	
+				expect(";");
+				
+				return node;
+			}
 		}
 
 		//parse structures
@@ -87,7 +126,7 @@ public class Parser {
 
 		//parse assignments
 		else if (lex.nextTypeIs(Token.IDENTIFIER)) {
-			ASTNode node = parseAssignment();
+			ASTNode node = parseFunctionCallOrAssignment();
 			expect(";");
 			return node;
 		}
@@ -96,7 +135,7 @@ public class Parser {
 			return parseBlock();
 		}
 
-		//give an error if no statment was found
+		//give an error if no statement was found
 		error("keyword or identifier");
 
 		return null;
@@ -108,6 +147,7 @@ public class Parser {
 	 */
 	public static ASTNode parseStructure() {
 
+		//parse a function
 		if(lex.nextValueIs("func")) {
 			return parseFunction();
 		}
@@ -141,10 +181,50 @@ public class Parser {
 			return parsePrint();
 		}
 
-		//giev an error if no structure is found
+		//give an error if no structure is found
 		error("structure");
 
 		return null;
+	}
+	
+	public static BinaryAST parseFunctionCallOrAssignment(){
+		
+		Token identifier = lex.consume();
+		
+		// a function call has two parts: the name (AST) and the arguments (Nary)
+		
+		if(lex.nextValueIs("(")){
+			BinaryAST node = new BinaryAST(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
+			return node;
+		} else {
+			return new BinaryAST(new ASTNode(identifier), expect(Token.ASSIGNMENT), parseExpression());
+		}
+		
+	}
+	
+	/**
+	 * Parses a set of arguments.
+	 * @return A NaryAST representing the set.
+	 */
+	public static NaryAST parseArguments(){
+		
+		NaryAST node = new NaryAST(new Token("arguments", Token.GROUPING));
+		
+		expect("(");
+		
+		//add multiple arguments
+		while(!lex.nextValueIs(")")){
+			node.addNode(parseExpression());
+			
+			//commas between arguments
+			if(!lex.nextValueIs(")")){
+				expect(",");
+			}
+		}
+		
+		expect(")");
+		
+		return node;
 	}
 	
 	public static UnaryAST parsePrint(){
@@ -231,28 +311,41 @@ public class Parser {
 		return node;
 	}
 	
-	public static UnaryAST parseFunction(){
-		Token funcToken = lex.consume();
-		BinaryAST node = new BinaryAST(new ASTNode(expect(Token.IDENTIFIER)), new Token("=", Token.ASSIGNMENT), parseFunctionBody());
-		UnaryAST function = new UnaryAST(node, funcToken);
-		return function;
+	/**
+	 * Parses function declarations. Called when the keyword "func" is the start of a statement.
+	 * @return A Binary node representing the function.
+	 */
+	public static BinaryAST parseFunction(){
+		//a function consists of a name (left), parameters (center), and a body (right)
+		
+		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+		
+		node.left = new ASTNode(expect(Token.IDENTIFIER));
+		node.right = new BinaryAST(parseParameters(), new Token("function", Token.STRUCTURE), parseBlock());
+		
+		return node;
 	}
 	
-	public static BinaryAST parseFunctionBody(){
-		
-		NaryAST params = new NaryAST(new Token("params", Token.GROUPING));
+	/**
+	 * Parses a set of parameters (type, name).
+	 * @return A NaryASt representing the set of parameters.
+	 */
+	public static NaryAST parseParameters(){
+		NaryAST node = new NaryAST(new Token("parameters", Token.GROUPING));
 		
 		expect("(");
 		
-		//collect the params
+		//collect the parameters
 		while(!lex.nextValueIs(")")){
 			Token type = expect(Token.TYPE);
 			Token identifier = expect(Token.IDENTIFIER);
-			UnaryAST param = new UnaryAST(new ASTNode(type), identifier);
 			
-			params.addNode(param);
+			//a parameter consists of a type (left) and a name (right)
+			BinaryAST param = new BinaryAST(new ASTNode(type), new Token("parameter", Token.BLANK), new ASTNode(identifier));
 			
-			//need a comma if there is a next param
+			node.addNode(param);
+			
+			//need a comma if there is a next parameter
 			if(!lex.nextValueIs(")")){
 				expect(",");
 			}
@@ -260,11 +353,9 @@ public class Parser {
 		
 		expect(")");
 		
-		NaryAST body = parseBlock();
-		
-		return new BinaryAST(params, new Token("function", Token.STRUCTURE), body);
+		return node;
 	}
-
+	
 	//TODO: Make for loops LL(1)
 	public static QuaternaryAST parseFor() {
 		QuaternaryAST node = new QuaternaryAST(lex.consume());
@@ -373,7 +464,7 @@ public class Parser {
 	 * @return An ASTNode representing the if statement.
 	 */
 	public static ASTNode parseIf() {
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+		TernaryAST node = new TernaryAST(lex.consume());
 
 		// get condition
 		expect("(");
@@ -382,29 +473,28 @@ public class Parser {
 
 		// get the body as a block or a single statement
 		if (lex.nextValueIs("{")) {
-			node.right = parseBlock();
+			node.center = parseBlock();
 		} else {
-			node.right = parseStatement();
+			node.center = parseStatement();
 		}
 
 		// the optional else
 		if (lex.nextValueIs("else")) {
 			lex.consume();
 
-			TernaryAST elseNode = new TernaryAST(node.left, node.right, null, node.token);
-
 			// the else can be another if
 			if (lex.nextValueIs("if")) {
-				elseNode.right = parseIf();
+				node.right = parseIf();
 			} else {
 				if (lex.nextValueIs("{")) {
-					elseNode.right = parseBlock();
+					node.right = parseBlock();
 				} else {
-					elseNode.right = parseStatement();
+					node.right = parseStatement();
 				}
 			}
 
-			return elseNode;
+		} else {
+			node.right = new ASTNode(new Token("", Token.BLANK));
 		}
 
 		return node;

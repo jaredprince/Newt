@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class BinaryAST extends ASTNode {
 	ASTNode left;
 	ASTNode right;
@@ -118,7 +121,25 @@ public class BinaryAST extends ASTNode {
 			}
 
 		}
+		
+		if(token.value.equals("call")){
+			NaryAST args = (NaryAST) right;
+			
+			List<Object> arguments = new ArrayList<Object>();
+			
+			//visit each argument to get the object returned
+			for(int i = 0; i < args.nodes.size(); i++){
+				arguments.add(args.nodes.get(i).visitNode());
+			}
+			
+			//return the result of calling the function with the given arguments
+			return ((Callable)Parser.environment.get(left.token)).call(null, arguments);
+		}
 
+		if(token.value.equals("func")){
+			Parser.environment.define(token, left.token, new Function((BinaryAST)right));
+		}
+		
 		if (token.type == Token.STRUCTURE) {
 
 			Parser.environment.enterScope();

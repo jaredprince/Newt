@@ -27,6 +27,10 @@ public class ASTNode {
 	
 	public Object visitNode(){
 		
+		if(token.type == Token.BLANK){
+			return null;
+		}
+		
 		if(token.type != Token.IDENTIFIER && token.type != Token.LITERAL && token.type != Token.STATEMENT && token.type != Token.TYPE){
 			System.out.println("Expected: identifier, literal, statement, or type");
 			System.out.println("  Recieved: " + Token.names[token.type]);

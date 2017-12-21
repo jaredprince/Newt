@@ -45,7 +45,12 @@ public class NaryAST extends ASTNode {
 		
 		if(token.type == Token.GROUPING){
 			for(int i = 0; i < nodes.size(); i++){
-				nodes.get(i).visitNode();
+				ASTNode node = nodes.get(i);
+				Object obj = node.visitNode();
+				
+				if(node.token.value.equals("return")){
+					return obj;
+				}
 			}
 		}
 		

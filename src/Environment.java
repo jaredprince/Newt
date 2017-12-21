@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class Environment {
 
-	private LinkedList<Map<String, Object>> variables = new LinkedList<Map<String, Object>>();
+	private LinkedList<Map<String, TypedVariable>> variables = new LinkedList<Map<String, TypedVariable>>();
 	
 	public Environment(){
 		enterScope();
@@ -17,13 +17,14 @@ public class Environment {
 	 * @param value The value of the variable.
 	 */
 	public void define(Token type, Token name, Object value){
-		//TODO: static typing
+		
+		//TODO: overloading methods
 		
 		//define the variable in the innermost scope
 		if(variables.getFirst().containsKey(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
-			variables.getFirst().put(name.value, value);
+			variables.getFirst().put(name.value, new TypedVariable(type.value, value));
 		}
 	}
 	
@@ -33,19 +34,7 @@ public class Environment {
 	 * @return The value of the variable.
 	 */
 	public Object get(Token name){
-		
-		//for each scope starting with the innermost
-		for(int i = 0; i < variables.size(); i++){
-			//get the variables
-			Map<String, Object> scope = variables.get(i);
-			
-			//check if the map contains the key
-			if(scope.containsKey(name.value)){
-				return scope.get(name.value);
-			}
-		}
-		
-		throw new RuntimeError(name, RuntimeError.UNDEFINED_VARIABLE);
+		return findVariable(name).object;
 	}
 	
 	/**
@@ -54,25 +43,39 @@ public class Environment {
 	 * @param value The value to assign to the variable.
 	 */
 	public void assign(Token name, Object value){
-		boolean found = false;
+		TypedVariable var = findVariable(name);
+		
+		//TODO: enforce type
+		
+		var.object = value;
+	}
+	
+	//TODO: Decide what happens when the type of a variable is changed. Right now, nothing happens to the object already in the variable.
+	/**
+	 * Changes the type of a variable.
+	 * @param name The name of the variable.
+	 * @param type The new type to assign.
+	 */
+	public void changeType(Token name, Token type){
+		TypedVariable var = findVariable(name);
+		var.type = type.value;
+	}
+	
+	public TypedVariable findVariable(Token name){
 		
 		//for each scope starting with the innermost
 		for(int i = 0; i < variables.size(); i++){
 			//get the variables
-			Map<String, Object> scope = variables.get(i);
+			Map<String, TypedVariable> scope = variables.get(i);
 			
 			//check if the map contains the key
 			if(scope.containsKey(name.value)){
-				scope.put(name.value, value);
-				found = true;
-				break;
+				return scope.get(name.value);
 			}
 		}
 		
 		//if no variable was found
-		if(!found){
-			throw new RuntimeError(name, RuntimeError.UNDEFINED_VARIABLE);
-		}
+		throw new RuntimeError(name, RuntimeError.UNDEFINED_VARIABLE);
 	}
 	
 	/**
@@ -98,7 +101,7 @@ public class Environment {
 	 * @param depth The depth of the scope from the innermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, Object> getScopeFromInner(int depth){
+	public Map<String, TypedVariable> getScopeFromInner(int depth){
 		return variables.get(depth);
 	}
 	
@@ -109,17 +112,17 @@ public class Environment {
 	 * @param depth The depth of the scope from the outermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, Object> getScopeFromOuter(int depth){
+	public Map<String, TypedVariable> getScopeFromOuter(int depth){
 		return variables.get(variables.size() - 1 - depth);
 	}
 	
-//	private class TypeCheck {
-//		String type;
-//		Object object;
-//		
-//		public TypeCheck(String t, Object o){
-//			type = t;
-//			object = o;
-//		}
-//	}
+	private class TypedVariable {
+		String type;
+		Object object;
+		
+		public TypedVariable(String t, Object o){
+			type = t;
+			object = o;
+		}
+	}
 }
