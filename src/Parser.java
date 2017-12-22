@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Parser {
 
@@ -17,32 +16,24 @@ public class Parser {
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
 		
-		environment.define(new Token("func", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
-
-			@Override
-			public Object call(Parser parser, List<Object> arguments) {
-				System.out.println("this is test one");
-				return "this is test two";
-			}
-
-			@Override
-			public int arity() {
-				return 0;
-			}
-			
-		});
+//		environment.define(new Token("func", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
+//			
+//			@Override
+//			public Object call(Parser parser, List<Object> arguments) {
+//				System.out.println("this is test one");
+//				return "this is test two";
+//			}
+//
+//			@Override
+//			public int arity() {
+//				return 0;
+//			}
+//			
+//		});
 		
 //		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());
 //		}
-		
-//		System.out.println((Double)(new Integer(2)));
-		
-//		root = parseProgram();
-
-//		ASTNode r = root;
-		
-//		System.out.println(parseStatement().visitNode());
 		
 		parseProgram().visitNode();
 		 
@@ -69,13 +60,13 @@ public class Parser {
 		
 		//parse statements until there is no next token
 		while (lex.hasNextToken() && !lex.nextTypeIs(Token.EOF)) {
-			node.addNode(parseStatement());
-			
-			ASTNode subNode = node.nodes.get(node.nodes.size() - 1);
+			ASTNode subnode = parseStatement();
 			
 			//functions get declared immediately so they can be used
-			if(subNode.token.value.equals("func")){
-				subNode.visitNode();
+			if(subnode.token.value.equals("func")){
+				subnode.visitNode();
+			} else {
+				node.addNode(subnode);
 			}
 		}
 
@@ -225,6 +216,11 @@ public class Parser {
 		expect(")");
 		
 		return node;
+	}
+	
+	public static BinaryAST parseAnonymousFunction(){
+		lex.consume();
+		return new BinaryAST(parseParameters(), new Token("function", Token.STRUCTURE), parseBlock());
 	}
 	
 	public static UnaryAST parsePrint(){
@@ -585,6 +581,10 @@ public class Parser {
 	 * @return An ASTNode representing the expression.
 	 */
 	public static ASTNode parseExpression() {
+		if(lex.nextValueIs("func")){
+			return parseAnonymousFunction();
+		}
+		
 		return parseConditional();
 	}
 
@@ -746,7 +746,15 @@ public class Parser {
 
 		//handles variables
 		if (lex.nextTypeIs(Token.IDENTIFIER)) {
-			return new ASTNode(lex.consume());
+			Token t = lex.consume();
+			
+			if(lex.nextValueIs("(")){
+				NaryAST node = parseArguments();
+				
+				return new BinaryAST(new ASTNode(t), new Token("call", Token.GROUPING), node);
+			}
+			
+			return new ASTNode(t);
 		}
 
 		//a type in an expression must be a cast
@@ -806,7 +814,7 @@ public class Parser {
 			return lex.consume();
 		}
 		
-		error("");
+		error(Token.names[i]);
 		
 		return null;
 	}

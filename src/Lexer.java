@@ -40,7 +40,7 @@ public class Lexer {
 	Scanner in;
 
 	int char_loc = 0;
-	int line_loc = 0;
+	int line_loc = 1;
 
 	String line = "";
 
@@ -139,7 +139,7 @@ public class Lexer {
 		line = line.length() > 2 ? line.substring(2) : "";
 		
 		//continue until the comment block closes
-		while(val.charAt(val.length() - 1) != '/' || val.charAt(val.length() - 2) != '*'){
+		while( val.charAt(val.length() - 1) != '/' || val.charAt(val.length() - 2) != '*' ){
 			if(line.length() == 0){
 				if(in.hasNextLine()){
 					line = in.nextLine();
@@ -147,12 +147,12 @@ public class Lexer {
 				} else {
 					break;
 				}
+			} else {
+				val += line.charAt(0);
+				line = line.length() > 1 ? line.substring(1) : "";
+				
+				char_loc++;
 			}
-			
-			val += line.charAt(0);
-			line = line.length() > 1 ? line.substring(1) : "";
-			
-			char_loc++;
 		}
 		
 		Token t = new Token(char_loc, line_loc, val, Token.COMMENT);
@@ -334,7 +334,7 @@ public class Lexer {
 			return false;
 		}
 		
-		return tokens.get(0).type == i;
+		return tokens.get(0).type == i ? true : tokens.get(0).subtype == i;
 	}
 	
 	public boolean nextValueIs(String... strings){

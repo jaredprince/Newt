@@ -28,6 +28,10 @@ public class UnaryAST extends ASTNode {
 		
 		String val = token.value;
 		
+		if(token.value.equals("return")){
+			return child;
+		}
+		
 		if(token.type == Token.TYPE){
 			if(val.equals("int")){
 				if(child instanceof Integer){

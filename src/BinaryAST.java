@@ -26,8 +26,15 @@ public class BinaryAST extends ASTNode {
 			Object left = this.left.visitNode();
 			Object right = this.right.visitNode();
 			
+			//TODO: Handle compound assignment (a += b)
 			// handles assignments
 			if (token.subtype == Token.ASSIGNMENT) {
+				
+				//a function variable gets the actual node
+				if(this.left.token.value.equals("function")){
+					Parser.environment.assign(this.left.token, new Function((BinaryAST)right));
+				}
+				
 				Parser.environment.assign(this.left.token, right);
 			}
 
@@ -137,7 +144,12 @@ public class BinaryAST extends ASTNode {
 		}
 
 		if(token.value.equals("func")){
-			Parser.environment.define(token, left.token, new Function((BinaryAST)right));
+			if(Parser.environment.depth > 0){
+				Parser.environment.define(token, left.token, new Function((BinaryAST) right, Parser.environment.getScopeFromInner(0)));
+			}
+			else {
+				Parser.environment.define(token, left.token, new Function((BinaryAST)right));
+			}
 		}
 		
 		if (token.type == Token.STRUCTURE) {

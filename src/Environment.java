@@ -5,6 +5,7 @@ import java.util.Map;
 public class Environment {
 
 	private LinkedList<Map<String, TypedVariable>> variables = new LinkedList<Map<String, TypedVariable>>();
+	public int depth;
 	
 	public Environment(){
 		enterScope();
@@ -24,7 +25,8 @@ public class Environment {
 		if(variables.getFirst().containsKey(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
-			variables.getFirst().put(name.value, new TypedVariable(type.value, value));
+			variables.getFirst().put(name.value, new TypedVariable(type.value, null));
+			assign(name, value);
 		}
 	}
 	
@@ -46,6 +48,48 @@ public class Environment {
 		TypedVariable var = findVariable(name);
 		
 		//TODO: enforce type
+		
+		switch(var.type){
+		
+		case "int":
+			if(value instanceof Double){
+				value = new Integer(((Double) value).intValue());
+			} else if (!(value instanceof Integer)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+			break;
+			
+		case "double":
+			if(value instanceof Integer){
+				value = new Double(((Integer) value).intValue());
+			} else if (!(value instanceof Double)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+			break;
+			
+		case "string":
+			if(!(value instanceof String)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+			break;
+			
+		case "boolean":
+			if(!(value instanceof Boolean)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+			break;
+			
+		case "char":
+			if(!(value instanceof Character)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+			break;
+			
+		case "func":
+			if(!(value instanceof Function)){
+				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
+			}
+		}
 		
 		var.object = value;
 	}
@@ -84,6 +128,7 @@ public class Environment {
 	 */
 	public void enterScope(){
 		variables.addFirst(new HashMap<>());
+		depth++;
 	}
 	
 	/**
@@ -92,6 +137,7 @@ public class Environment {
 	 */
 	public void exitScope(){
 		variables.removeFirst();
+		depth--;
 	}
 	
 	/**
@@ -114,15 +160,5 @@ public class Environment {
 	 */
 	public Map<String, TypedVariable> getScopeFromOuter(int depth){
 		return variables.get(variables.size() - 1 - depth);
-	}
-	
-	private class TypedVariable {
-		String type;
-		Object object;
-		
-		public TypedVariable(String t, Object o){
-			type = t;
-			object = o;
-		}
 	}
 }
