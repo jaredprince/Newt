@@ -95,6 +95,7 @@ public class Environment {
 	}
 	
 	//TODO: Decide what happens when the type of a variable is changed. Right now, nothing happens to the object already in the variable.
+	//I probably want to cast the variable to the new type (if it can be cast) or else set it to a default value for that type
 	/**
 	 * Changes the type of a variable.
 	 * @param name The name of the variable.

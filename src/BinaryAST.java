@@ -63,6 +63,10 @@ public class BinaryAST extends ASTNode {
 			if (token.subtype == Token.COMPARATIVE) {
 				
 				if(token.value.equals("==")){
+					if(left instanceof Double && right instanceof Integer){
+						return new Boolean(((Double)left).equals(new Double(((Integer)right).intValue())));
+					}
+					
 					return new Boolean(left.equals(right));
 				}
 

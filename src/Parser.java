@@ -1,10 +1,9 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Parser {
-
-	//TODO: Make 1 == 1.0 be true
 	
 	static Lexer lex;
 	static ASTNode root;
@@ -16,20 +15,21 @@ public class Parser {
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
 		
-//		environment.define(new Token("func", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
-//			
-//			@Override
-//			public Object call(Parser parser, List<Object> arguments) {
-//				System.out.println("this is test one");
-//				return "this is test two";
-//			}
-//
-//			@Override
-//			public int arity() {
-//				return 0;
-//			}
-//			
-//		});
+		//a netive method
+		environment.define(new Token("native", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
+			
+			@Override
+			public Object call(Parser parser, List<Object> arguments) {
+				System.out.println("this is test one");
+				return "this is test two";
+			}
+
+			@Override
+			public int arity() {
+				return 0;
+			}
+			
+		});
 		
 //		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());
@@ -79,6 +79,8 @@ public class Parser {
 	 */
 	public static ASTNode parseStatement() {
 
+		//TODO: Allow declaring functions without initializing (func c;) and allow (func c = otherFuncName;)
+		
 		//parse keyword statements
 		if (lex.nextTypeIs(Token.STATEMENT)) {
 			if(lex.nextValueIs("return")){
@@ -178,6 +180,7 @@ public class Parser {
 		return null;
 	}
 	
+	//TODO: Fix to make this LL(1)
 	public static BinaryAST parseFunctionCallOrAssignment(){
 		
 		Token identifier = lex.consume();
@@ -188,7 +191,8 @@ public class Parser {
 			BinaryAST node = new BinaryAST(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
 			return node;
 		} else {
-			return new BinaryAST(new ASTNode(identifier), expect(Token.ASSIGNMENT), parseExpression());
+			lex.returnToken(identifier);
+			return parseAssignment();
 		}
 		
 	}
@@ -367,8 +371,7 @@ public class Parser {
 			Token t = lex.consume();
 
 			// check for assignment
-			//TODO: Decide if I want to allow compound assignments in the for loop head
-			if (lex.nextValueIs("=", "+=", "-=", "*=", "/=", "^=", "%=")) {
+			if (lex.nextValueIs("=")) {
 				node.left = new BinaryAST(new ASTNode(t), lex.consume(), parseExpression());
 				expect(";");
 			} else {
@@ -559,11 +562,33 @@ public class Parser {
 		if (!lex.nextTypeIs(Token.IDENTIFIER)) {
 			error("identifier");
 		}
+		
+		//TODO: support (a++)
 
 		BinaryAST node = new BinaryAST(new ASTNode(lex.consume()), null, null);
 
-		if (lex.nextValueIs("=", "+=", "-=", "*=", "/=", "^=", "%=")) {
+		if (lex.nextValueIs("=")) {
 			node.token = lex.consume();
+		} else if (lex.nextTypeIs(Token.ASSIGNMENT)){
+			Token t = lex.consume();
+			node.token = new Token("=", Token.OPERATOR);
+			node.token.subtype = Token.ASSIGNMENT;
+			
+			Token op = new Token(t.value.charAt(0) + "", Token.OPERATOR);
+			op.subtype = Token.MATHEMATICAL;
+			
+			ASTNode secondExp;
+			
+			if(t.value.equals("++") || t.value.equals("--")){
+				secondExp = new ASTNode(new Token("1", Token.LITERAL));
+				secondExp.token.subtype = Token.INTEGER;
+			} else {
+				secondExp = parseExpression();
+			}
+			
+			node.right = new BinaryAST(new ASTNode(node.left.token), op, secondExp);
+			
+			return node;
 		} else {
 			error("assignment operator");
 		}

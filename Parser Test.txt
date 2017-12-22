@@ -1,4 +1,7 @@
+
 string a = create(1, 2);
+
+a += "cat";
 
 func create(int count, int day){
 	string pronouncement = "Let there be Light!";
@@ -23,7 +26,27 @@ func create(int count, int day){
 	return "wefwef";
 }
 
+int b = 1;
+b +=1;
+print b;
+b*=2;
+print b;
+
 print a;
+a++;
+b--;
+print b;
+print a;
+func c(){
+
+}
+/*
+c = func () {
+
+print(7);
+};
+
+c();
 
 func makeCounter() {
   int i = 0;
@@ -48,3 +71,4 @@ var c = func () {
 var counter = makeCounter();
 counter(); // "1".
 counter(); // "2".
+*/
