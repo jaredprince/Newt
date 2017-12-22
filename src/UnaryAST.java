@@ -28,6 +28,7 @@ public class UnaryAST extends ASTNode {
 		
 		String val = token.value;
 		
+		//TODO: make returns rise through nested blocks
 		if(token.value.equals("return")){
 			return child;
 		}
@@ -55,8 +56,8 @@ public class UnaryAST extends ASTNode {
 			}
 			
 			else {
-				System.err.println("Expect a boolean.");
-				System.exit(0);
+				
+				throw new RuntimeError(token, RuntimeError.BOOLEAN_INPUT_EXPECTED);
 			}
 		}
 		
@@ -69,8 +70,7 @@ public class UnaryAST extends ASTNode {
 				return new Integer(Math.abs(( (Integer)child).intValue() ));
 			}
 			
-			System.err.println("Expect a numeric value.");
-			System.exit(0);
+			throw new RuntimeError(token, RuntimeError.NUMERIC_INPUT_EXPECTED);
 		}
 		
 		if(val.equals("-")) {
@@ -82,8 +82,7 @@ public class UnaryAST extends ASTNode {
 				return new Integer( -((Integer)child).intValue() );
 			}
 			
-			System.err.println("Expect a numeric value.");
-			System.exit(0);
+			throw new RuntimeError(token, RuntimeError.NUMERIC_INPUT_EXPECTED);
 		}
 		
 		return null;

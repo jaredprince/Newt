@@ -41,8 +41,8 @@ public class Function implements Callable {
 			Parser.environment.define(((BinaryAST) parameters.get(i)).left.token, ((BinaryAST) parameters.get(i)).right.token, arguments.get(i));
 		}
 		
-		//TODO: make the block and the argument declarations the same scope
 		//execute the block
+		((NaryAST) node.right).structureBody = true;
 		Object result = node.right.visitNode();
 		
 		Parser.environment.exitScope();

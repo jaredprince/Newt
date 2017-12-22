@@ -4,6 +4,10 @@ public class NaryAST extends ASTNode {
 	
 	ArrayList<ASTNode> nodes;
 	
+	//used to ensure variables declared in for loops
+	//and functions are in the same scope as teh body
+	boolean structureBody;
+	
 	public NaryAST(){
 		nodes = new ArrayList<ASTNode>();
 	}
@@ -41,7 +45,10 @@ public class NaryAST extends ASTNode {
 	}
 	
 	public Object visitNode(){
-		Parser.environment.enterScope();
+		
+		if(!structureBody){
+			Parser.environment.enterScope();
+		}
 		
 		if(token.type == Token.GROUPING){
 			for(int i = 0; i < nodes.size(); i++){
@@ -54,7 +61,9 @@ public class NaryAST extends ASTNode {
 			}
 		}
 		
-		Parser.environment.exitScope();
+		if(!structureBody){
+			Parser.environment.exitScope();
+		}
 		
 		return null;
 	}
