@@ -5,6 +5,16 @@ import java.util.List;
 
 public class Parser {
 	
+	//TODO: Add arrays
+	
+	//TODO: Add sets
+	
+	//TODO: compare references of objects with "==="
+	
+	//TODO: add classes
+	
+	//TODO: try/catch structures
+	
 	static Lexer lex;
 	static ASTNode root;
 
@@ -15,7 +25,7 @@ public class Parser {
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
 		
-		//a netive method
+		//a native method
 		environment.define(new Token("native", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
 			
 			@Override
@@ -563,8 +573,6 @@ public class Parser {
 			error("identifier");
 		}
 		
-		//TODO: support (a++)
-
 		BinaryAST node = new BinaryAST(new ASTNode(lex.consume()), null, null);
 
 		if (lex.nextValueIs("=")) {

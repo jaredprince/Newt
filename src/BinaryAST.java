@@ -25,8 +25,7 @@ public class BinaryAST extends ASTNode {
 		if (token.type == Token.OPERATOR) {
 			Object left = this.left.visitNode();
 			Object right = this.right.visitNode();
-			
-			//TODO: Handle compound assignment (a += b)
+
 			// handles assignments
 			if (token.subtype == Token.ASSIGNMENT) {
 				
@@ -160,36 +159,60 @@ public class BinaryAST extends ASTNode {
 
 			Parser.environment.enterScope();
 			
+			Object returned_value = null;
+			
 			if(token.value.equals("do")){
 				
-				right.visitNode();
+				returned_value = right.visitNode();
 				
-				while((Boolean) left.visitNode()){
-					right.visitNode();
+				while(((Boolean) left.visitNode())){
+					
+					//break if the return for that iteration was a break
+					if(returned_value instanceof Token && ((Token) returned_value).value.equals("break")){
+						break;
+					}
+					
+					returned_value = right.visitNode();
 				}
 			}
 			
-			else if(token.value.equals("while")){				
+			else if(token.value.equals("while")){			
 				while((Boolean) left.visitNode()){
-					right.visitNode();
+					returned_value = right.visitNode();
+					
+					//break if the return for that iteration was a break
+					if(returned_value instanceof Token && ((Token) returned_value).value.equals("break")){
+						break;
+					}
 				}
 			}
 
+			//TODO: convert the switch AST to a series of statements where a case is an if and the condition is carried down
 			else if(token.value.equals("switch")){
 				int size = ((NaryAST)right).nodes.size() - 1;
 				
 				for(int i = 0; i < size; i++){
 					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(i)).left){
-						((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
+						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
+					}
+					
+					if(returned_value != null && returned_value instanceof Token){
+						
+						//break breaks the switch, continue breaks a surrounding loop
+						if(((Token) returned_value).value.equals("break")){
+							return null;
+						} else {
+							return returned_value;
+						}
 					}
 				}
 				
 				if(((NaryAST)right).nodes.get(size).token.value.equals("case")){
 					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(size)).left){
-						((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
 					}
 				} else {
-					((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+					returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
 				}
 			}
 			

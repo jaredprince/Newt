@@ -5,11 +5,11 @@ import java.util.Scanner;
 
 public class Lexer {
 
-	static String[] structures = { "do", "if", "else", "while", "for", "func", "switch", "case", "default", "try",
-			"catch", "print" // structures
+	static String[] structures = { "do", "class", "if", "else", "while", "for", "func", "switch", "case", "default", "try",
+			"catch", "print", "class" // structures
 	};
 
-	static String[] statements = { "goto", "return", "break" };
+	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit" };
 
 	static String[] types = { "short", "long", "int", "string", "char", "double", "boolean", "var" };
 

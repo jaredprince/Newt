@@ -55,8 +55,17 @@ public class NaryAST extends ASTNode {
 				ASTNode node = nodes.get(i);
 				Object obj = node.visitNode();
 				
+				if(obj != null)
+					return obj;
+				
+				//returns exit the block immediately and return a value
 				if(node.token.value.equals("return")){
 					return obj;
+				}
+				
+				//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
+				if(node.token.value.equals("break") || node.token.value.equals("continue")){
+					return node.token;
 				}
 			}
 		}

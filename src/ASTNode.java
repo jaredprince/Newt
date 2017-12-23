@@ -26,9 +26,14 @@ public class ASTNode {
 	}
 	
 	public Object visitNode(){
-		
 		if(token.type == Token.BLANK){
 			return null;
+		}
+		
+		if(token.type == Token.STATEMENT){
+			if(token.value.equals("break")){
+				return token;
+			}
 		}
 		
 		if(token.type != Token.IDENTIFIER && token.type != Token.LITERAL && token.type != Token.STATEMENT && token.type != Token.TYPE){

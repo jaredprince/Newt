@@ -28,9 +28,9 @@ public class TernaryAST extends ASTNode {
 		
 		if(token.value.equals("if")){
 			if((Boolean)left.visitNode()){
-				center.visitNode();
+				return center.visitNode();
 			} else if(right.token.type != Token.BLANK){
-				right.visitNode();
+				return right.visitNode();
 			}
 		}
 		

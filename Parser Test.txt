@@ -1,73 +1,18 @@
-string a = create(1, 2);
-a = -a;
-a += "cat";
-
-func create(int count, int day){
-	string pronouncement = "Let there be Light!";
-	int b = 3;
-	print("Day: " + day);
-	print(pronouncement);
-	
-	func func1(){
-		
-		
-		
-		func func2(){
-		print 6;
-			return 7;
-		}
-		print(func2());
-		return 8;
-	}
-	
-	print(func1());
-
-	return "wefwef";
-}
-
-int b = 1;
-b +=1;
-print b;
-b*=2;
-print b;
-
-print a;
-a++;
-b--;
-print b;
-print a;
-func c(){
-
-}
-/*
-c = func () {
-
-print(7);
-};
-
-c();
-
-func makeCounter() {
-  int i = 0;
-  func count() {
-    i = i + 1;
-    print i;
-  }
-
-  return count;
-}
-
-var c = func () {
-  int i = 0;
-  func count() {
-    i = i + 1;
-    print i;
-  }
-
-  return count;
-};
-
-var counter = makeCounter();
-counter(); // "1".
-counter(); // "2".
-*/
+int i = 0;
+switch (i){
+					case (0){
+						print 4;}
+					case (5){
+						break;}
+					}
+while(i < 10){ i++;
+print( i == 3);
+					switch (i){
+					case (3){
+						continue;}
+					case (5){
+						break;}
+					}
+					
+					print i;
+				}
