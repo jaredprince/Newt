@@ -19,19 +19,19 @@ public class BinaryAST extends ASTNode {
 		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
 	}
 
-	public Object visitNode() {
+	public TypedObject visitNode() {
 		
 		// handles expressions and assignments
 		if (token.type == Token.OPERATOR) {
-			Object left = this.left.visitNode();
-			Object right = this.right.visitNode();
+			TypedObject left = this.left.visitNode();
+			TypedObject right = this.right.visitNode();
 
 			// handles assignments
 			if (token.subtype == Token.ASSIGNMENT) {
 				
 				//a function variable gets the actual node
 				if(this.left.token.value.equals("function")){
-					Parser.environment.assign(this.left.token, new Function((BinaryAST)right));
+					Parser.environment.assign(this.left.token, new TypedObject("func", new Function((BinaryAST)this.right)));
 				}
 				
 				Parser.environment.assign(this.left.token, right);
@@ -41,16 +41,16 @@ public class BinaryAST extends ASTNode {
 				try {
 					switch (token.value) {
 					case "&&":
-						return new Boolean((Boolean) left && (Boolean) right);
+						return new TypedObject("int", new Boolean((Boolean) left.object && (Boolean) right.object));
 
 					case "||":
-						return new Boolean((Boolean) left || (Boolean) right);
+						return new TypedObject("int", new Boolean((Boolean) left.object || (Boolean) right.object));
 
 					case "~NOR":
-						return new Boolean(!((Boolean) left || (Boolean) right));
+						return new TypedObject("int", new Boolean(!((Boolean) left.object || (Boolean) right.object)));
 
 					case "~NAND":
-						return new Boolean(!((Boolean) left && (Boolean) right));
+						return new TypedObject("int", new Boolean(!((Boolean) left.object && (Boolean) right.object)));
 					}
 				} catch (ClassCastException e) {
 					System.err.println("Only boolean values can be used with logical operators.");
@@ -62,29 +62,29 @@ public class BinaryAST extends ASTNode {
 			if (token.subtype == Token.COMPARATIVE) {
 				
 				if(token.value.equals("==")){
-					if(left instanceof Double && right instanceof Integer){
-						return new Boolean(((Double)left).equals(new Double(((Integer)right).intValue())));
+					if(left.type.equals("double") && right.type.equals("int")){
+						return new TypedObject("boolean", new Boolean(((Double)left.object).equals(new Double(((Integer)right.object).intValue()))));
 					}
 					
-					return new Boolean(left.equals(right));
+					return new TypedObject("boolean", new Boolean(left.object.equals(right.object)));
 				}
 
-				if ((left instanceof Double || left instanceof Integer)
-						&& (right instanceof Double || right instanceof Integer)) {
+				if ((left.type.equals("double") || left.type.equals("int"))
+						&& (right.type.equals("double") || right.type.equals("int"))) {
 
 					switch (token.value) {
 
 					case "<":
-						return new Boolean(toDouble(left) < toDouble(right));
+						return new TypedObject("boolean", new Boolean(toDouble(left.object) < toDouble(right.object)));
 
 					case "<=":
-						return new Boolean(toDouble(left) <= toDouble(right));
+						return new TypedObject("boolean", new Boolean(toDouble(left.object) <= toDouble(right.object)));
 						
 					case ">=":
-						return new Boolean(toDouble(left) >= toDouble(right));
+						return new TypedObject("boolean", new Boolean(toDouble(left.object) >= toDouble(right.object)));
 						
 					case ">":
-						return new Boolean(toDouble(left) > toDouble(right));
+						return new TypedObject("boolean", new Boolean(toDouble(left.object) > toDouble(right.object)));
 					}
 
 				} else {
@@ -96,32 +96,32 @@ public class BinaryAST extends ASTNode {
 			if (token.subtype == Token.MATHEMATICAL) {
 				
 				//TODO: account for non-literal returns
-				if(token.value.equals("+") && (left instanceof String || right instanceof String)){					
-					return left.toString() + right.toString();
+				if(token.value.equals("+") && (left.type.equals("string") || right.type.equals("string"))){					
+					return new TypedObject("string", left.object.toString() + right.object.toString());
 				}
 				
-				if ((left instanceof Double || left instanceof Integer)
-						&& (right instanceof Double || right instanceof Integer)) {
+				if ((left.type.equals("double") || left.type.equals("int"))
+						&& (right.type.equals("double") || right.type.equals("int"))) {
 
 					switch (token.value) {
 
 					case "+":
-						return new Double(toDouble(left) + toDouble(right));
+						return new TypedObject("double", new Double(toDouble(left.object) + toDouble(right.object)));
 
 					case "*":
-						return new Double(toDouble(left) * toDouble(right));
+						return new TypedObject("double", new Double(toDouble(left.object) * toDouble(right.object)));
 
 					case "/":
-						return new Double(toDouble(left) / toDouble(right));
+						return new TypedObject("double", new Double(toDouble(left.object) / toDouble(right.object)));
 						
 					case "-":
-						return new Double(toDouble(left) - toDouble(right));
+						return new TypedObject("double", new Double(toDouble(left.object) - toDouble(right.object)));
 						
 					case "%":
-						return new Double(toDouble(left) % toDouble(right));
+						return new TypedObject("double", new Double(toDouble(left.object) % toDouble(right.object)));
 						
 					case "^":
-						return new Double(Math.pow(toDouble(left), toDouble(right)));
+						return new TypedObject("double", new Double(Math.pow(toDouble(left.object), toDouble(right.object))));
 					}
 
 				} else {
@@ -135,7 +135,7 @@ public class BinaryAST extends ASTNode {
 		if(token.value.equals("call")){
 			NaryAST args = (NaryAST) right;
 			
-			List<Object> arguments = new ArrayList<Object>();
+			List<TypedObject> arguments = new ArrayList<TypedObject>();
 			
 			//visit each argument to get the object returned
 			for(int i = 0; i < args.nodes.size(); i++){
@@ -143,15 +143,15 @@ public class BinaryAST extends ASTNode {
 			}
 			
 			//return the result of calling the function with the given arguments
-			return ((Callable)Parser.environment.get(left.token)).call(null, arguments);
+			return ((Callable)Parser.environment.get(left.token).object).call(null, arguments);
 		}
 
 		if(token.value.equals("func")){
 			if(Parser.environment.depth > 0){
-				Parser.environment.define(token, left.token, new Function((BinaryAST) right, Parser.environment.getScopeFromInner(0)));
+				Parser.environment.define(token, left.token, new TypedObject("func", new Function((BinaryAST) right, Parser.environment.getScopeFromInner(0))));
 			}
 			else {
-				Parser.environment.define(token, left.token, new Function((BinaryAST)right));
+				Parser.environment.define(token, left.token, new TypedObject("func", new Function((BinaryAST)right)));
 			}
 		}
 		
@@ -159,16 +159,16 @@ public class BinaryAST extends ASTNode {
 
 			Parser.environment.enterScope();
 			
-			Object returned_value = null;
+			TypedObject returned_value = null;
 			
 			if(token.value.equals("do")){
 				
 				returned_value = right.visitNode();
 				
-				while(((Boolean) left.visitNode())){
+				while(((Boolean) left.visitNode().object)){
 					
 					//break if the return for that iteration was a break
-					if(returned_value instanceof Token && ((Token) returned_value).value.equals("break")){
+					if(returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
 						break;
 					}
 					
@@ -177,11 +177,11 @@ public class BinaryAST extends ASTNode {
 			}
 			
 			else if(token.value.equals("while")){			
-				while((Boolean) left.visitNode()){
+				while((Boolean) left.visitNode().object){
 					returned_value = right.visitNode();
 					
 					//break if the return for that iteration was a break
-					if(returned_value instanceof Token && ((Token) returned_value).value.equals("break")){
+					if(returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
 						break;
 					}
 				}
@@ -189,31 +189,31 @@ public class BinaryAST extends ASTNode {
 
 			//TODO: convert the switch AST to a series of statements where a case is an if and the condition is carried down
 			else if(token.value.equals("switch")){
-				int size = ((NaryAST)right).nodes.size() - 1;
-				
-				for(int i = 0; i < size; i++){
-					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(i)).left){
-						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
-					}
-					
-					if(returned_value != null && returned_value instanceof Token){
-						
-						//break breaks the switch, continue breaks a surrounding loop
-						if(((Token) returned_value).value.equals("break")){
-							return null;
-						} else {
-							return returned_value;
-						}
-					}
-				}
-				
-				if(((NaryAST)right).nodes.get(size).token.value.equals("case")){
-					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(size)).left){
-						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
-					}
-				} else {
-					returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
-				}
+//				int size = ((NaryAST)right).nodes.size() - 1;
+//				
+//				for(int i = 0; i < size; i++){
+//					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(i)).left){
+//						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
+//					}
+//					
+//					if(returned_value != null && returned_value.type.equals("token")){
+//						
+//						//break breaks the switch, continue breaks a surrounding loop
+//						if(((Token) returned_value.object).value.equals("break")){
+//							return null;
+//						} else {
+//							return returned_value;
+//						}
+//					}
+//				}
+//				
+//				if(((NaryAST)right).nodes.get(size).token.value.equals("case")){
+//					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(size)).left){
+//						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+//					}
+//				} else {
+//					returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
+//				}
 			}
 			
 			Parser.environment.exitScope();

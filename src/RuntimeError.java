@@ -37,10 +37,10 @@ public class RuntimeError extends RuntimeException {
 		System.exit(0);
 	}
 	
-	public RuntimeError(Token name, String expected_type, Object value, int err_type){
+	public RuntimeError(Token name, String expected_type, TypedObject value, int err_type){
 		if(err_type == CANNOT_ASSIGN_TYPE){
 			System.err.println("Cannot assign the given value to a variable of this type.");
-			System.err.println("  Value Type: " + value.getClass().getName());
+			System.err.println("  Value Type: " + value.type);
 			System.err.println("  Variable Type: " + expected_type);
 			System.err.println("  Variable Name: " + name.value);
 		}

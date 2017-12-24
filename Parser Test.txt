@@ -1,7 +1,13 @@
+int k = 2;
+print k;
+k*=2;
 
-				
-				func create(int i, int j){
-					print (i + j);
-				}
-				
-				create(1, (100 - 7));
+print k;
+
+func create(int i, int j){
+	print (i + j);
+}
+
+print(test());
+
+create(1, (100 - 7));

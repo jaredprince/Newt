@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class Environment {
 
-	private LinkedList<Map<String, TypedVariable>> variables = new LinkedList<Map<String, TypedVariable>>();
+	private LinkedList<Map<String, TypedObject>> variables = new LinkedList<Map<String, TypedObject>>();
 	public int depth;
 	
 	public Environment(){
@@ -17,7 +17,7 @@ public class Environment {
 	 * @param name The name of the variable.
 	 * @param value The value of the variable.
 	 */
-	public void define(Token type, Token name, Object value){
+	public void define(Token type, Token name, TypedObject value){
 		
 		//TODO: overloading methods
 		
@@ -25,7 +25,7 @@ public class Environment {
 		if(variables.getFirst().containsKey(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
-			variables.getFirst().put(name.value, new TypedVariable(type.value, null));
+			variables.getFirst().put(name.value, new TypedObject(type.value, null));
 			assign(name, value);
 		}
 	}
@@ -35,8 +35,8 @@ public class Environment {
 	 * @param name The token of the variable name.
 	 * @return The value of the variable.
 	 */
-	public Object get(Token name){
-		return findVariable(name).object;
+	public TypedObject get(Token name){
+		return findVariable(name);
 	}
 	
 	/**
@@ -44,54 +44,36 @@ public class Environment {
 	 * @param name The name of the variable.
 	 * @param value The value to assign to the variable.
 	 */
-	public void assign(Token name, Object value){
-		TypedVariable var = findVariable(name);
+	public void assign(Token name, TypedObject value){
+		TypedObject var = findVariable(name);
 		
 		//TODO: enforce type
 		
 		switch(var.type){
 		
 		case "int":
-			if(value instanceof Double){
-				value = new Integer(((Double) value).intValue());
-			} else if (!(value instanceof Integer)){
+			if(value.type.equals("double")){
+				value.object = new Integer(((Double) value.object).intValue());
+			} else if (!(value.type.equals("int"))){
 				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
 			}
 			break;
 			
 		case "double":
-			if(value instanceof Integer){
-				value = new Double(((Integer) value).intValue());
-			} else if (!(value instanceof Double)){
+			if(value.type.equals("int")){
+				value.object = new Double(((Integer) value.object).intValue());
+			} else if (!(value.type.equals("double"))){
 				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
 			}
 			break;
 			
-		case "string":
-			if(!(value instanceof String)){
-				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
-			}
-			break;
-			
-		case "boolean":
-			if(!(value instanceof Boolean)){
-				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
-			}
-			break;
-			
-		case "char":
-			if(!(value instanceof Character)){
-				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
-			}
-			break;
-			
-		case "func":
-			if(!(value instanceof Function)){
+		default:
+			if(!value.type.equals(var.type)){
 				throw new RuntimeError(name, var.type, value, RuntimeError.CANNOT_ASSIGN_TYPE);
 			}
 		}
 		
-		var.object = value;
+		var.object = value.object;
 	}
 	
 	//TODO: Decide what happens when the type of a variable is changed. Right now, nothing happens to the object already in the variable.
@@ -102,16 +84,16 @@ public class Environment {
 	 * @param type The new type to assign.
 	 */
 	public void changeType(Token name, Token type){
-		TypedVariable var = findVariable(name);
+		TypedObject var = findVariable(name);
 		var.type = type.value;
 	}
 	
-	public TypedVariable findVariable(Token name){
+	public TypedObject findVariable(Token name){
 		
 		//for each scope starting with the innermost
 		for(int i = 0; i < variables.size(); i++){
 			//get the variables
-			Map<String, TypedVariable> scope = variables.get(i);
+			Map<String, TypedObject> scope = variables.get(i);
 			
 			//check if the map contains the key
 			if(scope.containsKey(name.value)){
@@ -148,7 +130,7 @@ public class Environment {
 	 * @param depth The depth of the scope from the innermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, TypedVariable> getScopeFromInner(int depth){
+	public Map<String, TypedObject> getScopeFromInner(int depth){
 		return variables.get(depth);
 	}
 	
@@ -159,7 +141,7 @@ public class Environment {
 	 * @param depth The depth of the scope from the outermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, TypedVariable> getScopeFromOuter(int depth){
+	public Map<String, TypedObject> getScopeFromOuter(int depth){
 		return variables.get(variables.size() - 1 - depth);
 	}
 }

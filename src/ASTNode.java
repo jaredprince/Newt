@@ -25,14 +25,15 @@ public class ASTNode {
 		return str + "Token: " + token.value;
 	}
 	
-	public Object visitNode(){
+	public TypedObject visitNode(){
 		if(token.type == Token.BLANK){
 			return null;
 		}
 		
 		if(token.type == Token.STATEMENT){
 			if(token.value.equals("break")){
-				return token;
+				//TODO: special
+				return new TypedObject("token", token);
 			}
 		}
 		
@@ -44,7 +45,8 @@ public class ASTNode {
 		
 		//types get passed up to the declaration node
 		if(token.type == Token.TYPE){
-			return token;
+			//TODO: special
+			return new TypedObject("token", token);
 		}
 		
 		if(token.type == Token.IDENTIFIER){
@@ -55,15 +57,15 @@ public class ASTNode {
 		int stype = token.subtype;
 		
 		if(stype == Token.STRING){
-			return val.substring(1, val.length() - 1);
+			return new TypedObject("string", val.substring(1, val.length() - 1));
 		} else if(stype == Token.BOOLEAN) {
-			return new Boolean(val);
+			return new TypedObject("boolean", new Boolean(val));
 		} else if(stype == Token.CHARACTER) {
-			return new Character(val.charAt(1));
+			return new TypedObject("char", new Character(val.charAt(1)));
 		} else if(stype == Token.DOUBLE){
-			return new Double(val);
+			return new TypedObject("double", new Double(val));
 		} else if(stype == Token.INTEGER){
-			return new Integer(val);
+			return new TypedObject("int", new Integer(val));
 		}
 		
 		return null;

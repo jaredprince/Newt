@@ -26,12 +26,12 @@ public class Parser {
 		lex = new Lexer(new File("Parser Test.txt"));
 		
 		//a native method
-		environment.define(new Token("native", Token.TYPE), new Token("test", Token.STRUCTURE), new Callable(){
+		environment.define(new Token("native", Token.TYPE), new Token("test", Token.STRUCTURE), new TypedObject("native", new Callable(){
 			
 			@Override
-			public Object call(Parser parser, List<Object> arguments) {
+			public TypedObject call(Parser parser, List<TypedObject> arguments) {
 				System.out.println("this is test one");
-				return "this is test two";
+				return new TypedObject("string", "this is test two");
 			}
 
 			@Override
@@ -39,7 +39,7 @@ public class Parser {
 				return 0;
 			}
 			
-		});
+		}));
 		
 //		while(lex.hasNextToken()){
 //			 System.out.println(lex.consume());

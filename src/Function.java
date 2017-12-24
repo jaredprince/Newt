@@ -6,7 +6,7 @@ public class Function implements Callable {
 	 
 	public BinaryAST node;
 	public int arity;
-	public Map<String, TypedVariable> parentMap;
+	public Map<String, TypedObject> parentMap;
 	
 	public Function(BinaryAST node){
 		this.node = node;
@@ -16,7 +16,7 @@ public class Function implements Callable {
 		arity = ((NaryAST)node.left).nodes.size();
 	}
 	
-	public Function(BinaryAST node, Map<String, TypedVariable> map){
+	public Function(BinaryAST node, Map<String, TypedObject> map){
 		this.node = node;
 		parentMap = map;
 		
@@ -24,7 +24,7 @@ public class Function implements Callable {
 	}
 
 	@Override
-	public Object call(Parser parser, List<Object> arguments) {
+	public TypedObject call(Parser parser, List<TypedObject> arguments) {
 
 		//TODO: check types of arguments match parameters
 		
@@ -49,7 +49,7 @@ public class Function implements Callable {
 		
 		//execute the block
 		((NaryAST) node.right).structureBody = true;
-		Object result = node.right.visitNode();
+		TypedObject result = node.right.visitNode();
 		
 		Parser.environment.exitScope();
 		

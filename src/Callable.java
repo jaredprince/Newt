@@ -1,6 +1,6 @@
 import java.util.List;
 
 interface Callable {
-  Object call(Parser parser, List<Object> arguments);
+  TypedObject call(Parser parser, List<TypedObject> arguments);
   int arity();
 }

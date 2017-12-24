@@ -25,7 +25,7 @@ public class QuaternaryAST extends ASTNode {
 		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + left_center.toString(depth + 1) + "\n" + right_center.toString(depth + 1) + "\n" + right.toString(depth + 1);
 	}
 	
-	public Object visitNode(){
+	public TypedObject visitNode(){
 		
 		if(token.value.equals("for")){
 		
@@ -34,15 +34,15 @@ public class QuaternaryAST extends ASTNode {
 			//should declare a variable or do nothing
 			left.visitNode();
 			
-			Object returned_value;
+			TypedObject returned_value;
 	
-			while((Boolean) left_center.visitNode()){
+			while((Boolean) left_center.visitNode().object){
 				//executes the body
 				((NaryAST)right).structureBody = true;
 				returned_value = right.visitNode();
 				
 				//break if the return for that iteration was a break
-				if(returned_value instanceof Token && ((Token) returned_value).value.equals("break")){
+				if(returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
 					break;
 				}
 				

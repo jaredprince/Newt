@@ -23,8 +23,8 @@ public class UnaryAST extends ASTNode {
 	}
 	
 	@Override
-	public Object visitNode(){
-		Object child = this.child.visitNode();
+	public TypedObject visitNode(){
+		TypedObject child = this.child.visitNode();
 		
 		String val = token.value;
 		
@@ -34,38 +34,38 @@ public class UnaryAST extends ASTNode {
 		
 		if(token.type == Token.TYPE){
 			if(val.equals("int")){
-				if(child instanceof Integer){
+				if(child.type.equals("int")){
 					return child;
-				} else if(child instanceof Double) {
-					return new Integer((int)((Double)child).doubleValue());
+				} else if(child.type.equals("double")) {
+					return new TypedObject("int", new Integer((int)((Double)child.object).doubleValue()));
 				} else {
 					throw new RuntimeError(token, RuntimeError.CANNOT_CAST);
 				}
 			}
 			
 			else if(val.equals("double")){
-				if(child instanceof Double){
+				if(child.type.equals("double")){
 					return child;
-				} else if(child instanceof Integer) {
-					return new Double(((Integer)child).intValue());
+				} else if(child.type.equals("int")) {
+					return new TypedObject("double", new Double(((Integer)child.object).intValue()));
 				} else {
 					throw new RuntimeError(token, RuntimeError.CANNOT_CAST);
 				}
 			}
 			
 			else if(val.equals("string")){
-				return child.toString();
+				return new TypedObject("string", child.toString());
 			}
 		}
 		
 		if(val.equals("print")){
-			System.out.println(child);
+			System.out.println(child.object);
 			return null;
 		}
 
 		if(val.equals("!")){
-			if(child instanceof Boolean){
-				return new Boolean(!((Boolean)child).booleanValue());
+			if(child.type.equals("boolean")){
+				return new TypedObject("boolean", new Boolean(!((Boolean)child.object).booleanValue()));
 			}
 			
 			else {
@@ -75,24 +75,24 @@ public class UnaryAST extends ASTNode {
 		}
 		
 		if(val.equals("|")){
-			if(child instanceof Double){
-				return new Double(Math.abs(( (Double)child).doubleValue() ));
+			if(child.type.equals("double")){
+				return new TypedObject("double", new Double(Math.abs(( (Double)child.object).doubleValue() )));
 			}
 			
-			if(child instanceof Integer){
-				return new Integer(Math.abs(( (Integer)child).intValue() ));
+			if(child.type.equals("int")){
+				return new TypedObject("int", new Integer(Math.abs(( (Integer)child.object).intValue() )));
 			}
 			
 			throw new RuntimeError(token, RuntimeError.NUMERIC_INPUT_EXPECTED);
 		}
 		
 		if(val.equals("-")) {
-			if(child instanceof Double){
-				return new Double( -((Double)child).doubleValue() );
+			if(child.type.equals("double")){
+				return new TypedObject("double", new Double( -((Double)child.object).doubleValue() ));
 			}
 			
-			if(child instanceof Integer){
-				return new Integer( -((Integer)child).intValue() );
+			if(child.type.equals("int")){
+				return new TypedObject("int", new Integer( -((Integer)child.object).intValue() ));
 			}
 			
 			throw new RuntimeError(token, RuntimeError.NUMERIC_INPUT_EXPECTED);

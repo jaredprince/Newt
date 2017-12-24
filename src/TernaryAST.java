@@ -24,10 +24,10 @@ public class TernaryAST extends ASTNode {
 	}
 	
 	@Override
-	public Object visitNode(){
+	public TypedObject visitNode(){
 		
 		if(token.value.equals("if")){
-			if((Boolean)left.visitNode()){
+			if((Boolean)left.visitNode().object){
 				return center.visitNode();
 			} else if(right.token.type != Token.BLANK){
 				return right.visitNode();
@@ -40,12 +40,12 @@ public class TernaryAST extends ASTNode {
 		}
 		
 		if(token.type == Token.OPERATOR){
-			Object left = this.left.visitNode();
+			TypedObject left = this.left.visitNode();
 			
 			if(token.value.equals("?")){
 				
 				//handle conditional operator using conditional operator
-				return (Boolean)left ? center.visitNode() : right.visitNode();
+				return (Boolean)left.object ? center.visitNode() : right.visitNode();
 			}
 		}
 		

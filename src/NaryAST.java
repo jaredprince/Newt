@@ -44,7 +44,7 @@ public class NaryAST extends ASTNode {
 		return str;
 	}
 	
-	public Object visitNode(){
+	public TypedObject visitNode(){
 		
 		if(!structureBody){
 			Parser.environment.enterScope();
@@ -53,7 +53,7 @@ public class NaryAST extends ASTNode {
 		if(token.type == Token.GROUPING){
 			for(int i = 0; i < nodes.size(); i++){
 				ASTNode node = nodes.get(i);
-				Object obj = node.visitNode();
+				TypedObject obj = node.visitNode();
 				
 				if(obj != null)
 					return obj;
@@ -65,7 +65,7 @@ public class NaryAST extends ASTNode {
 				
 				//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
 				if(node.token.value.equals("break") || node.token.value.equals("continue")){
-					return node.token;
+					return new TypedObject("token", node.token);
 				}
 			}
 		}
