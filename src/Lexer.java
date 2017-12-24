@@ -144,6 +144,7 @@ public class Lexer {
 				if(in.hasNextLine()){
 					line = in.nextLine();
 					line_loc++;
+					char_loc = 0;
 				} else {
 					break;
 				}

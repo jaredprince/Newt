@@ -28,7 +28,6 @@ public class UnaryAST extends ASTNode {
 		
 		String val = token.value;
 		
-		//TODO: make returns rise through nested blocks
 		if(token.value.equals("return")){
 			return child;
 		}
@@ -42,6 +41,20 @@ public class UnaryAST extends ASTNode {
 				} else {
 					throw new RuntimeError(token, RuntimeError.CANNOT_CAST);
 				}
+			}
+			
+			else if(val.equals("double")){
+				if(child instanceof Double){
+					return child;
+				} else if(child instanceof Integer) {
+					return new Double(((Integer)child).intValue());
+				} else {
+					throw new RuntimeError(token, RuntimeError.CANNOT_CAST);
+				}
+			}
+			
+			else if(val.equals("string")){
+				return child.toString();
 			}
 		}
 		

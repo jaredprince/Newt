@@ -1,18 +1,7 @@
-int i = 0;
-switch (i){
-					case (0){
-						print 4;}
-					case (5){
-						break;}
-					}
-while(i < 10){ i++;
-print( i == 3);
-					switch (i){
-					case (3){
-						continue;}
-					case (5){
-						break;}
-					}
-					
-					print i;
+
+				
+				func create(int i, int j){
+					print (i + j);
 				}
+				
+				create(1, (100 - 7));

@@ -39,6 +39,12 @@ public class Function implements Callable {
 		for(int i = 0; i < arguments.size(); i++){
 			//assign argument i to parameter i
 			Parser.environment.define(((BinaryAST) parameters.get(i)).left.token, ((BinaryAST) parameters.get(i)).right.token, arguments.get(i));
+		
+			
+			String expectedType = ((BinaryAST) parameters.get(i)).left.token.value;
+//			if(arguments.get(i)){
+//				
+//			}
 		}
 		
 		//execute the block
