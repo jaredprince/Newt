@@ -42,7 +42,7 @@ public class QuaternaryAST extends ASTNode {
 				returned_value = right.visitNode();
 				
 				//break if the return for that iteration was a break
-				if(returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
+				if(returned_value != null && returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
 					break;
 				}
 				

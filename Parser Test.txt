@@ -1,6 +1,12 @@
 int i = 4;
 int j = 5;
 
+
+for(int l = 0; i < 23; i++){
+print (i);
+}
+int i = 2;
+
 switch(i, j, 6){
 	case(any,9,any){
 		print("2");
@@ -19,3 +25,12 @@ switch(i, j, 6){
 	print "def-test";
 	}
 }
+
+var i = 2.5;
+print i;
+print (i + 3);
+
+i = "cat";
+print i;
+
+int j = 2;

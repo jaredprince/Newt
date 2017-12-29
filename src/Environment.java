@@ -25,7 +25,13 @@ public class Environment {
 		if(variables.getFirst().containsKey(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
-			variables.getFirst().put(name.value, new TypedObject(type.value, null));
+			TypedObject o = new TypedObject(type.value, null);
+			
+			if(type.value.equals("var")){
+				o.dynamic = true;
+			}
+			
+			variables.getFirst().put(name.value, o);
 			assign(name, value);
 		}
 	}
@@ -49,8 +55,18 @@ public class Environment {
 		
 		//TODO: enforce type
 		
-		switch(var.type){
+		//TODO: Decide how to handle dynamic types (var). I need to track which are dynamic somehow, but I still need to know what type
+		//the current value is
 		
+		//dynamic variables can be any type
+		if(var.dynamic){
+			var.object = value.object;
+			var.type = value.type;
+			return;
+		}
+		
+		switch(var.type){
+			
 		case "int":
 			if(value.type.equals("double")){
 				value.object = new Integer(((Double) value.object).intValue());
