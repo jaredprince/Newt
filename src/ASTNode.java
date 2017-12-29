@@ -31,8 +31,8 @@ public class ASTNode {
 		}
 		
 		if(token.type == Token.STATEMENT){
-			if(token.value.equals("break")){
-				//TODO: special
+			if(token.value.equals("break") || token.value.equals("continue")){
+				//tokens will be passed up the tree until they are used
 				return new TypedObject("token", token);
 			}
 		}
@@ -45,7 +45,6 @@ public class ASTNode {
 		
 		//types get passed up to the declaration node
 		if(token.type == Token.TYPE){
-			//TODO: special
 			return new TypedObject("token", token);
 		}
 		
@@ -66,6 +65,8 @@ public class ASTNode {
 			return new TypedObject("double", new Double(val));
 		} else if(stype == Token.INTEGER){
 			return new TypedObject("int", new Integer(val));
+		} else if (stype == Token.SPECIAL_VALUE){
+			return new TypedObject("token", token);
 		}
 		
 		return null;

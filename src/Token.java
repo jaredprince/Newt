@@ -3,7 +3,8 @@ public class Token {
 	
 	static final String[] names = {
 		"ERROR", "TYPE", "STATEMENT", "DELINEATOR", "COMMENT", "OPERATOR", "STRUCTURE", "IDENTIFIER", "GROUPING", "BLANK", "LITERAL",
-		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL", "ASSIGNMENT", "EOF"
+		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL_OP",
+		"ASSIGNMENT", "EOF", "SPECIAL_VALUE"
 	};
 	
 	//basic types
@@ -29,11 +30,13 @@ public class Token {
 	static final int OBJECT = 15; //currently unused
 	static final int STRING = 16; //"string"
 	
+	static final int SPECIAL_VALUE = 23;
+	
 	//operators
 	static final int MATHEMATICAL = 17; // +, -, *, /, %, etc.
 	static final int LOGICAL = 18; // &&, ||, ~NOR, etc.
 	static final int COMPARATIVE = 19; // <, ==, !=, >=, etc.
-	static final int SPECIAL = 20;
+	static final int SPECIAL_OP = 20;
 	static final int ASSIGNMENT = 21; // =, *=, +=, etc.
 	
 	static final int EOF = 22;
@@ -69,7 +72,6 @@ public class Token {
 	
 	public String toString(){
 		String out = String.format("(%3d,%3d)  %10s : %s", char_loc, line_loc, names[type], value);
-//		return "type: " + names[type] + "\t\tValue: " + value + "\t\tCharacter: " + char_loc + "\t\tLine: " + line_loc;
 		return out;
 	}
 }

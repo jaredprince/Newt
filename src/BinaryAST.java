@@ -61,6 +61,23 @@ public class BinaryAST extends ASTNode {
 			//TODO: Handle objects using "=="
 			if (token.subtype == Token.COMPARATIVE) {
 				
+				//handles any
+				if(left.type.equals("token")){
+					Token t = (Token) left.object;
+					
+					if(t.value.equals("any")){
+						return new TypedObject("boolean", new Boolean(true));
+					}
+				}
+				
+				if(right.type.equals("token")){
+					Token t = (Token) right.object;
+					
+					if(t.value.equals("any")){
+						return new TypedObject("boolean", new Boolean(true));
+					}
+				}
+				
 				if(token.value.equals("==")){
 					if(left.type.equals("double") && right.type.equals("int")){
 						return new TypedObject("boolean", new Boolean(((Double)left.object).equals(new Double(((Integer)right.object).intValue()))));

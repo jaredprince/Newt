@@ -838,6 +838,11 @@ public class Parser {
 
 			return node;
 		}
+		
+		//special values (any, inf, neginf) are literals
+		if(lex.nextTypeIs(Token.SPECIAL_VALUE)){
+			return new ASTNode(lex.consume());
+		}
 
 		//handles subexpressions
 		if (lex.nextValueIs("(")) {

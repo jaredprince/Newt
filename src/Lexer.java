@@ -9,7 +9,9 @@ public class Lexer {
 			"catch", "print", "class" // structures
 	};
 
-	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit" };
+	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit"};
+	
+	static String[] specials = {"any", "inf", "neginf"};
 
 	static String[] types = { "short", "long", "int", "string", "char", "double", "boolean", "var" };
 
@@ -102,6 +104,9 @@ public class Lexer {
 						t.type = Token.STATEMENT;
 					} else if(contains(types, t.value)) {
 						t.type = Token.TYPE;
+					} else if(contains(specials, t.value)) {
+						t.type = Token.LITERAL;
+						t.subtype = Token.SPECIAL_VALUE;
 					} else if(t.value.equals("true") || t.value.equals("false")){
 						t.type = Token.LITERAL;
 						t.subtype = Token.BOOLEAN;
@@ -206,7 +211,7 @@ public class Lexer {
 		} else if(contains(logical_op, val)){
 			t.subtype = Token.LOGICAL;
 		} else {
-			t.subtype = Token.SPECIAL;
+			t.subtype = Token.SPECIAL_OP;
 		}
 		
 		return t;

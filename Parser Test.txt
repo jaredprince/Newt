@@ -2,12 +2,12 @@ int i = 4;
 int j = 5;
 
 switch(i, j, 6){
-	case(2,2,2){
+	case(any,9,any){
 		print("2");
 		break;
 	}
 	
-	case(4, 5, 4){
+	case(4, 5, any){
 		print(6);
 	}
 	
