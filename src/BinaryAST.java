@@ -186,35 +186,6 @@ public class BinaryAST extends ASTNode {
 					}
 				}
 			}
-
-			//TODO: convert the switch AST to a series of statements where a case is an if and the condition is carried down
-			else if(token.value.equals("switch")){
-//				int size = ((NaryAST)right).nodes.size() - 1;
-//				
-//				for(int i = 0; i < size; i++){
-//					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(i)).left){
-//						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(i)).right.visitNode();
-//					}
-//					
-//					if(returned_value != null && returned_value.type.equals("token")){
-//						
-//						//break breaks the switch, continue breaks a surrounding loop
-//						if(((Token) returned_value.object).value.equals("break")){
-//							return null;
-//						} else {
-//							return returned_value;
-//						}
-//					}
-//				}
-//				
-//				if(((NaryAST)right).nodes.get(size).token.value.equals("case")){
-//					if(left.visitNode() == ((BinaryAST)((NaryAST)right).nodes.get(size)).left){
-//						returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
-//					}
-//				} else {
-//					returned_value = ((BinaryAST)((NaryAST)right).nodes.get(size)).right.visitNode();
-//				}
-			}
 			
 			Parser.environment.exitScope();
 		}

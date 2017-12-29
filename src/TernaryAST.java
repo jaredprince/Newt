@@ -26,11 +26,18 @@ public class TernaryAST extends ASTNode {
 	@Override
 	public TypedObject visitNode(){
 		
+		/* If statements will return token statements if their bodies do (break, continue, etc.).
+		 * Otherwise, they return a boolean denoting if the condition was true.
+		 * This is used by the switch to check for default case. */
 		if(token.value.equals("if")){
 			if((Boolean)left.visitNode().object){
-				return center.visitNode();
+				TypedObject c = center.visitNode();
+				return c != null ? c : new TypedObject("boolean", new Boolean(true));
 			} else if(right.token.type != Token.BLANK){
-				return right.visitNode();
+				TypedObject r = right.visitNode();
+				return r != null ? r : new TypedObject("boolean", new Boolean(false));
+			} else {
+				return new TypedObject("boolean", new Boolean(false));
 			}
 		}
 		

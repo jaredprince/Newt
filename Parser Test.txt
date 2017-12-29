@@ -1,13 +1,21 @@
-int k = 2;
-print k;
-k*=2;
+int i = 4;
+int j = 5;
 
-print k;
-
-func create(int i, int j){
-	print (i + j);
+switch(i, j, 6){
+	case(2,2,2){
+		print("2");
+		break;
+	}
+	
+	case(4, 5, 4){
+		print(6);
+	}
+	
+	case(4,3,4){
+		print(33);
+	}
+	
+	default{
+	print "def-test";
+	}
 }
-
-print(test());
-
-create(1, (100 - 7));

@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -261,51 +262,89 @@ public class Parser {
 	 * Parses a switch statement.
 	 * @return A BinaryAST node representing the statement
 	 */
-	public static BinaryAST parseSwitch() {
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	public static NaryAST parseSwitch() {
+		Token t = lex.consume();
+		t.type = Token.GROUPING;
+		NaryAST node = new NaryAST(t);
 
 		//get the rest of the head
 		expect("(");
-		node.left = parseExpression();
+		ArrayList<ASTNode> testVal = new ArrayList<ASTNode>();
+		ASTNode firstVal = parseExpression();
+		testVal.add(firstVal);
+		
+		while(lex.nextValueIs(",")){
+			expect(",");
+			testVal.add(parseExpression());
+		}
+		
 		expect(")");
 		expect("{");
-
-		//hold the case statements
-		NaryAST block = new NaryAST();
-		block.token = new Token("switch-body", Token.GROUPING);
-
+		
 		//add cases to the block
 		while (lex.read().value.equals("case")) {
-			block.addNode(parseCase());
+			node.addNode(testVal.size() == 1 ? parseCase(testVal.get(0)) : parseComplexCase(testVal));
 		}
 
 		//optional default statement
 		if (lex.read().value.equals("default")) {
-			block.addNode(parseDefault());
+			node.addNode(parseDefault());
 		}
 
 		expect("}");
-
-		node.right = block;
 
 		return node;
 	}
 
 	/**
 	 * Parses a case statement.
+	 * @param testVal The value used in the switch as the test value.
 	 * @return A BinaryAST node representing the case.
 	 */
-	public static BinaryAST parseCase() {
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	public static TernaryAST parseCase(ASTNode testVal) {
+		lex.consume();
+		TernaryAST node = new TernaryAST(new Token("if", Token.STRUCTURE));
 
 		//get the expression
 		expect("(");
-		node.left = parseExpression();
+		Token t = new Token("==", Token.OPERATOR);
+		t.subtype = Token.COMPARATIVE;
+		node.left = new BinaryAST(testVal, t, parseExpression());
 		expect(")");
 		
 		//get the following statements
-		node.right = parseBlock();
+		node.center = parseBlock();
+		
+		node.right = new ASTNode(new Token("", Token.BLANK));
 
+		return node;
+	}
+	
+	public static TernaryAST parseComplexCase(ArrayList<ASTNode> testVals){
+		lex.consume();
+		TernaryAST node = new TernaryAST(new Token("if", Token.STRUCTURE));
+
+		//get the expression
+		expect("(");
+		Token equals = new Token("==", Token.OPERATOR);
+		equals.subtype = Token.COMPARATIVE;
+		
+		Token and = new Token("&&", Token.OPERATOR);
+		and.subtype = Token.LOGICAL;
+		
+		node.left = new BinaryAST(testVals.get(0), equals, parseExpression());
+		int i = 1;
+		while(i < testVals.size()){
+			expect(",");
+			node.left = new BinaryAST(node.left, and, new BinaryAST(testVals.get(i), equals, parseExpression()));
+			i++;
+		}
+		
+		expect(")");
+		
+		//get the following statements
+		node.center = parseBlock();
+		node.right = new ASTNode(new Token("", Token.BLANK));
 		return node;
 	}
 
@@ -313,7 +352,7 @@ public class Parser {
 	 * Parses a default statement.
 	 * @return A UnaryAST node representing the default.
 	 */
-	public static UnaryAST parseDefault() {
+	public static UnaryAST parseDefault() {		
 		UnaryAST node = new UnaryAST(null, lex.consume());
 
 		node.child = parseBlock();
