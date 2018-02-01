@@ -83,6 +83,15 @@ public class Parser {
 
 		return node;
 	}
+	
+	public static BinaryAST parseClass(){
+		Token c = expect("class");
+		Token id = expect(Token.IDENTIFIER);
+
+		BinaryAST node = new BinaryAST(new ASTNode(id), c, parseBlock());
+
+		return node;
+	}
 
 	/**
 	 * Parses a single statement (declaration, assignment, structure, or keyword statement).
@@ -266,6 +275,7 @@ public class Parser {
 		Token t = lex.consume();
 		t.type = Token.GROUPING;
 		NaryAST node = new NaryAST(t);
+		node.structureBody = true;
 
 		//get the rest of the head
 		expect("(");
@@ -335,8 +345,15 @@ public class Parser {
 		node.left = new BinaryAST(testVals.get(0), equals, parseExpression());
 		int i = 1;
 		while(i < testVals.size()){
-			expect(",");
-			node.left = new BinaryAST(node.left, and, new BinaryAST(testVals.get(i), equals, parseExpression()));
+			if(!lex.nextValueIs(",")){
+				Token t = new Token("any", Token.LITERAL);
+				t.subtype = Token.SPECIAL_VALUE;
+				node.left = new BinaryAST(node.left, and, new BinaryAST(testVals.get(i), equals, new ASTNode(t)));
+			} else {
+				expect(",");
+				node.left = new BinaryAST(node.left, and, new BinaryAST(testVals.get(i), equals, parseExpression()));
+			}
+			
 			i++;
 		}
 		
@@ -872,18 +889,18 @@ public class Parser {
 	/**
 	 * Consumes the next token if it matches the given string, prints an error otherwise.
 	 * @param str The expected value.
+	 * @return The token consumed.
 	 */
-	public static void expect(String str) {
+	public static Token expect(String str) {
 		if (lex.hasNextToken()) {
 			if (lex.nextValueIs(str)) {
-				lex.consume();
-				return;
+				return lex.consume();
 			}
 		}
 
 		error(str);
 
-		return;
+		return null;
 	}
 	
 	public static Token expect(int i){

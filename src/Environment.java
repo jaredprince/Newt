@@ -53,11 +53,6 @@ public class Environment {
 	public void assign(Token name, TypedObject value){
 		TypedObject var = findVariable(name);
 		
-		//TODO: enforce type
-		
-		//TODO: Decide how to handle dynamic types (var). I need to track which are dynamic somehow, but I still need to know what type
-		//the current value is
-		
 		//dynamic variables can be any type
 		if(var.dynamic){
 			var.object = value.object;
