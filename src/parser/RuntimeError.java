@@ -1,4 +1,4 @@
-
+package parser;
 public class RuntimeError extends RuntimeException {
 
 	/**

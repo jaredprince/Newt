@@ -1,3 +1,5 @@
+package parser;
+
 public class QuaternaryAST extends ASTNode {
 
 	ASTNode left;

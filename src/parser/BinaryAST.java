@@ -1,5 +1,15 @@
+package parser;
+
+
 import java.util.ArrayList;
 import java.util.List;
+
+import parser.ASTNode;
+import parser.Callable;
+import parser.Function;
+import parser.Parser;
+import parser.Token;
+import parser.TypedObject;
 
 public class BinaryAST extends ASTNode {
 	ASTNode left;
