@@ -11,7 +11,7 @@ public class Token {
 	
 	//basic types
 	public static final int ERROR = 0; //an unidentifiable sequence
-	public static final int TYPE = 1; //a type keyword (int, char, string, etc.)
+	public static final int DATA_TYPE = 1; //a type keyword (int, char, string, etc.)
 	public static final int STATEMENT = 2; //a statement keyword (break, return, continue, etc.)
 	public static final int DELINEATOR = 3; //a separating punctuation mark ({, (, :, etc.)
 	public static final int COMMENT = 4; //a comment (// or /**/)

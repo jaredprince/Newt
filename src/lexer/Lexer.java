@@ -9,7 +9,7 @@ import parser.Token;
 public class Lexer {
 
 	static String[] structures = { "do", "class", "if", "else", "while", "for", "func", "switch", "case", "default", "try",
-			"catch", "print", "class" // structures
+			"catch", "class" // structures
 	};
 
 	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit"};
@@ -44,21 +44,34 @@ public class Lexer {
 	ArrayList<Token> tokens = new ArrayList<Token>();
 	Scanner in;
 
-	int char_loc = 0;
-	int line_loc = 1;
+	int char_loc = 0; /* Location of the character on the line */
+	int line_loc = 1; /* Location of the line in the file */
 
 	String line = "";
 
+	/**
+	 * Lexer constructor.
+	 * 
+	 * @param source The file to be lexed.
+	 * @throws FileNotFoundException
+	 */
 	public Lexer(File source) throws FileNotFoundException {
 		in = new Scanner(source);
 		lex();
 	}
 
+	/**
+	 * Lexer constructor.
+	 * @param source The String to be lexed.
+	 */
 	public Lexer(String source) {
 		in = new Scanner(source);
 		lex();
 	}
 
+	/**
+	 * Lexes the file or String associated with this Lexer into tokens.
+	 */
 	public void lex(){
 		
 		while(in.hasNextLine()){
@@ -92,12 +105,14 @@ public class Lexer {
 					t = numberToken();
 				}
 				
+				//lex a delineator
 				else if(contains(delineators, c)){
 					t = new Token(char_loc, line_loc, c + "", Token.DELINEATOR);
 					line = line.substring(1);
 					char_loc++;
 				}
 				
+				//lex an identifier
 				else if(Character.isLetter(c) || c == '_'){				
 					t = identifierToken();
 					
@@ -106,7 +121,7 @@ public class Lexer {
 					} else if(contains(statements, t.value)) {
 						t.type = Token.STATEMENT;
 					} else if(contains(types, t.value)) {
-						t.type = Token.TYPE;
+						t.type = Token.DATA_TYPE;
 					} else if(contains(specials, t.value)) {
 						t.type = Token.LITERAL;
 						t.subtype = Token.SPECIAL_VALUE;
@@ -126,6 +141,7 @@ public class Lexer {
 					}
 				}
 				
+				//Finally, lex an operator
 				else {
 					t = operatorToken();
 				}
@@ -141,6 +157,13 @@ public class Lexer {
 		tokens.add(new Token("EOF", Token.EOF));
 	}
 	
+	/**
+	 * Lexes a block comment token.
+	 * 
+	 * ex. /* This is a comment. *\/
+	 * 
+	 * @return The token.
+	 */
 	public Token blockCommentToken(){
 		//start with the first char
 		String val = "" + line.charAt(0) + line.charAt(1);
@@ -148,14 +171,16 @@ public class Lexer {
 		
 		//continue until the comment block closes
 		while( val.charAt(val.length() - 1) != '/' || val.charAt(val.length() - 2) != '*' ){
+			
+			//ends the line
 			if(line.length() == 0){
+				
 				if(in.hasNextLine()){
 					line = in.nextLine();
 					line_loc++;
 					char_loc = 0;
-				} else {
-					break;
 				}
+				
 			} else {
 				val += line.charAt(0);
 				line = line.length() > 1 ? line.substring(1) : "";
@@ -173,6 +198,13 @@ public class Lexer {
 		return t;
 	}
 	
+	/**
+	 * Lexes an operator token.
+	 * 
+	 * ex. +, -, >, ->, ?
+	 * 
+	 * @return The token.
+	 */
 	public Token operatorToken(){
 		//start with the first char
 		String val = line.charAt(0) + "";
@@ -220,6 +252,13 @@ public class Lexer {
 		return t;
 	}
 	
+	/**
+	 * Lexes an identifier token.
+	 * 
+	 * ex. var, _var, var0
+	 * 
+	 * @return The token.
+	 */
 	public Token identifierToken(){
 		//start with the first char
 		String val = line.charAt(0) + "";
@@ -236,6 +275,13 @@ public class Lexer {
 		return new Token(char_loc, line_loc, val, Token.IDENTIFIER);
 	}
 	
+	/**
+	 * Lexes an integer or double token.
+	 * 
+	 * ex. 123, 123.5. .004
+	 * 
+	 * @return The token.
+	 */
 	public Token numberToken(){
 		//start with the first char
 		String val = line.charAt(0) + "";
@@ -262,6 +308,13 @@ public class Lexer {
 		return t;
 	}
 	
+	/**
+	 * Lexes a character token.
+	 * 
+	 * ex. 'a'
+	 * 
+	 * @return The character token.
+	 */
 	public Token charToken(){
 		//start with the apostrophe
 		String val = line.charAt(0) + "";
@@ -287,6 +340,9 @@ public class Lexer {
 	
 	/**
 	 * Lexes a string token.
+	 * 
+	 * ex. "cat", "\"dog\""
+	 * 
 	 * @return The token.
 	 */
 	public Token stringToken(){
@@ -314,6 +370,12 @@ public class Lexer {
 		}
 	}
 
+	/**
+	 * Checks if a String is present in a String array.
+	 * @param arr The array of Strings.
+	 * @param x The String for which to search.
+	 * @return True if the String is present, false otherwise.
+	 */
 	public static boolean contains(String[] arr, String x) {
 		for (int i = 0; i < arr.length; i++) {
 			if (x.equals(arr[i])) {
@@ -324,6 +386,12 @@ public class Lexer {
 		return false;
 	}
 
+	/**
+	 * Checks if a character is present in a character array.
+	 * @param arr The array of characters.
+	 * @param x The character for which to search.
+	 * @return True if the character is present, false otherwise.
+	 */
 	public static boolean contains(char[] arr, char x) {
 		for (int i = 0; i < arr.length; i++) {
 			if (x == arr[i]) {
@@ -334,10 +402,19 @@ public class Lexer {
 		return false;
 	}
 	
+	/**
+	 * Checks if there is a next token.
+	 * @return False if the token stack is empty, false otherwise.
+	 */
 	public boolean hasNextToken(){
 		return !tokens.isEmpty();
 	}
 	
+	/**
+	 * CHecks if the next token is of the given type.
+	 * @param i An integer representing the type.
+	 * @return True if the token is of type i, false otherwise.
+	 */
 	public boolean nextTypeIs(int i){
 		if(!hasNextToken()){
 			return false;
@@ -346,6 +423,11 @@ public class Lexer {
 		return tokens.get(0).type == i ? true : tokens.get(0).subtype == i;
 	}
 	
+	/**
+	 * Checks if the next token is any of the given strings.
+	 * @param strings The strings to be checked.
+	 * @return True if the next token is in 'strings', false otherwise.
+	 */
 	public boolean nextValueIs(String... strings){
 		if(!hasNextToken()){
 			return false;
@@ -362,10 +444,19 @@ public class Lexer {
 		return false;
 	}
 	
+	/**
+	 * Pushes the given token back onto the stack.
+	 * In a LL(1) grammar, this is not necessary.
+	 * @param t The token to add.
+	 */
 	public void returnToken(Token t){
 		tokens.add(0, t);
 	}
 	
+	/**
+	 * Reads and destroys the next token.
+	 * @return The next token.
+	 */
 	public Token consume(){
 		Token s = tokens.get(0);
 		tokens.remove(0);
@@ -373,6 +464,10 @@ public class Lexer {
 		return s;
 	}
 	
+	/**
+	 * Reads the next token, without consuming.
+	 * @return The next token or null.
+	 */
 	public Token read(){
 		return hasNextToken() ? tokens.get(0) : null;
 	}

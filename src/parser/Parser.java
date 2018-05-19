@@ -29,9 +29,15 @@ public class Parser {
 
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));
+
+		defineNatives();
 		
+		parseProgram().visitNode();
+	}
+	
+	public static void defineNatives() {
 		//a native method
-		environment.define(new Token("native", Token.TYPE), new Token("test", Token.STRUCTURE), new TypedObject("native", new Callable(){
+		environment.define(new Token("native", Token.DATA_TYPE), new Token("test", Token.IDENTIFIER), new TypedObject("native", new Callable(){
 			
 			@Override
 			public TypedObject call(Parser parser, List<TypedObject> arguments) {
@@ -46,19 +52,26 @@ public class Parser {
 			
 		}));
 		
-//		while(lex.hasNextToken()){
-//			 System.out.println(lex.consume());
-//		}
-		
-		parseProgram().visitNode();
-		 
-//		System.out.println(r.toString(0));
+		environment.define(new Token("native", Token.DATA_TYPE), new Token("print", Token.IDENTIFIER), new TypedObject("native", new Callable(){
+			
+			@Override
+			public TypedObject call(Parser parser, List<TypedObject> args) {
+				System.out.print(args.get(0).object);
+				return null;
+			}
+
+			@Override
+			public int arity() {
+				return 1;
+			}
+			
+		}));
 	}
 
 	//TODO: replace multiple operator methods with a list of string[]
 	public static void operatorsPrecedence() {
 		String[][] ops = { { "==", "!=" }, { ">=", "<=", "<", ">" }, { "+", "-" }, { "*", "/", "%" }, { "^" },
-				{ "-", "!" } };
+				{ "-", "!" }, {"."} };
 
 		operators = new LinkedList<String[]>();
 		for (int i = 0; i < ops.length; i++) {
@@ -135,7 +148,7 @@ public class Parser {
 		}
 
 		//parse declarations
-		else if (lex.nextTypeIs(Token.TYPE)) {
+		else if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			ASTNode node = parseDeclaration();
 			expect(";");
 			return node;
@@ -407,7 +420,7 @@ public class Parser {
 		
 		//collect the parameters
 		while(!lex.nextValueIs(")")){
-			Token type = expect(Token.TYPE);
+			Token type = expect(Token.DATA_TYPE);
 			Token identifier = expect(Token.IDENTIFIER);
 			
 			//a parameter consists of a type (left) and a name (right)
@@ -434,7 +447,7 @@ public class Parser {
 		expect("(");
 
 		// get a declaration
-		if (lex.nextTypeIs(Token.TYPE)) {
+		if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			node.left = parseDeclaration();
 			expect(";");
 		} else if (lex.nextTypeIs(Token.IDENTIFIER)) {
@@ -600,9 +613,9 @@ public class Parser {
 	public static TernaryAST parseDeclaration() {
 		
 		// a declaration begins with a type
-		if (lex.nextTypeIs(Token.TYPE)) {
+		if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			Token t = lex.consume();
-			TernaryAST node = new TernaryAST(new Token("declaration", Token.TYPE));
+			TernaryAST node = new TernaryAST(new Token("declaration", Token.DATA_TYPE));
 			node.left = new ASTNode(t); //get the type
 			node.center = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
 			
@@ -851,7 +864,7 @@ public class Parser {
 		}
 
 		//a type in an expression must be a cast
-		if (lex.nextTypeIs(Token.TYPE)) {
+		if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			Token t = lex.consume();
 			expect("(");
 			UnaryAST node = new UnaryAST(parseExpression(), t);
@@ -892,6 +905,7 @@ public class Parser {
 
 	/**
 	 * Consumes the next token if it matches the given string, prints an error otherwise.
+	 * 
 	 * @param str The expected value.
 	 * @return The token consumed.
 	 */
@@ -907,6 +921,12 @@ public class Parser {
 		return null;
 	}
 	
+	/**
+	 * Consumes a token if it is of the given type, prints an error otherwise.
+	 * 
+	 * @param i The expected type.
+	 * @return The consumed token.
+	 */
 	public static Token expect(int i){
 		if(lex.nextTypeIs(i)){
 			return lex.consume();

@@ -1,0 +1,20 @@
+File Parsing:
+
+File
+	Statement
+		Statement Word - i.e. return, continue - keyword
+			return
+				expression
+			other
+		
+		Structure - for, while - keyword
+		
+		Declaration - type
+		
+		Assignment - identifier
+			
+		
+		Block - {
+			Statement
+			...
+	...

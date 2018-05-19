@@ -31,7 +31,7 @@ public class UnaryAST extends ASTNode {
 			return child;
 		}
 		
-		if(token.type == Token.TYPE){
+		if(token.type == Token.DATA_TYPE){
 			if(val.equals("int")){
 				if(child.type.equals("int")){
 					return child;

@@ -37,14 +37,14 @@ public class ASTNode {
 			}
 		}
 		
-		if(token.type != Token.IDENTIFIER && token.type != Token.LITERAL && token.type != Token.STATEMENT && token.type != Token.TYPE){
+		if(token.type != Token.IDENTIFIER && token.type != Token.LITERAL && token.type != Token.STATEMENT && token.type != Token.DATA_TYPE){
 			System.out.println("Expected: identifier, literal, statement, or type");
 			System.out.println("  Recieved: " + Token.names[token.type]);
 			System.out.println("  Value:    " + token.value);
 		}
 		
 		//types get passed up to the declaration node
-		if(token.type == Token.TYPE){
+		if(token.type == Token.DATA_TYPE){
 			return new TypedObject("token", token);
 		}
 		
