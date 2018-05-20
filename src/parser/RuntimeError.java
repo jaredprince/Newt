@@ -9,10 +9,11 @@ public class RuntimeError extends RuntimeException {
 	static final int UNDEFINED_VARIABLE = 0;
 	static final int VARIABLE_ALREADY_DEFINED = 1;
 	static final int CANNOT_CAST = 2;
-	static final int MISMATCHED_ARGUMENTS = 3;
-	static final int CANNOT_ASSIGN_TYPE = 4;
-	static final int NUMERIC_INPUT_EXPECTED = 5;
-	static final int BOOLEAN_INPUT_EXPECTED = 6;
+	static final int MISMATCHED_ARGUMENT_NUMBER = 3;
+	static final int MISMATCHED_ARGUMENT_TYPE = 4;
+	static final int CANNOT_ASSIGN_TYPE = 5;
+	static final int NUMERIC_INPUT_EXPECTED = 6;
+	static final int BOOLEAN_INPUT_EXPECTED = 7;
 	
 	public RuntimeError(Token t, int type){
 		if(type == UNDEFINED_VARIABLE){
@@ -21,9 +22,7 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("Variable already defined: " + t.value);
 		} else if(type == CANNOT_CAST) {
 			System.err.println("Cannot cast to type: " + t.value);
-		} else if(type == MISMATCHED_ARGUMENTS) {
-			System.err.println("Function call does not have the correct number of parameters.");
-		} else if(type == NUMERIC_INPUT_EXPECTED){
+		}else if(type == NUMERIC_INPUT_EXPECTED){
 			System.err.println("Numeric input expected after: " + t.value);
 		} else if(type == BOOLEAN_INPUT_EXPECTED){
 			System.err.println("Boolean input expected after: " + t.value);
@@ -32,6 +31,27 @@ public class RuntimeError extends RuntimeException {
 		if(t != null){
 			System.err.println("  Line: " + t.line_loc);
 			System.err.println("  Character: " + t.char_loc);
+		}
+		
+		System.exit(0);
+	}
+	
+	public RuntimeError(int arity, int args, int type) {
+		if(type == MISMATCHED_ARGUMENT_NUMBER) {
+			System.err.println("Function call does not have the correct number of arguments.");
+			System.err.println("Expected arguments: " + arity);
+			System.err.println("Arguments given: " + args);
+		}
+		
+		System.exit(0);
+	}
+	
+	public RuntimeError(int argumentNum, String paramType, String argType, int type) {
+		if(type == MISMATCHED_ARGUMENT_TYPE) {
+			System.err.println("Mismatched type in function call.");
+			System.err.println("Argument number: " + argumentNum);
+			System.err.println("Expected type: " + paramType);
+			System.err.println("Recieved type: " + argType);
 		}
 		
 		System.exit(0);

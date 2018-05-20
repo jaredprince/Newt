@@ -53,7 +53,7 @@ public class Lexer {
 	 * Lexer constructor.
 	 * 
 	 * @param source The file to be lexed.
-	 * @throws FileNotFoundException
+	 * @throws FileNotFoundException if the given source file does not exist.
 	 */
 	public Lexer(File source) throws FileNotFoundException {
 		in = new Scanner(source);

@@ -27,26 +27,31 @@ public class Function implements Callable {
 
 	@Override
 	public TypedObject call(Parser parser, List<TypedObject> arguments) {
-
-		//TODO: check types of arguments match parameters
 		
 		Parser.environment.enterScope();
 		
 		ArrayList<ASTNode> parameters = ((NaryAST) node.left).nodes;
 		
-		if(arguments.size() != arity){
-			throw new RuntimeError(null, RuntimeError.MISMATCHED_ARGUMENTS);
+		int args = arguments.size();
+		
+		if(args != arity){
+			throw new RuntimeError(arity, args, RuntimeError.MISMATCHED_ARGUMENT_NUMBER);
 		}
 		
-		for(int i = 0; i < arguments.size(); i++){
-			//assign argument i to parameter i
-			Parser.environment.define(((BinaryAST) parameters.get(i)).left.token, ((BinaryAST) parameters.get(i)).right.token, arguments.get(i));
+		//initialize parameters with the arguments given
+		for(int i = 0; i < args; i++){			
 		
+			Token paramType = ((BinaryAST) parameters.get(i)).left.token;
+			Token paramName = ((BinaryAST) parameters.get(i)).right.token;
 			
-			String expectedType = ((BinaryAST) parameters.get(i)).left.token.value;
-//			if(arguments.get(i)){
-//				
-//			}
+			String argType = arguments.get(i).type;
+			
+			//check the expected and received type
+			if(paramType.value.equals(argType)) {
+				Parser.environment.define(paramType, paramName, arguments.get(i));
+			} else {
+				throw new RuntimeError(i, paramType.value, argType, RuntimeError.MISMATCHED_ARGUMENT_TYPE);
+			}
 		}
 		
 		//execute the block

@@ -32,7 +32,8 @@ public class Parser {
 
 		defineNatives();
 		
-		parseProgram().visitNode();
+		NaryAST tree = parseProgram();
+		tree.visitNode();
 	}
 	
 	public static void defineNatives() {
