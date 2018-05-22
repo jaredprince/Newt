@@ -1,16 +1,17 @@
 package parser;
 
 public class ForNode extends ASTNode {
-	ASTNode declaration;
+	//TODO: make this assignment or declaration
+	DeclarationNode declaration;
 	ASTNode condition;
-	ASTNode assignment;
-	NaryAST body;
+	AssignmentNode assignment;
+	StructureBodyNode body;
 	
 	public ForNode(Token t){
 		token = t;
 	}
 	
-	public ForNode(ASTNode l, ASTNode lc, ASTNode rc, NaryAST r, Token t){
+	public ForNode(DeclarationNode l, ASTNode lc, AssignmentNode rc, StructureBodyNode r, Token t){
 		declaration = l;
 		condition = lc;
 		body = r;
@@ -37,7 +38,6 @@ public class ForNode extends ASTNode {
 
 		while((Boolean) condition.visitNode().object){
 			//executes the body
-			body.structureBody = true;
 			returned_value = body.visitNode();
 			
 			//break if the return for that iteration was a break

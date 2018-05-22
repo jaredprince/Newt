@@ -25,7 +25,7 @@ public class Parser {
 
 	static LinkedList<String[]> operators;
 	
-	static Environment environment = new Environment();
+	public static Environment environment = new Environment();
 
 	public static void main(String[] args) throws IOException {
 		lex = new Lexer(new File("Parser Test.txt"));

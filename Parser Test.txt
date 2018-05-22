@@ -1,6 +1,14 @@
 switch(1, 2, 3){
 case(1){
-print(1);
 }
 
+}
+
+if(1==2){
+	print(3);
+	return;
+}
+else {
+print(34);
+return;
 }

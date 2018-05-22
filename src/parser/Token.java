@@ -16,7 +16,7 @@ public class Token {
 	public static final int DELINEATOR = 3; //a separating punctuation mark ({, (, :, etc.)
 	public static final int COMMENT = 4; //a comment (// or /**/)
 	public static final int OPERATOR = 5; //an operator (logical, mathematical, assignment, comparative)
-	public static final int STRUCTURE = 6; //a structure keyword (for, whil, switch, case, etc.)
+	public static final int STRUCTURE = 6; //a structure keyword (for, while, switch, case, etc.)
 	public static final int IDENTIFIER = 7; //a variable name
 	public static final int GROUPING = 8; //used by parser to denote a block node
 	public static final int BLANK = 9; //used by the parser when a blank token is needed
