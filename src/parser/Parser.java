@@ -91,7 +91,7 @@ public class Parser {
 		while (lex.hasNextToken() && !lex.nextTypeIs(Token.EOF)) {
 			ASTNode subnode = parseStatement();
 			
-			//functions get declared immediately so they can be used
+			//functions in the outermost scope get declared immediately so they can be used
 			if(subnode.token.value.equals("func")){
 				subnode.visitNode();
 			} else {
@@ -122,17 +122,15 @@ public class Parser {
 		//parse keyword statements
 		if (lex.nextTypeIs(Token.STATEMENT)) {
 			if(lex.nextValueIs("return")){
-				UnaryAST node = new UnaryAST(lex.consume());
+				Token t = lex.consume();
 				
 				if(!lex.nextValueIs(";")){
-					node.child = parseExpression();
+					expect(";");
+					return new UnaryAST(parseExpression(), t);
 				} else {
-					node.child = new ASTNode(new Token("void", Token.BLANK));
+					expect(";");
+					return new ASTNode(t);
 				}
-				
-				expect(";");
-				
-				return node;
 			}
 			
 			else {
@@ -208,10 +206,6 @@ public class Parser {
 			return parseSwitch();
 		}
 		
-		if(lex.nextValueIs("print")){
-			return parsePrint();
-		}
-
 		//give an error if no structure is found
 		error("structure");
 
@@ -219,14 +213,14 @@ public class Parser {
 	}
 	
 	//TODO: Fix to make this LL(1)
-	public static BinaryAST parseFunctionCallOrAssignment(){
+	public static ASTNode parseFunctionCallOrAssignment(){
 		
 		Token identifier = lex.consume();
 		
 		// a function call has two parts: the name (AST) and the arguments (Nary)
 		
 		if(lex.nextValueIs("(")){
-			BinaryAST node = new BinaryAST(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
+			CallNode node = new CallNode(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
 			return node;
 		} else {
 			lex.returnToken(identifier);
@@ -265,25 +259,6 @@ public class Parser {
 		return new BinaryAST(parseParameters(), new Token("function", Token.STRUCTURE), parseBlock());
 	}
 	
-	public static UnaryAST parsePrint(){
-		UnaryAST node = new UnaryAST(lex.consume());
-		
-		//compound expressions must be in parentheses
-		if(lex.nextValueIs("(")){
-			expect("(");
-			node.child = parseExpression();
-			expect(")");
-		}
-		
-		//single elements can be alone
-		else {
-			node.child = parsePrimary();
-		}
-		
-		expect(";");
-		
-		return node;
-	}
 
 	/**
 	 * Parses a switch statement.
@@ -441,56 +416,67 @@ public class Parser {
 	}
 	
 	//TODO: Make for loops LL(1)
-	public static QuaternaryAST parseFor() {
-		QuaternaryAST node = new QuaternaryAST(lex.consume());
+	public static ForNode parseFor() {
+		ForNode node = new ForNode(lex.consume());
 
 		// read the condition
 		expect("(");
 
 		// get a declaration
 		if (lex.nextTypeIs(Token.DATA_TYPE)) {
-			node.left = parseDeclaration();
-			expect(";");
-		} else if (lex.nextTypeIs(Token.IDENTIFIER)) {
+			node.declaration = parseDeclaration();
+		}
+		
+		expect(";");
+
+		/*
+		else if (lex.nextTypeIs(Token.IDENTIFIER)) {
 			Token t = lex.consume();
 
 			// check for assignment
 			if (lex.nextValueIs("=")) {
-				node.left = new BinaryAST(new ASTNode(t), lex.consume(), parseExpression());
+				node.declaration = new DeclarationNode(new ASTNode(t), lex.consume(), parseExpression());
 				expect(";");
 			} else {
 				lex.returnToken(t);
-				node.left = new ASTNode(new Token(Token.BLANK));
+				node.declaration = null;
 			}
 		}
+		*/
 
 		// get the condition
-		node.left_center = parseExpression();
+		node.condition = parseExpression();
 
 		// get the optional final statement
 		if (!lex.nextValueIs(")")) {
 			expect(";");
 
 			if (lex.nextTypeIs(Token.IDENTIFIER)) {
-				node.right_center = parseAssignment();
-			} else if (lex.nextTypeIs(Token.STRUCTURE)) {
+				node.assignment = parseAssignment();
+			} 
+			
+			/*else if (lex.nextTypeIs(Token.STRUCTURE)) {
 				node.right_center = parseStructure();
 			} else if (lex.nextTypeIs(Token.STATEMENT)) {
 				node.right_center = new ASTNode(lex.consume());
-			} else {
+			} 
+			*/
+			
+			else {
 				error("statement");
 			}
 		} else {
-			node.right_center = new ASTNode(new Token(Token.BLANK));
+			node.assignment = null;
 		}
 
 		expect(")");
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.right = parseBlock();
+			node.body = parseBlock();
 		} else {
-			node.right = parseStatement();
+			node.body = new StructureBodyNode();
+			node.body.addNode(parseStatement());
 		}
 
 		return node;
@@ -500,20 +486,21 @@ public class Parser {
 	 * Parses a do-while loop.
 	 * @return A BinaryAST node representing the loop.
 	 */
-	public static BinaryAST parseDo() {
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	public static DoWhileNode parseDo() {
+		DoWhileNode node = new DoWhileNode(null, lex.consume(), null);
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.right = parseBlock();
+			node.body = parseBlock();
 		} else {
-			node.right = parseStatement();
+			node.body = new StructureBodyNode();
+			node.body.addNode(parseStatement());
 		}
-
+		
 		// read the condition
 		expect("while");
 		expect("(");
-		node.left = parseExpression();
+		node.condition = parseExpression();
 		expect(")");
 		expect(";");
 
@@ -524,19 +511,20 @@ public class Parser {
 	 * Parses a while loop.
 	 * @return A BinaryAST node representing the while.
 	 */
-	public static BinaryAST parseWhile() {
-		BinaryAST node = new BinaryAST(null, lex.consume(), null);
+	public static WhileNode parseWhile() {
+		WhileNode node = new WhileNode(null, lex.consume(), null);
 
 		// read the condition
 		expect("(");
-		node.left = parseExpression();
+		node.condition = parseExpression();
 		expect(")");
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.right = parseBlock();
+			node.body = parseBlock();
 		} else {
-			node.right = parseStatement();
+			node.body = new StructureBodyNode();
+			node.body.addNode(parseStatement());
 		}
 
 		return node;
@@ -587,11 +575,11 @@ public class Parser {
 	 * Parses a block of code. A block consists of any number of statements.
 	 * @return A NaryAST node representing the block.
 	 */
-	public static NaryAST parseBlock() {
+	public static StructureBodyNode parseBlock() {
 
 		expect("{");
 
-		NaryAST node = new NaryAST();
+		StructureBodyNode node = new StructureBodyNode();
 
 		node.token = new Token("block", Token.GROUPING);
 
@@ -611,21 +599,19 @@ public class Parser {
 	 * 
 	 * @return A TernaryAST node representing the declaration.
 	 */
-	public static TernaryAST parseDeclaration() {
+	public static DeclarationNode parseDeclaration() {
 		
 		// a declaration begins with a type
 		if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			Token t = lex.consume();
-			TernaryAST node = new TernaryAST(new Token("declaration", Token.DATA_TYPE));
-			node.left = new ASTNode(t); //get the type
-			node.center = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
+			DeclarationNode node = new DeclarationNode(new Token("declaration", Token.DATA_TYPE));
+			node.type = new ASTNode(t); //get the type
+			node.name = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
 			
 			//the right node is either blank or an expression
-			if(lex.nextValueIs(";")){
-				node.right = new ASTNode(new Token(Token.BLANK));
-			} else {
-				expect("="); //only the simple assignment is acceptable
-				node.right = parseExpression();
+			if(!lex.nextValueIs(";")){
+				//only the simple assignment is acceptable
+				node.assignment = new AssignmentNode(node.name, expect("="), parseExpression());
 			}
 			
 			return node;
@@ -642,15 +628,16 @@ public class Parser {
 	 * 
 	 * @return A BinaryAST node representing the assignment.
 	 */
-	public static BinaryAST parseAssignment() {
+	public static AssignmentNode parseAssignment() {
 		if (!lex.nextTypeIs(Token.IDENTIFIER)) {
 			error("identifier");
 		}
 		
-		BinaryAST node = new BinaryAST(new ASTNode(lex.consume()), null, null);
+		AssignmentNode node = new AssignmentNode(new ASTNode(lex.consume()), null, null);
 
 		if (lex.nextValueIs("=")) {
 			node.token = lex.consume();
+			node.value = parseExpression();
 		} else if (lex.nextTypeIs(Token.ASSIGNMENT)){
 			Token t = lex.consume();
 			node.token = new Token("=", Token.OPERATOR);
@@ -668,14 +655,12 @@ public class Parser {
 				secondExp = parseExpression();
 			}
 			
-			node.right = new BinaryAST(new ASTNode(node.left.token), op, secondExp);
+			node.value = new OperationNode(new ASTNode(node.variable.token), op, secondExp);
 			
 			return node;
 		} else {
 			error("assignment operator");
 		}
-
-		node.right = parseExpression();
 
 		return node;
 	}

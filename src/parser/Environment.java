@@ -12,6 +12,20 @@ public class Environment {
 		enterScope();
 	}
 	
+	public void define(Token type, Token name) {
+		if(variables.getFirst().containsKey(name.value)){
+			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
+		} else {
+			TypedObject o = new TypedObject(type.value, null);
+			
+			if(type.value.equals("var")){
+				o.dynamic = true;
+			}
+			
+			variables.getFirst().put(name.value, o);
+		}
+	}
+	
 	/**
 	 * Defines a new variable
 	 * @param type The type of the variable.

@@ -19,30 +19,7 @@ public class AssignmentNode extends ASTNode {
 	}
 
 	public TypedObject visitNode() {
-		
-		//TODO: Handle unary and complex assignments
-		
-		switch(token.value) {
-		
-		case "++":
-			break;
-		case "--":
-			break;
-		case "+=":
-			break;
-		case "-=":
-			break;
-		case "/=":
-			break;
-		case "*=":
-			break;
-		case "%=":
-			break;
-			
-		default:
-			Parser.environment.assign(variable.token, value.visitNode());
-		}
-
+		Parser.environment.assign(variable.token, value.visitNode());
 		return null;
 	}
 }

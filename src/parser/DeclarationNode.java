@@ -36,7 +36,11 @@ public class DeclarationNode extends ASTNode {
 	@Override
 	public TypedObject visitNode(){
 		
-		Parser.environment.define(type.token, name.token, (assignment == null ? null : assignment.visitNode()));
+		Parser.environment.define(type.token, name.token);
+		
+		if(assignment != null) {
+			assignment.visitNode();
+		}
 		
 		return null;
 	}
