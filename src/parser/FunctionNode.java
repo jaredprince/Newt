@@ -21,16 +21,15 @@ public class FunctionNode extends ASTNode {
 		}
 		return str + "Token: " + token.value + "\n" + "Parameters" + "\n" + body.toString(depth + 1);
 	}
+	
+	public void addParam(DeclarationNode p) {
+		params.add(p);
+	}
 
 	public TypedObject visitNode() {
 		
-//		//TODO: update 'Function' to match new params
-//		if(Parser.environment.depth > 0){
-//			Parser.environment.define(token, name.token, new TypedObject("func", new Function(params, body, Parser.environment.getScopeFromInner(0))));
-//		}
-//		else {
-//			Parser.environment.define(token, name.token, new TypedObject("func", new Function(params, body)));
-//		}
+		Parser.environment.define(token, name.token, new TypedObject("func", new Function(params, body, Parser.environment.getScopeFromInner(0))));
+	
 		return null;
 	}
 }

@@ -134,6 +134,10 @@ public class OperationNode extends ASTNode {
 				System.exit(0);
 			}
 		}
+		
+		if(token.subtype == Token.MEMBERSHIP) {
+			//TODO: handle membership
+		}
 
 		return null;
 	}

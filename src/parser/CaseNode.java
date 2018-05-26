@@ -5,17 +5,17 @@ public class CaseNode extends ASTNode {
 	OperationNode value;
 	StructureBodyNode body;
 	
-	public CaseNode() {
-		
+	public CaseNode(Token t) {
+		token = t;
 	}
 	
 	public CaseNode(StructureBodyNode body) {
 		this.body = body;
 	}
 	
-//	public boolean createOperation(Token switchToken) {
-//
-//	}
+	public static OperationNode createOperation(Token switchToken) {
+		return null;
+	}
 	
 	public TypedObject visitNode() {
 		

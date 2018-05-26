@@ -3,8 +3,8 @@ package parser;
 public class IfElseNode extends ASTNode {
 	
 	ASTNode condition;
-	NaryAST ifBody;
-	NaryAST elseBody;
+	StructureBodyNode ifBody;
+	StructureBodyNode elseBody;
 	
 	public IfElseNode(Token t){
 		token = t;
@@ -28,8 +28,8 @@ public class IfElseNode extends ASTNode {
 		if((Boolean)condition.visitNode().object){
 			TypedObject c = ifBody.visitNode();
 			return c != null ? c : new TypedObject("boolean", new Boolean(true));
-		} else if(elseBody.token.type != Token.BLANK){
-			TypedObject r = elseBody.visitNode();
+		} else if(elseBody != null){
+			TypedObject r = elseBody == null ? null : elseBody.visitNode();
 			return r != null ? r : new TypedObject("boolean", new Boolean(false));
 		} else {
 			return new TypedObject("boolean", new Boolean(false));

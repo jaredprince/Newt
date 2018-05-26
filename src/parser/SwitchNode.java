@@ -55,31 +55,31 @@ public class SwitchNode extends ASTNode {
 		boolean caseExecuted = false;
 		
 		for(int i = 0; i < cases.size(); i++){
-			CaseNode node = cases.get(i);
-			
-			if(node.token.value.equals("default") && caseExecuted){
-				return null;
-			}
-			
+			CaseNode node = cases.get(i);			
 			TypedObject obj = node.visitNode();
 			
 			if(obj != null){
 				if(obj.type.equals("token")){
+					
+					//returns are passed up through the switch
+					if(((Token)(obj.object)).value.equals("return")){
+						return obj;
+					}
+					
+					//breaks and continues cause the switch to exit instantly and are destroyed
+					if(((Token)(obj.object)).value.equals("break") || ((Token)(obj.object)).value.equals("continue")){
+						return null;
+					}
+					
 					return obj;
 				} else {
 					caseExecuted = caseExecuted ? true : ((Boolean)obj.object).booleanValue();
 				}
 			}
-									
-			//returns exit the block immediately and return a value
-			if(node.token.value.equals("return")){
-				return obj;
-			}
-			
-			//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
-			if(node.token.value.equals("break") || node.token.value.equals("continue")){
-				return new TypedObject("token", node.token);
-			}
+		}
+		
+		if(!caseExecuted && defaultNode != null) {
+			return defaultNode.visitNode();
 		}
 		
 		return null;

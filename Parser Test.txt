@@ -1,17 +1,109 @@
+
+
+if(true){
+	print("success");
+} else if (true) {
+	print("fail");
+} else {
+	print("fail");
+}
+
+if(false){
+	print("fail");
+} else if (true) {
+	print("success");
+} else {
+	print("fail");
+}
+
+if(false){
+	print("fail");
+} else if (false) {
+	print("fail");
+} else {
+	print("success");
+}
+
+var k = 0;
+print(k);
+k = "catnip";
+print(k);
 int i = 0;
 int j=3;
 
 for(int j = 0; j < 2; j++){
-	print(j);
+	print(j + " ");
 }
-print("test");
+
 while(j < 4){
-	print(j);
+	print(j + " ");
 	j = j + 1;
 	break;
 }
-print("test2");
-while(j < 6){
-	print(j);
+
+while(j < 12){
 	j += 1;
+	
+	if(j==9){
+		continue;
+	}
+
+	print(j + " ");
+	
+	if(j==11){
+		break;
+	}
+}
+
+do {
+	print(j+ " ");
+	j++;
+} while (j < 22);
+
+cat(1, " test ");
+
+func cat(int c, string s){
+	print(c + s);
+}
+
+cat(34, " I like cats ");
+
+int l = 0;
+switch(l){
+	case(0){
+		print("test0");
+	}
+	
+	case(0){
+		print("test1");
+		break;
+	}
+	
+	case(1){
+		print("failure");
+	}
+
+	default {
+		print("failure - default");
+	}
+}
+
+switch(l){
+	case(0){
+		print("test3");
+		break;
+	}
+	
+	case(0){
+		print("test1");
+	}
+	
+	case(1){
+		print("failure");
+		break;
+	}
+
+	default {
+		print("failure - default");
+	}
 }

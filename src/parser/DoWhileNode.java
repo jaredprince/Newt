@@ -1,9 +1,8 @@
 package parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DoWhileNode extends ASTNode {
+	
+	//TODO: Consider removing final semi-colon after while
 	
 	ASTNode condition;
 	StructureBodyNode body;
@@ -23,20 +22,22 @@ public class DoWhileNode extends ASTNode {
 	}
 
 	public TypedObject visitNode() {
+		
+		Parser.environment.enterScope();
 				
-			TypedObject returned_value = body.visitNode();
+		TypedObject returned_value = body.visitNode();
+		
+		while(((Boolean) condition.visitNode().object)){
 			
-			while(((Boolean) condition.visitNode().object)){
-				
-				//break if the return for that iteration was a break
-				if(returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
-					break;
-				}
-				
-				returned_value = body.visitNode();
+			//break if the return for that iteration was a break
+			if(returned_value != null && returned_value.type.equals("token") && ((Token) returned_value.object).value.equals("break")){
+				break;
 			}
 			
-			Parser.environment.exitScope();
+			returned_value = body.visitNode();
+		}
+		
+		Parser.environment.exitScope();
 
 		return null;
 	}

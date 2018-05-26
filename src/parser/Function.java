@@ -5,32 +5,25 @@ import java.util.List;
 import java.util.Map;
 
 public class Function implements Callable {
-	 
-	public BinaryAST node;
+	
+	public ArrayList<DeclarationNode> params;
+	public StructureBodyNode body;
+	
 	public int arity;
 	public Map<String, TypedObject> parentMap;
 	
-	public Function(BinaryAST node){
-		this.node = node;
-		
-		//TODO: figure out how to give a range of arities
-		//arity is the number of parameters
-		arity = ((NaryAST)node.left).nodes.size();
-	}
-	
-	public Function(BinaryAST node, Map<String, TypedObject> map){
-		this.node = node;
+	public Function(ArrayList<DeclarationNode> params, StructureBodyNode body, Map<String, TypedObject> map){
+		this.params = params;
+		this.body = body;
 		parentMap = map;
 		
-		arity = ((NaryAST)node.left).nodes.size();
+		arity = params.size();
 	}
 
 	@Override
 	public TypedObject call(Parser parser, List<TypedObject> arguments) {
 		
 		Parser.environment.enterScope();
-		
-		ArrayList<ASTNode> parameters = ((NaryAST) node.left).nodes;
 		
 		int args = arguments.size();
 		
@@ -41,8 +34,8 @@ public class Function implements Callable {
 		//initialize parameters with the arguments given
 		for(int i = 0; i < args; i++){			
 		
-			Token paramType = ((BinaryAST) parameters.get(i)).left.token;
-			Token paramName = ((BinaryAST) parameters.get(i)).right.token;
+			Token paramType = params.get(i).type.token;
+			Token paramName = params.get(i).name.token;
 			
 			String argType = arguments.get(i).type;
 			
@@ -55,8 +48,7 @@ public class Function implements Callable {
 		}
 		
 		//execute the block
-		((NaryAST) node.right).structureBody = true;
-		TypedObject result = node.right.visitNode();
+		TypedObject result = body.visitNode();
 		
 		Parser.environment.exitScope();
 		
