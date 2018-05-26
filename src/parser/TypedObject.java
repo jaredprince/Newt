@@ -1,8 +1,8 @@
 package parser;
 
 public class TypedObject {
-	String type;
-	Object object;
+	public String type;
+	public Object object;
 	boolean dynamic;
 
 	public TypedObject(String t, Object o) {

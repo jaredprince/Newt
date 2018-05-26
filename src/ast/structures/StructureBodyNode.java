@@ -1,6 +1,10 @@
-package parser;
+package ast.structures;
 
 import java.util.ArrayList;
+
+import ast.ASTNode;
+import parser.Token;
+import parser.TypedObject;
 
 public class StructureBodyNode extends ASTNode {
 

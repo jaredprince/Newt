@@ -1,4 +1,8 @@
-package parser;
+package ast.operations;
+
+import ast.ASTNode;
+import parser.Token;
+import parser.TypedObject;
 
 public class TertiaryOperationNode extends OperationNode {
 
@@ -16,11 +20,11 @@ public class TertiaryOperationNode extends OperationNode {
 		for(int i = 0; i < depth; i++){
 			str = str + "  ";
 		}
-		return str + "Token: " + token.value + "\n" + condition.toString(depth + 1) + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
+		return str + "Token: " + token.value + "\n" + condition.toString(depth + 1) + "\n" + left.toString(depth + 1) + "\n" + getRight().toString(depth + 1);
 	}
 	
 	@Override
 	public TypedObject visitNode(){
-		return (Boolean)condition.visitNode().object ? left.visitNode() : right.visitNode();
+		return (Boolean)condition.visitNode().object ? left.visitNode() : getRight().visitNode();
 	}
 }

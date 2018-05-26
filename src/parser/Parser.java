@@ -6,6 +6,21 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import ast.ASTNode;
+import ast.NaryAST;
+import ast.operations.OperationNode;
+import ast.operations.TertiaryOperationNode;
+import ast.statement.AssignmentNode;
+import ast.statement.CallNode;
+import ast.statement.DeclarationNode;
+import ast.structures.CaseNode;
+import ast.structures.DoWhileNode;
+import ast.structures.ForNode;
+import ast.structures.FunctionNode;
+import ast.structures.IfElseNode;
+import ast.structures.StructureBodyNode;
+import ast.structures.SwitchNode;
+import ast.structures.WhileNode;
 import lexer.Lexer;
 
 public class Parser {
@@ -38,12 +53,12 @@ public class Parser {
 	
 	public static void defineNatives() {
 		//a native method
-		environment.define(new Token("native", Token.DATA_TYPE), new Token("test", Token.IDENTIFIER), new TypedObject("native", new Callable(){
+		environment.define(new Token("native", Token.DATA_TYPE), new Token("nativeTest", Token.IDENTIFIER), new TypedObject("native", new Callable(){
 			
 			@Override
 			public TypedObject call(Parser parser, List<TypedObject> arguments) {
-				System.out.println("this is test one");
-				return new TypedObject("string", "this is test two");
+				System.out.println("This is a print inside a native.");
+				return new TypedObject("string", "This is the return of a native.");
 			}
 
 			@Override
@@ -58,6 +73,21 @@ public class Parser {
 			@Override
 			public TypedObject call(Parser parser, List<TypedObject> args) {
 				System.out.print(args.get(0).object);
+				return null;
+			}
+
+			@Override
+			public int arity() {
+				return 1;
+			}
+			
+		}));
+		
+		environment.define(new Token("native", Token.DATA_TYPE), new Token("println", Token.IDENTIFIER), new TypedObject("native", new Callable(){
+			
+			@Override
+			public TypedObject call(Parser parser, List<TypedObject> args) {
+				System.out.println(args.get(0).object);
 				return null;
 			}
 
@@ -282,7 +312,7 @@ public class Parser {
 		//optional default statement
 		if (lex.read().value.equals("default")) {
 			lex.consume();
-			node.defaultNode = parseBlock();
+			node.setDefaultNode(parseBlock());
 		}
 
 		expect("}");
@@ -319,10 +349,10 @@ public class Parser {
 		expect("(");
 		Token t = new Token("==", Token.OPERATOR);
 		t.subtype = Token.COMPARATIVE;
-		node.value = new OperationNode(testVal.get(0), t, parseExpression());
+		node.setValue(new OperationNode(testVal.get(0), t, parseExpression()));
 		expect(")");
 		
-		node.body = parseBlock();		
+		node.setBody(parseBlock());		
 		
 		return node;
 	}
@@ -373,9 +403,9 @@ public class Parser {
 		//a function consists of a name (left), parameters (center), and a body (right)
 		FunctionNode node = new FunctionNode(null, null, lex.consume(), null);
 		
-		node.name = new ASTNode(expect(Token.IDENTIFIER));
-		node.params = parseParameters();		
-		node.body = parseBlock();
+		node.setName(new ASTNode(expect(Token.IDENTIFIER)));
+		node.setParams(parseParameters());		
+		node.setBody(parseBlock());
 		
 		return node;
 	}
@@ -419,7 +449,7 @@ public class Parser {
 
 		// get a declaration
 		if (lex.nextTypeIs(Token.DATA_TYPE)) {
-			node.declaration = parseDeclaration();
+			node.setDeclaration(parseDeclaration());
 		}
 		
 		expect(";");
@@ -440,14 +470,14 @@ public class Parser {
 		*/
 
 		// get the condition
-		node.condition = parseExpression();
+		node.setCondition(parseExpression());
 
 		// get the optional final statement
 		if (!lex.nextValueIs(")")) {
 			expect(";");
 
 			if (lex.nextTypeIs(Token.IDENTIFIER)) {
-				node.assignment = parseAssignment();
+				node.setAssignment(parseAssignment());
 			} 
 			
 			/*else if (lex.nextTypeIs(Token.STRUCTURE)) {
@@ -461,17 +491,17 @@ public class Parser {
 				error("statement");
 			}
 		} else {
-			node.assignment = null;
+			node.setAssignment(null);
 		}
 
 		expect(")");
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.body = parseBlock();
+			node.setBody(parseBlock());
 		} else {
-			node.body = new StructureBodyNode();
-			node.body.addNode(parseStatement());
+			node.setBody(new StructureBodyNode());
+			node.getBody().addNode(parseStatement());
 		}
 
 		return node;
@@ -486,16 +516,16 @@ public class Parser {
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.body = parseBlock();
+			node.setBody(parseBlock());
 		} else {
-			node.body = new StructureBodyNode();
-			node.body.addNode(parseStatement());
+			node.setBody(new StructureBodyNode());
+			node.getBody().addNode(parseStatement());
 		}
 		
 		// read the condition
 		expect("while");
 		expect("(");
-		node.condition = parseExpression();
+		node.setCondition(parseExpression());
 		expect(")");
 		expect(";");
 
@@ -511,15 +541,15 @@ public class Parser {
 
 		// read the condition
 		expect("(");
-		node.condition = parseExpression();
+		node.setCondition(parseExpression());
 		expect(")");
 
 		// the body can be a block starting with '{' or a single statement
 		if (lex.nextValueIs("{")) {
-			node.body = parseBlock();
+			node.setBody(parseBlock());
 		} else {
-			node.body = new StructureBodyNode();
-			node.body.addNode(parseStatement());
+			node.setBody(new StructureBodyNode());
+			node.getBody().addNode(parseStatement());
 		}
 
 		return node;
@@ -534,15 +564,15 @@ public class Parser {
 
 		// get condition
 		expect("(");
-		node.condition = parseExpression();
+		node.setCondition(parseExpression());
 		expect(")");
 
 		// get the body as a block or a single statement
 		if (lex.nextValueIs("{")) {
-			node.ifBody = parseBlock();
+			node.setIfBody(parseBlock());
 		} else {
-			node.ifBody = new StructureBodyNode();
-			node.ifBody.addNode(parseStatement());
+			node.setIfBody(new StructureBodyNode());
+			node.getIfBody().addNode(parseStatement());
 		}
 
 		// the optional else
@@ -551,19 +581,19 @@ public class Parser {
 
 			// the else can be another if
 			if (lex.nextValueIs("if")) {
-				node.elseBody = new StructureBodyNode();
-				node.elseBody.addNode(parseIf());
+				node.setElseBody(new StructureBodyNode());
+				node.getElseBody().addNode(parseIf());
 			} else {
 				if (lex.nextValueIs("{")) {
-					node.elseBody = parseBlock();
+					node.setElseBody(parseBlock());
 				} else {
-					node.elseBody = new StructureBodyNode();
-					node.elseBody.addNode(parseStatement());
+					node.setElseBody(new StructureBodyNode());
+					node.getElseBody().addNode(parseStatement());
 				}
 			}
 
 		} else {
-			node.elseBody = null;
+			node.setElseBody(null);
 		}
 
 		return node;
@@ -603,13 +633,13 @@ public class Parser {
 		if (lex.nextTypeIs(Token.DATA_TYPE)) {
 			Token t = lex.consume();
 			DeclarationNode node = new DeclarationNode(new Token("declaration", Token.DATA_TYPE));
-			node.type = new ASTNode(t); //get the type
-			node.name = new ASTNode(expect(Token.IDENTIFIER)); //get the identifier
+			node.setType(new ASTNode(t)); //get the type
+			node.setName(new ASTNode(expect(Token.IDENTIFIER))); //get the identifier
 			
 			//the right node is either blank or an expression
 			if(!lex.nextValueIs(";")){
 				//only the simple assignment is acceptable
-				node.assignment = new AssignmentNode(node.name, expect("="), parseExpression());
+				node.setAssignment(new AssignmentNode(node.getName(), expect("="), parseExpression()));
 			}
 			
 			return node;
@@ -635,7 +665,7 @@ public class Parser {
 
 		if (lex.nextValueIs("=")) {
 			node.token = lex.consume();
-			node.value = parseExpression();
+			node.setValue(parseExpression());
 		} else if (lex.nextTypeIs(Token.ASSIGNMENT)){
 			Token t = lex.consume();
 			node.token = new Token("=", Token.OPERATOR);
@@ -653,7 +683,7 @@ public class Parser {
 				secondExp = parseExpression();
 			}
 			
-			node.value = new OperationNode(new ASTNode(node.variable.token), op, secondExp);
+			node.setValue(new OperationNode(new ASTNode(node.getVariable().token), op, secondExp));
 			
 			return node;
 		} else {
@@ -691,7 +721,7 @@ public class Parser {
 			node = new TertiaryOperationNode(node, parseExpression(), t, null);
 			expect(":");
 
-			((TertiaryOperationNode) node).right = parseExpression();
+			((TertiaryOperationNode) node).setRight(parseExpression());
 		}
 
 		return node;

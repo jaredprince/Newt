@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import ast.statement.DeclarationNode;
+import ast.structures.StructureBodyNode;
+
 public class Function implements Callable {
 	
 	public ArrayList<DeclarationNode> params;
@@ -34,8 +37,8 @@ public class Function implements Callable {
 		//initialize parameters with the arguments given
 		for(int i = 0; i < args; i++){			
 		
-			Token paramType = params.get(i).type.token;
-			Token paramName = params.get(i).name.token;
+			Token paramType = params.get(i).getType().token;
+			Token paramName = params.get(i).getName().token;
 			
 			String argType = arguments.get(i).type;
 			

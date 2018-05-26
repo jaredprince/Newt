@@ -1,14 +1,18 @@
-package parser;
+package ast.operations;
+
+import ast.ASTNode;
+import parser.Token;
+import parser.TypedObject;
 
 public class OperationNode extends ASTNode {
 	
 	ASTNode left;
-	ASTNode right;
+	private ASTNode right;
 
 	public OperationNode(ASTNode l, Token t, ASTNode r) {
 		left = l;
 		token = t;
-		right = r;
+		setRight(r);
 	}
 
 	public String toString(int depth) {
@@ -16,14 +20,14 @@ public class OperationNode extends ASTNode {
 		for (int i = 0; i < depth; i++) {
 			str = str + "  ";
 		}
-		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
+		return str + "Token: " + token.value + "\n" + left.toString(depth + 1) + "\n" + getRight().toString(depth + 1);
 	}
 
 	public TypedObject visitNode() {
 		
 		//evaluate left and right branches
 		TypedObject left = this.left.visitNode();
-		TypedObject right = this.right.visitNode();
+		TypedObject right = this.getRight().visitNode();
 
 		if (token.subtype == Token.LOGICAL) {
 			try {
@@ -152,5 +156,13 @@ public class OperationNode extends ASTNode {
 		}
 		
 		return null;
+	}
+
+	public ASTNode getRight() {
+		return right;
+	}
+
+	public void setRight(ASTNode right) {
+		this.right = right;
 	}
 }

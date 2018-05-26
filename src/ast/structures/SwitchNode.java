@@ -1,6 +1,10 @@
-package parser;
+package ast.structures;
 
 import java.util.ArrayList;
+
+import ast.ASTNode;
+import parser.Token;
+import parser.TypedObject;
 
 public class SwitchNode extends ASTNode {
 	
@@ -8,7 +12,7 @@ public class SwitchNode extends ASTNode {
 	ASTNode test;
 	
 	ArrayList<CaseNode> cases;
-	StructureBodyNode defaultNode;
+	private StructureBodyNode defaultNode;
 	
 	public SwitchNode(){
 		cases = new ArrayList<CaseNode>();
@@ -32,7 +36,7 @@ public class SwitchNode extends ASTNode {
 	}
 	
 	public void setDefault(StructureBodyNode node) {
-		defaultNode = node;
+		setDefaultNode(node);
 	}
 	
 	public String toString(int depth){
@@ -78,11 +82,19 @@ public class SwitchNode extends ASTNode {
 			}
 		}
 		
-		if(!caseExecuted && defaultNode != null) {
-			return defaultNode.visitNode();
+		if(!caseExecuted && getDefaultNode() != null) {
+			return getDefaultNode().visitNode();
 		}
 		
 		return null;
+	}
+
+	public StructureBodyNode getDefaultNode() {
+		return defaultNode;
+	}
+
+	public void setDefaultNode(StructureBodyNode defaultNode) {
+		this.defaultNode = defaultNode;
 	}
 
 }

@@ -1,4 +1,4 @@
-package parser;
+package ast;
 
 import java.util.ArrayList;
 
@@ -8,31 +8,31 @@ import parser.TypedObject;
 
 public class NaryAST extends ASTNode {
 	
-	ArrayList<ASTNode> nodes;
+	private ArrayList<ASTNode> nodes;
 	
 	//used to ensure variables declared in for loops
 	//and functions are in the same scope as teh body
 	boolean structureBody;
 	
 	public NaryAST(){
-		nodes = new ArrayList<ASTNode>();
+		setNodes(new ArrayList<ASTNode>());
 	}
 	
 	public NaryAST(Token t){
-		nodes = new ArrayList<ASTNode>();
+		setNodes(new ArrayList<ASTNode>());
 		token = t;
 	}
 	
 	public NaryAST(Token t, ArrayList<ASTNode> nodes){
 		for(int i = 0; i < nodes.size(); i++){
-			this.nodes.add(nodes.get(i));
+			this.getNodes().add(nodes.get(i));
 		}
 		
 		token = t;
 	}
 	
 	public void addNode(ASTNode node){
-		nodes.add(node);
+		getNodes().add(node);
 	}
 	
 	public String toString(int depth){
@@ -43,8 +43,8 @@ public class NaryAST extends ASTNode {
 		
 		str += "Token: " + token.value;
 		
-		for(int i = 0; i < nodes.size(); i++){
-			str += "\n" + nodes.get(i).toString(depth + 1);
+		for(int i = 0; i < getNodes().size(); i++){
+			str += "\n" + getNodes().get(i).toString(depth + 1);
 		}
 		
 		return str;
@@ -59,8 +59,8 @@ public class NaryAST extends ASTNode {
 		if(token.type == Token.GROUPING){
 			if(token.value.equals("switch")){
 				boolean caseExecuted = false;
-				for(int i = 0; i < nodes.size(); i++){
-					ASTNode node = nodes.get(i);
+				for(int i = 0; i < getNodes().size(); i++){
+					ASTNode node = getNodes().get(i);
 					
 					if(node.token.value.equals("default") && caseExecuted){
 						return null;
@@ -88,8 +88,8 @@ public class NaryAST extends ASTNode {
 				}
 			}
 			else {
-				for(int i = 0; i < nodes.size(); i++){
-					ASTNode node = nodes.get(i);
+				for(int i = 0; i < getNodes().size(); i++){
+					ASTNode node = getNodes().get(i);
 					TypedObject obj = node.visitNode();
 					
 					if(obj != null && obj.type.equals("token"))
@@ -113,5 +113,13 @@ public class NaryAST extends ASTNode {
 		}
 		
 		return null;
+	}
+
+	public ArrayList<ASTNode> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(ArrayList<ASTNode> nodes) {
+		this.nodes = nodes;
 	}
 }

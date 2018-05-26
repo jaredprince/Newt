@@ -1,5 +1,7 @@
 package parser;
 
+import ast.ASTNode;
+
 public class UnaryAST extends ASTNode {
 
 	ASTNode child;

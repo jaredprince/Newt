@@ -1,7 +1,14 @@
-package parser;
+package ast.statement;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ast.ASTNode;
+import ast.NaryAST;
+import parser.Callable;
+import parser.Parser;
+import parser.Token;
+import parser.TypedObject;
 
 public class CallNode extends ASTNode {
 	
@@ -27,8 +34,8 @@ public class CallNode extends ASTNode {
 		List<TypedObject> arguments = new ArrayList<TypedObject>();
 		
 		//visit each argument to get the object returned
-		for(int i = 0; i < args.nodes.size(); i++){
-			arguments.add(args.nodes.get(i).visitNode());
+		for(int i = 0; i < args.getNodes().size(); i++){
+			arguments.add(args.getNodes().get(i).visitNode());
 		}
 		
 		//return the result of calling the function with the given arguments

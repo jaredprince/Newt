@@ -1,9 +1,13 @@
-package parser;
+package ast;
+
+import parser.Parser;
+import parser.Token;
+import parser.TypedObject;
 
 public class ASTNode {
 	
-	int type;
-	Token token;
+	public int type;
+	public Token token;
 
 	public ASTNode(){
 		
