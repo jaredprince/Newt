@@ -1,13 +1,17 @@
 package ast.operations;
 
+import java.util.Map;
+
 import ast.ASTNode;
+import parser.Parser;
+import parser.RuntimeError;
 import parser.Token;
 import parser.TypedObject;
 
 public class OperationNode extends ASTNode {
 	
 	ASTNode left;
-	private ASTNode right;
+	ASTNode right;
 
 	public OperationNode(ASTNode l, Token t, ASTNode r) {
 		left = l;
@@ -24,12 +28,13 @@ public class OperationNode extends ASTNode {
 	}
 
 	public TypedObject visitNode() {
-		
-		//evaluate left and right branches
-		TypedObject left = this.left.visitNode();
-		TypedObject right = this.getRight().visitNode();
 
 		if (token.subtype == Token.LOGICAL) {
+			
+			//evaluate left and right branches
+			TypedObject left = this.left.visitNode();
+			TypedObject right = this.getRight().visitNode();
+			
 			try {
 				switch (token.value) {
 				case "&&":
@@ -52,6 +57,10 @@ public class OperationNode extends ASTNode {
 
 		//TODO: Handle objects using "=="
 		if (token.subtype == Token.COMPARATIVE) {
+			
+			//evaluate left and right branches
+			TypedObject left = this.left.visitNode();
+			TypedObject right = this.getRight().visitNode();
 			
 			//handles any
 			if(left.type.equals("token")){
@@ -104,6 +113,10 @@ public class OperationNode extends ASTNode {
 
 		if (token.subtype == Token.MATHEMATICAL) {
 			
+			//evaluate left and right branches
+			TypedObject left = this.left.visitNode();
+			TypedObject right = this.getRight().visitNode();
+			
 			//TODO: account for non-literal returns
 			if(token.value.equals("+") && (left.type.equals("string") || right.type.equals("string"))){					
 				return new TypedObject("string", left.object.toString() + right.object.toString());
@@ -141,6 +154,20 @@ public class OperationNode extends ASTNode {
 		
 		if(token.subtype == Token.MEMBERSHIP) {
 			//TODO: handle membership
+			
+			//evaluate left branch to get the instance scope
+			TypedObject left = this.left.visitNode();
+			
+			if(left.object instanceof Map<?, ?>) {
+				Map<String, TypedObject> scope = (Map<String, TypedObject>) left.object;
+				Parser.environment.appendScope(scope);
+	
+				TypedObject right = this.getRight().visitNode();
+				
+				
+			} else {
+				throw new RuntimeError(token, RuntimeError.MISPLACED_MEMBERSHIP);
+			}
 		}
 
 		return null;

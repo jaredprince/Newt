@@ -15,6 +15,10 @@ public class RuntimeError extends RuntimeException {
 	static final int NUMERIC_INPUT_EXPECTED = 6;
 	static final int BOOLEAN_INPUT_EXPECTED = 7;
 	
+	static final int UNEXPECTED_CLASS_FIELD = 8;
+	static final int UNEXPECTED_CONSTRUCT = 9;
+	public static final int MISPLACED_MEMBERSHIP = 10;
+	
 	public RuntimeError(Token t, int type){
 		if(type == UNDEFINED_VARIABLE){
 			System.err.println("Undefined variable: " + t.value);
@@ -22,10 +26,16 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("Variable already defined: " + t.value);
 		} else if(type == CANNOT_CAST) {
 			System.err.println("Cannot cast to type: " + t.value);
-		}else if(type == NUMERIC_INPUT_EXPECTED){
+		} else if(type == NUMERIC_INPUT_EXPECTED){
 			System.err.println("Numeric input expected after: " + t.value);
 		} else if(type == BOOLEAN_INPUT_EXPECTED){
 			System.err.println("Boolean input expected after: " + t.value);
+		} else if(type == UNEXPECTED_CLASS_FIELD) {
+			System.err.println("The class field \"" + t.value + "\" is not a function or variable.");
+		} else if(type == UNEXPECTED_CONSTRUCT) {
+			System.err.println("A construct can only be defined as a class field.");
+		} else if(type == MISPLACED_MEMBERSHIP) {
+			System.err.println("The membership operator ('.') can only be used on a class or and instance of a class.");
 		}
 		
 		if(t != null){

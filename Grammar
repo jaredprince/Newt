@@ -17,3 +17,117 @@ multi		-> exponent ( ("*" | "/" | "%") exponent )*
 exponent	-> unary ( ("^") unary )*
 unary		-> ("-" | "!") unary | primary
 primary		-> literal | "(" expression ")" | "|" expression "|"
+
+//declaration and assignment
+int i;
+var j;
+i = 0;
+j = "cat";
+var k = 1;
+string l = "hat";
+
+println("Declaration and assignment test:");
+println("    Expected: 0 cat 1 hat");
+println("    Received: " + i + " " + j + " " + k + " " + l);
+
+
+//type change tests
+println("Dynamic type test:");
+j = 1.0;
+k = "mat";
+println("    Expected: 1.0 mat");
+println("    Received: " + j + " " + k);
+
+
+//natives
+print("This should be on the same line...");
+println(" as this.");
+
+println("This should be on a different line...");
+println("from this.");
+
+println(nativeTest());
+
+
+//if statement tests
+if(true){
+	println("If test #1: success");
+} else if (true) {
+	println("If test #1: failure 1");
+} else {
+	println("If test #1: failure 2");
+}
+
+if(false)
+	println("If test #2: failure 1");
+else if (true)
+	println("If test #2: success");
+else
+	println("If test #2: failure 2");
+
+if(false){
+	println("If test #3: failure 1");
+} else if (false) {
+	println("If test #3: failure 2");
+} else {
+	println("If test #3: success");
+}
+
+
+//for loop tests
+println("For loop test (0 - 10):");
+for(int j = 0; j < 10; j++){
+	print(j + " ");
+}
+println("");
+
+println("For loop break test (0 - 10, break at 5):");
+for(int j = 0; j < 10; j++){
+	if(j == 5)
+		break;
+
+	print(j + " ");
+}
+println("");
+
+println("For loop continue test (0 - 10, continue at 5):");
+for(int j = 0; j < 10; j++){
+	if(j == 5)
+		continue;
+
+	print(j + " ");
+}
+println("");
+
+
+//while tests
+println("While test (0 - 10):");
+int m = 0;
+while(m < 10){
+	print(m + " ");
+	m = m + 1;
+}
+println("");
+
+println("While break test (0 - 10, break at 5):");
+m = 0;
+while(m < 10){
+	if(m == 5)
+		break;
+	print(m + " ");
+	m = m + 1;
+}
+println("");
+
+println("While continue test (0 - 10, continue at 5):");
+m = 0;
+while(m < 10){
+	if(m == 5){
+		m = m + 1;
+		continue;
+	}
+	
+	print(m + " ");
+	m = m + 1;
+}
+println("");

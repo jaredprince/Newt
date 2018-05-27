@@ -170,4 +170,8 @@ public class Environment {
 	public Map<String, TypedObject> getScopeFromOuter(int depth){
 		return variables.get(variables.size() - 1 - depth);
 	}
+	
+	public void appendScope(Map<String, TypedObject> scope) {
+		variables.addFirst(scope);
+	}
 }

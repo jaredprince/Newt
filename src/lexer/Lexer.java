@@ -8,8 +8,8 @@ import parser.Token;
 
 public class Lexer {
 
-	static String[] structures = { "do", "class", "if", "else", "while", "for", "func", "switch", "case", "default", "try",
-			"catch", "class" // structures
+	static String[] structures = {"if", "else", "do", "while", "for", "switch", "case", "default", "try",
+			"catch", "func", "class", "construct" // structures
 	};
 
 	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit"};

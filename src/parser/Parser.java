@@ -14,6 +14,7 @@ import ast.statement.AssignmentNode;
 import ast.statement.CallNode;
 import ast.statement.DeclarationNode;
 import ast.structures.CaseNode;
+import ast.structures.ClassNode;
 import ast.structures.DoWhileNode;
 import ast.structures.ForNode;
 import ast.structures.FunctionNode;
@@ -227,10 +228,53 @@ public class Parser {
 			return parseSwitch();
 		}
 		
+		if (lex.nextValueIs("class")) {
+			return parseClass();
+		}
+		
+		if(lex.nextValueIs("construct")) {
+			throw new RuntimeError(lex.consume(), RuntimeError.UNEXPECTED_CONSTRUCT);
+		}
+		
 		//give an error if no structure is found
 		error("structure");
 
 		return null;
+	}
+	
+	public static ClassNode parseClass() {
+		ClassNode node = new ClassNode(lex.consume());
+		
+		node.setName(new ASTNode(expect(Token.IDENTIFIER)));
+		expect("{");
+		
+		while(!lex.nextValueIs("}")) {
+			if(lex.nextTypeIs(Token.DATA_TYPE)) {
+				node.addData(parseDeclaration());
+				expect(";");
+			}
+			
+			else if (lex.nextValueIs("func")) {
+				node.addFunction(parseFunction());
+			}
+			
+			else if (lex.nextValueIs("construct")) {
+				FunctionNode construct = new FunctionNode(null, null, lex.consume(), null);
+				
+				construct.setParams(parseParameters());		
+				construct.setBody(parseBlock());
+				
+				node.setConstruct(construct);
+			}
+			
+			else {
+				throw new RuntimeError(lex.consume(), RuntimeError.UNEXPECTED_CLASS_FIELD);
+			}
+		}
+		
+		expect("}");
+		
+		return node;
 	}
 	
 	//TODO: Fix to make this LL(1)
