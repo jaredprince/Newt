@@ -1,3 +1,4 @@
+
 class testclass {
 	int t1 = 2;
 	
@@ -13,7 +14,7 @@ class testclass {
 	var t3 = 2.3;
 }
 
-testclass x = new testclass();
+//testclass x = new testclass();
 
 /*
 do {

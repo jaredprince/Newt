@@ -162,6 +162,8 @@ public class OperationNode extends ASTNode {
 				Map<String, TypedObject> scope = (Map<String, TypedObject>) left.object;
 				Parser.environment.appendScope(scope);
 	
+				
+				//TODO: The right variable should only be searched for in the innermost scope.
 				TypedObject right = this.getRight().visitNode();
 				
 				

@@ -40,7 +40,7 @@ public class CallNode extends ASTNode {
 		
 		//return the result of calling the function with the given arguments
 		Callable function = (Callable) Parser.environment.get(this.function.token).object;
-		return function.call(null, arguments);
+		return function.call(Parser.environment, arguments);
 	}
 
 }

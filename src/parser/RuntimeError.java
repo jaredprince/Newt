@@ -1,9 +1,6 @@
 package parser;
 public class RuntimeError extends RuntimeException {
 
-	/**
-	 * Not sure what this does, but it removes the warning.
-	 */
 	private static final long serialVersionUID = 6299130057608538903L;
 	
 	static final int UNDEFINED_VARIABLE = 0;
@@ -14,7 +11,6 @@ public class RuntimeError extends RuntimeException {
 	static final int CANNOT_ASSIGN_TYPE = 5;
 	static final int NUMERIC_INPUT_EXPECTED = 6;
 	static final int BOOLEAN_INPUT_EXPECTED = 7;
-	
 	static final int UNEXPECTED_CLASS_FIELD = 8;
 	static final int UNEXPECTED_CONSTRUCT = 9;
 	public static final int MISPLACED_MEMBERSHIP = 10;

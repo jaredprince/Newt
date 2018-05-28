@@ -24,9 +24,9 @@ public class Function implements Callable {
 	}
 
 	@Override
-	public TypedObject call(Parser parser, List<TypedObject> arguments) {
+	public TypedObject call(Environment environment, List<TypedObject> arguments) {
 		
-		Parser.environment.enterScope();
+		environment.enterScope();
 		
 		int args = arguments.size();
 		
@@ -44,7 +44,7 @@ public class Function implements Callable {
 			
 			//check the expected and received type
 			if(paramType.value.equals(argType)) {
-				Parser.environment.define(paramType, paramName, arguments.get(i));
+				environment.define(paramType, paramName, arguments.get(i));
 			} else {
 				throw new RuntimeError(i, paramType.value, argType, RuntimeError.MISMATCHED_ARGUMENT_TYPE);
 			}
@@ -53,7 +53,7 @@ public class Function implements Callable {
 		//execute the block
 		TypedObject result = body.visitNode();
 		
-		Parser.environment.exitScope();
+		environment.exitScope();
 		
 		return result;
 	}

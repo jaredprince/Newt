@@ -32,7 +32,7 @@ public class Parser {
 	
 	//TODO: compare references of objects with "==="
 	
-	//TODO: add classes
+	//TODO: make classes operable
 	
 	//TODO: try/catch structures
 	
@@ -57,7 +57,7 @@ public class Parser {
 		environment.define(new Token("native", Token.DATA_TYPE), new Token("nativeTest", Token.IDENTIFIER), new TypedObject("native", new Callable(){
 			
 			@Override
-			public TypedObject call(Parser parser, List<TypedObject> arguments) {
+			public TypedObject call(Environment environment, List<TypedObject> arguments) {
 				System.out.println("This is a print inside a native.");
 				return new TypedObject("string", "This is the return of a native.");
 			}
@@ -72,7 +72,7 @@ public class Parser {
 		environment.define(new Token("native", Token.DATA_TYPE), new Token("print", Token.IDENTIFIER), new TypedObject("native", new Callable(){
 			
 			@Override
-			public TypedObject call(Parser parser, List<TypedObject> args) {
+			public TypedObject call(Environment environment, List<TypedObject> args) {
 				System.out.print(args.get(0).object);
 				return null;
 			}
@@ -87,7 +87,7 @@ public class Parser {
 		environment.define(new Token("native", Token.DATA_TYPE), new Token("println", Token.IDENTIFIER), new TypedObject("native", new Callable(){
 			
 			@Override
-			public TypedObject call(Parser parser, List<TypedObject> args) {
+			public TypedObject call(Environment environment, List<TypedObject> args) {
 				System.out.println(args.get(0).object);
 				return null;
 			}
