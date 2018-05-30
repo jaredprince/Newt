@@ -33,6 +33,7 @@ public class ClassNode extends ASTNode {
 	
 	public TypedObject visitNode() {
 		ClassObject obj = new ClassObject(methods, data);
+		obj.setName(name.token.value);
 		obj.setConstructor(new Function(getConstruct().getParams(), getConstruct().getBody(), Parser.environment.getScopeFromInner(0)));
 		
 		Parser.environment.define(token, getName().token, new TypedObject("class", obj));

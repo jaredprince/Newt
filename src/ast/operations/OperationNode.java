@@ -152,7 +152,7 @@ public class OperationNode extends ASTNode {
 			}
 		}
 		
-		if(token.subtype == Token.MEMBERSHIP) {
+		if(token.subtype == Token.SPECIAL_OP && token.value.equals(".")) {
 			//TODO: handle membership
 			
 			//evaluate left branch to get the instance scope
@@ -161,11 +161,15 @@ public class OperationNode extends ASTNode {
 			if(left.object instanceof Map<?, ?>) {
 				Map<String, TypedObject> scope = (Map<String, TypedObject>) left.object;
 				Parser.environment.appendScope(scope);
-	
 				
 				//TODO: The right variable should only be searched for in the innermost scope.
-				TypedObject right = this.getRight().visitNode();
+				//evaluate the right branch to get the variable from the new scope
+				TypedObject right = this.right.visitNode();
+
+				//exit the new scope
+				Parser.environment.exitScope();
 				
+				return right;
 				
 			} else {
 				throw new RuntimeError(token, RuntimeError.MISPLACED_MEMBERSHIP);

@@ -43,7 +43,7 @@ public class Function implements Callable {
 			String argType = arguments.get(i).type;
 			
 			//check the expected and received type
-			if(paramType.value.equals(argType)) {
+			if(paramType.value.equals("var") || paramType.value.equals(argType)) {
 				environment.define(paramType, paramName, arguments.get(i));
 			} else {
 				throw new RuntimeError(i, paramType.value, argType, RuntimeError.MISMATCHED_ARGUMENT_TYPE);

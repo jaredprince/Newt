@@ -56,55 +56,21 @@ public class NaryAST extends ASTNode {
 			Parser.environment.enterScope();
 		}
 		
-		if(token.type == Token.GROUPING){
-			if(token.value.equals("switch")){
-				boolean caseExecuted = false;
-				for(int i = 0; i < getNodes().size(); i++){
-					ASTNode node = getNodes().get(i);
-					
-					if(node.token.value.equals("default") && caseExecuted){
-						return null;
-					}
-					
-					TypedObject obj = node.visitNode();
-					
-					if(obj != null){
-						if(obj.type.equals("token")){
-							return obj;
-						} else {
-							caseExecuted = caseExecuted ? true : ((Boolean)obj.object).booleanValue();
-						}
-					}
-											
-					//returns exit the block immediately and return a value
-					if(node.token.value.equals("return")){
-						return obj;
-					}
-					
-					//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
-					if(node.token.value.equals("break") || node.token.value.equals("continue")){
-						return new TypedObject("token", node.token);
-					}
-				}
+		for(int i = 0; i < getNodes().size(); i++){
+			ASTNode node = getNodes().get(i);
+			TypedObject obj = node.visitNode();
+			
+			if(obj != null && obj.type.equals("token"))
+				return obj;
+			
+			//returns exit the block immediately and return a value
+			if(node.token.value.equals("return")){
+				return obj;
 			}
-			else {
-				for(int i = 0; i < getNodes().size(); i++){
-					ASTNode node = getNodes().get(i);
-					TypedObject obj = node.visitNode();
-					
-					if(obj != null && obj.type.equals("token"))
-						return obj;
-					
-					//returns exit the block immediately and return a value
-					if(node.token.value.equals("return")){
-						return obj;
-					}
-					
-					//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
-					if(node.token.value.equals("break") || node.token.value.equals("continue")){
-						return new TypedObject("token", node.token);
-					}
-				}
+			
+			//breaks and continues exit immediately, but do not return a value, so a token is returned as a flag
+			if(node.token.value.equals("break") || node.token.value.equals("continue")){
+				return new TypedObject("token", node.token);
 			}
 		}
 		

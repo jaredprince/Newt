@@ -4,6 +4,9 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class Environment {
+	
+	//TODO: make assignments happen in the nodes
+	//in other words, in an assignment node, the visit function would retrieve the typedobject from the environment and chenge it internally
 
 	private LinkedList<Map<String, TypedObject>> variables = new LinkedList<Map<String, TypedObject>>();
 	public int depth;

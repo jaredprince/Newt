@@ -1,73 +1,201 @@
+import testclass.nwt
 
-class testclass {
-	int t1 = 2;
-	
-	construct (){
-		println("constructor successful");
-	}
-	
-	func t4(int i, var j){
-		println(i + j);
-	}
-	
-	string t2 = "cwrf";
-	var t3 = 2.3;
+//declaration and assignment
+int i;
+var j;
+i = 0;
+j = "cat";
+var k = 1;
+string l = "hat";
+
+println("Declaration and assignment test:");
+println("    Expected: 0 cat 1 hat");
+println("    Received: " + i + " " + j + " " + k + " " + l);
+
+
+//type change tests
+println("Dynamic type test:");
+j = 1.0;
+k = "mat";
+println("    Expected: 1.0 mat");
+println("    Received: " + j + " " + k);
+
+
+//natives
+print("This should be on the same line...");
+println(" as this.");
+
+println("This should be on a different line...");
+println("from this.");
+
+println(nativeTest());
+
+
+//if statement tests
+if(true){
+	println("If test #1: success");
+} else if (true) {
+	println("If test #1: failure 1");
+} else {
+	println("If test #1: failure 2");
 }
 
-//testclass x = new testclass();
+if(false)
+	println("If test #2: failure 1");
+else if (true)
+	println("If test #2: success");
+else
+	println("If test #2: failure 2");
 
-/*
+if(false){
+	println("If test #3: failure 1");
+} else if (false) {
+	println("If test #3: failure 2");
+} else {
+	println("If test #3: success");
+}
+
+
+//for loop tests
+println("For loop test (0 - 10):");
+for(int j = 0; j < 10; j++){
+	print(j + " ");
+}
+println("");
+
+println("For loop break test (0 - 10, break at 5):");
+for(int j = 0; j < 10; j++){
+	if(j == 5)
+		break;
+
+	print(j + " ");
+}
+println("");
+
+println("For loop continue test (0 - 10, continue at 5):");
+for(int j = 0; j < 10; j++){
+	if(j == 5)
+		continue;
+
+	print(j + " ");
+}
+println("");
+
+
+//while tests
+println("While test (0 - 10):");
+int m = 0;
+while(m < 10){
+	print(m + " ");
+	m = m + 1;
+}
+println("");
+
+println("While break test (0 - 10, break at 5):");
+m = 0;
+while(m < 10){
+	if(m == 5)
+		break;
+	print(m + " ");
+	m = m + 1;
+}
+println("");
+
+println("While continue test (0 - 10, continue at 5):");
+m = 0;
+while(m < 10){
+	if(m == 5){
+		m = m + 1;
+		continue;
+	}
+	
+	print(m + " ");
+	m = m + 1;
+}
+println("");
+
+
+//do while tests
+
+println("Do-While test (0 - 10):");
+int y = 0;
 do {
-	print(j+ " ");
-	j++;
-} while (j < 22);
+	print(y + " ");
+	y++;
+} while (y < 10);
+println("");
 
-cat(1, " test ");
+println("Do-While break test (0 - 10, break at 5):");
+y = 0;
+do {
+	print(y + " ");
+	y++;
+	
+	if(y == 5)
+		break;
+} while (y < 10);
+println("");
 
-func cat(int c, string s){
-	print(c + s);
+println("Do-While continue test (0 - 10, continue at 5):");
+int z = 0;
+do {
+	if(z == 5){
+		z++;
+		continue;
+	}
+	
+	print(z + " ");
+	z++;
+} while (z < 10);
+println("");
+
+//switch tests
+println("Switch test: ");
+switch(1){
+case(1){ print("success "); break;}
+case(2){ print("failure "); break;}
+default{ print("failure ");}
+}
+println("");
+
+println("Switch test default: ");
+switch(1){
+case(0){ print("failure "); break;}
+case(2){ print("failure "); break;}
+default{ print("success ");}
+}
+println("");
+
+println("Switch test multiple: ");
+int u = 0;
+switch(u){
+case(0){ print("success 1 - "); u++;}
+case(1){ print("success 2 - "); u++; break;}
+case(2){ print("failure");}
+default{ print("failure ");}
+}
+println("");
+
+//function tests
+
+string cat = "cat";
+func fTest(int i, var j){
+	println(i + j + cat);
 }
 
-cat(34, " I like cats ");
+println("Function test (no return):");
+fTest(2, 3);
+println("Function test (return):");
+println(fTest2());
 
-int l = 0;
-switch(l){
-	case(0){
-		print("test0");
-	}
-	
-	case(0){
-		print("test1");
-		break;
-	}
-	
-	case(1){
-		print("failure");
-	}
-
-	default {
-		print("failure - default");
-	}
+func fTest2(){
+	return "success";
 }
 
-switch(l){
-	case(0){
-		print("test3");
-		break;
-	}
-	
-	case(0){
-		print("test1");
-	}
-	
-	case(1){
-		print("failure");
-		break;
-	}
+//class tests
 
-	default {
-		print("failure - default");
-	}
+class cTest {
+	int x = 0;
+	
+	
 }
-
-*/

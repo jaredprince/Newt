@@ -1,0 +1,35 @@
+/* Read Evaluate Print Loop for Newt */
+
+boolean running = true;
+
+while(running) {
+
+	string input = "";
+	boolean accepting_input = true;
+	println("Input:");
+	
+	while(accepting_input){
+		print(">");
+		
+		/* receive will be a native function to take input from the console */
+		input = input + receive() + " ";
+		
+		/*Program will be an object containing the parsed program (along with any errors). Parse will be a native parsing function.*/
+		Program p = parse()
+		
+		if(p.valid){
+			accepting_input = false;
+		} else {
+			println(p.errors());
+		}
+		
+		println();
+		input = "";
+	}
+	
+	/* the run function is a native that executes the given code in the current environment */
+	result = run(input);
+	
+	println(" >" + result);
+	println();
+}

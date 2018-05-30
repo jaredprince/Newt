@@ -19,22 +19,28 @@ import ast.structures.DoWhileNode;
 import ast.structures.ForNode;
 import ast.structures.FunctionNode;
 import ast.structures.IfElseNode;
+import ast.structures.InstanceNode;
 import ast.structures.StructureBodyNode;
 import ast.structures.SwitchNode;
+import ast.structures.TryNode;
 import ast.structures.WhileNode;
 import lexer.Lexer;
 
 public class Parser {
 	
+	//TODO: returns from methods
+	//TODO: static class vars
+	
 	//TODO: Add arrays
 	
 	//TODO: Add sets
 	
+	//TODO: add maps (apply to all) - ie. map(func(){//code}, array)
+	
 	//TODO: compare references of objects with "==="
 	
-	//TODO: make classes operable
+	//TODO: try/catch structures - should be easy - just pass a error up the tree instead of throwing
 	
-	//TODO: try/catch structures
 	
 	static Lexer lex;
 	static ASTNode root;
@@ -147,8 +153,9 @@ public class Parser {
 				Token t = lex.consume();
 				
 				if(!lex.nextValueIs(";")){
+					UnaryAST node = new UnaryAST(parseExpression(), t);
 					expect(";");
-					return new UnaryAST(parseExpression(), t);
+					return node;
 				} else {
 					expect(";");
 					return new ASTNode(t);
@@ -236,10 +243,28 @@ public class Parser {
 			throw new RuntimeError(lex.consume(), RuntimeError.UNEXPECTED_CONSTRUCT);
 		}
 		
+		if(lex.nextValueIs("new")) {
+			return parseInstance();
+		}
+		
+		if(lex.nextValueIs("try")) {
+			return parseTryCatch();
+		}
+		
 		//give an error if no structure is found
 		error("structure");
 
 		return null;
+	}
+	
+	public static TryNode parseTryCatch() {
+		return null;
+	}
+	
+	public static InstanceNode parseInstance() {
+		Token t = lex.consume();
+		
+		return new InstanceNode(new ASTNode(expect(Token.IDENTIFIER)), t, parseArguments());
 	}
 	
 	public static ClassNode parseClass() {
@@ -283,9 +308,25 @@ public class Parser {
 		Token identifier = lex.consume();
 		
 		// a function call has two parts: the name (AST) and the arguments (Nary)
+		ASTNode node = null;
+		
+		//this will parse a compound membership expression (ex. class.object.sub-object)
+		boolean first = true;
+		while(lex.nextValueIs(".")) {
+			if(first) {
+				node = new OperationNode(new ASTNode(identifier), lex.consume(),new ASTNode(expect(Token.IDENTIFIER)));
+				first = false;
+			} else {
+				node = new OperationNode(node, lex.consume(), new ASTNode(expect(Token.IDENTIFIER)));
+			}
+		}
 		
 		if(lex.nextValueIs("(")){
-			CallNode node = new CallNode(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
+			if(first) {
+				node = new CallNode(new ASTNode(identifier), new Token("call", Token.STRUCTURE), parseArguments());
+			} else {
+				node = new CallNode(node, new Token("call", Token.STRUCTURE), parseArguments());
+			}
 			return node;
 		} else {
 			lex.returnToken(identifier);
@@ -484,7 +525,7 @@ public class Parser {
 		return params;
 	}
 	
-	//TODO: Make for loops LL(1)
+	//TODO: Clean this up
 	public static ForNode parseFor() {
 		ForNode node = new ForNode(lex.consume());
 
@@ -954,6 +995,10 @@ public class Parser {
 			expect("|");
 
 			return node;
+		}
+		
+		if(lex.nextValueIs("new")) {
+			return parseInstance();
 		}
 
 		expect("(, literal, or identifier");

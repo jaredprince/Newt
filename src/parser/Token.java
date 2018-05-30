@@ -6,7 +6,7 @@ public class Token {
 	public static final String[] names = {
 		"ERROR", "TYPE", "STATEMENT", "DELINEATOR", "COMMENT", "OPERATOR", "STRUCTURE", "IDENTIFIER", "GROUPING", "BLANK", "LITERAL",
 		"BOOLEAN", "CHARACTER", "DOUBLE", "INTEGER", "OBJECT", "STRING", "MATHEMATICAL", "LOGICAL", "COMPARATIVE", "SPECIAL_OP",
-		"ASSIGNMENT", "EOF", "SPECIAL_VALUE", "MEMBERSHIP"
+		"ASSIGNMENT", "EOF", "SPECIAL_VALUE", "CLASS"
 	};
 	
 	//basic types
@@ -41,7 +41,7 @@ public class Token {
 	public static final int SPECIAL_OP = 20;
 	public static final int ASSIGNMENT = 21; // =, *=, +=, etc.
 	
-	public static final int MEMBERSHIP = 24;
+	public static final int CLASS = 24;
 	
 	public static final int EOF = 22;
 	

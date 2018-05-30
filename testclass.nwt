@@ -1,0 +1,8 @@
+class testclass {
+	int i = 0;
+	
+	construct(){
+		println("success");
+		i++;
+	}
+}

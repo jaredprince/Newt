@@ -80,3 +80,13 @@ if : i == 2 : {
 	print: 2
 	test: 4, 5
 }
+
+try {
+	//executes
+} catch () {
+	//executes if an exception was raised in try
+} finally {
+	//executes no matter what happened before
+} else {
+	//executes if no exception was raised
+} 

@@ -1,6 +1,7 @@
 package parser;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import ast.statement.DeclarationNode;
@@ -13,6 +14,7 @@ import ast.structures.FunctionNode;
  */
 public class ClassObject {
 	
+	String name;
 	ArrayList<FunctionNode> methods;
 	ArrayList<DeclarationNode> variables;
 	Function constructor;
@@ -26,7 +28,16 @@ public class ClassObject {
 		constructor = f;
 	}
 	
-	public TypedObject generateInstance(String name) {
+	public void setName(String n) {
+		name = n;
+	}
+	
+	/**
+	 * Generates a new TypedObject that is an instance of this class.
+	 * @param arguments The arguments supplied to the constructor.
+	 * @return The object
+	 */
+	public TypedObject generateInstance(List<TypedObject> arguments) {
 		
 		//create a new scope
 		Parser.environment.enterScope();
@@ -40,6 +51,9 @@ public class ClassObject {
 		for(int i = 0; i < variables.size(); i++) {
 			variables.get(i).visitNode();
 		}
+		
+		//execute the constructor with the supplied arguments
+		constructor.call(Parser.environment, arguments);
 		
 		//get the populated scope
 		Map<String, TypedObject> scope = Parser.environment.getScopeFromInner(0);

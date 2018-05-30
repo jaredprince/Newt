@@ -9,10 +9,10 @@ import parser.Token;
 public class Lexer {
 
 	static String[] structures = {"if", "else", "do", "while", "for", "switch", "case", "default", "try",
-			"catch", "func", "class", "construct" // structures
+			"catch", "func", "class", "construct", "new" // structures
 	};
 
-	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit"};
+	static String[] statements = { "goto", "return", "break", "continue", "redo", "restart", "exit", "import"};
 	
 	static String[] specials = {"any", "inf", "neginf"};
 
