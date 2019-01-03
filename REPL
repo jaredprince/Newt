@@ -15,7 +15,7 @@ while(running) {
 		input = input + receive() + " ";
 		
 		/*Program will be an object containing the parsed program (along with any errors). Parse will be a native parsing function.*/
-		Program p = parse()
+		Program p = parse();
 		
 		if(p.valid){
 			accepting_input = false;

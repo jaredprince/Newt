@@ -5,6 +5,7 @@ import java.util.Map;
 import ast.ASTNode;
 import parser.Parser;
 import parser.RuntimeError;
+import parser.Scope;
 import parser.Token;
 import parser.TypedObject;
 
@@ -159,7 +160,7 @@ public class OperationNode extends ASTNode {
 			TypedObject left = this.left.visitNode();
 			
 			if(left.object instanceof Map<?, ?>) {
-				Map<String, TypedObject> scope = (Map<String, TypedObject>) left.object;
+				Scope scope = (Scope) left.object;
 				Parser.environment.appendScope(scope);
 				
 				//TODO: The right variable should only be searched for in the innermost scope.

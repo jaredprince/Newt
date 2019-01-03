@@ -8,7 +8,7 @@ public class Environment {
 	//TODO: make assignments happen in the nodes
 	//in other words, in an assignment node, the visit function would retrieve the typedobject from the environment and chenge it internally
 
-	private LinkedList<Map<String, TypedObject>> variables = new LinkedList<Map<String, TypedObject>>();
+	private LinkedList<Scope> variables = new LinkedList<Scope>();
 	public int depth;
 	
 	public Environment(){
@@ -16,7 +16,7 @@ public class Environment {
 	}
 	
 	public void define(Token type, Token name) {
-		if(variables.getFirst().containsKey(name.value)){
+		if(variables.getFirst().containsVariable(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
 			TypedObject o = new TypedObject(type.value, null);
@@ -25,7 +25,7 @@ public class Environment {
 				o.dynamic = true;
 			}
 			
-			variables.getFirst().put(name.value, o);
+			variables.getFirst().assignVariable(name.value, o);
 		}
 	}
 	
@@ -40,7 +40,7 @@ public class Environment {
 		//TODO: overloading methods
 		
 		//define the variable in the innermost scope
-		if(variables.getFirst().containsKey(name.value)){
+		if(variables.getFirst().containsVariable(name.value)){
 			throw new RuntimeError(name, RuntimeError.VARIABLE_ALREADY_DEFINED);
 		} else {
 			TypedObject o = new TypedObject(type.value, null);
@@ -49,7 +49,7 @@ public class Environment {
 				o.dynamic = true;
 			}
 			
-			variables.getFirst().put(name.value, o);
+			variables.getFirst().assignVariable(name.value, o);
 			assign(name, value);
 		}
 	}
@@ -122,11 +122,11 @@ public class Environment {
 		//for each scope starting with the innermost
 		for(int i = 0; i < variables.size(); i++){
 			//get the variables
-			Map<String, TypedObject> scope = variables.get(i);
+			Scope scope = variables.get(i);
 			
 			//check if the map contains the key
-			if(scope.containsKey(name.value)){
-				return scope.get(name.value);
+			if(scope.containsVariable(name.value)){
+				return scope.getValue(name.value);
 			}
 		}
 		
@@ -139,7 +139,7 @@ public class Environment {
 	 * Called when a scope is exited.
 	 */
 	public void enterScope(){
-		variables.addFirst(new HashMap<>());
+		variables.addFirst(new Scope());
 		depth++;
 	}
 	
@@ -159,7 +159,7 @@ public class Environment {
 	 * @param depth The depth of the scope from the innermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, TypedObject> getScopeFromInner(int depth){
+	public Scope getScopeFromInner(int depth){
 		return variables.get(depth);
 	}
 	
@@ -170,11 +170,11 @@ public class Environment {
 	 * @param depth The depth of the scope from the outermost.
 	 * @return The map representing the scope.
 	 */
-	public Map<String, TypedObject> getScopeFromOuter(int depth){
+	public Scope getScopeFromOuter(int depth){
 		return variables.get(variables.size() - 1 - depth);
 	}
 	
-	public void appendScope(Map<String, TypedObject> scope) {
+	public void appendScope(Scope scope) {
 		variables.addFirst(scope);
 	}
 }

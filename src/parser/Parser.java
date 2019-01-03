@@ -50,7 +50,7 @@ public class Parser {
 	public static Environment environment = new Environment();
 
 	public static void main(String[] args) throws IOException {
-		lex = new Lexer(new File("Parser Test.txt"));
+		lex = new Lexer(new File("Parser test.txt"));
 
 		defineNatives();
 		
@@ -827,7 +827,7 @@ public class Parser {
 	}
 
 	/**
-	 * Pares || and ~NOR. Precedence: 4
+	 * Parses || and ~NOR. Precedence: 4
 	 * @return An ASTNode representing the expression parsed to level 4.
 	 */
 	public static ASTNode parseOR() {

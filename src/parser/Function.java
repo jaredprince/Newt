@@ -13,9 +13,9 @@ public class Function implements Callable {
 	public StructureBodyNode body;
 	
 	public int arity;
-	public Map<String, TypedObject> parentMap;
+	public Scope parentMap;
 	
-	public Function(ArrayList<DeclarationNode> params, StructureBodyNode body, Map<String, TypedObject> map){
+	public Function(ArrayList<DeclarationNode> params, StructureBodyNode body, Scope map){
 		this.params = params;
 		this.body = body;
 		parentMap = map;

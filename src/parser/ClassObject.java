@@ -56,7 +56,7 @@ public class ClassObject {
 		constructor.call(Parser.environment, arguments);
 		
 		//get the populated scope
-		Map<String, TypedObject> scope = Parser.environment.getScopeFromInner(0);
+		Scope scope = Parser.environment.getScopeFromInner(0);
 		
 		//exit the scope
 		Parser.environment.exitScope();

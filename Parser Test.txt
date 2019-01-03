@@ -1,4 +1,4 @@
-import testclass.nwt
+//import testclass.nwt
 
 //declaration and assignment
 int i;

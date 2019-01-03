@@ -39,7 +39,7 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("  Character: " + t.char_loc);
 		}
 		
-		System.exit(0);
+//		System.exit(0);
 	}
 	
 	public RuntimeError(int arity, int args, int type) {
@@ -49,7 +49,7 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("Arguments given: " + args);
 		}
 		
-		System.exit(0);
+//		System.exit(0);
 	}
 	
 	public RuntimeError(int argumentNum, String paramType, String argType, int type) {
@@ -60,7 +60,7 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("Recieved type: " + argType);
 		}
 		
-		System.exit(0);
+//		System.exit(0);
 	}
 	
 	public RuntimeError(Token name, String expected_type, TypedObject value, int err_type){
@@ -71,6 +71,6 @@ public class RuntimeError extends RuntimeException {
 			System.err.println("  Variable Name: " + name.value);
 		}
 		
-		System.exit(0);
+//		System.exit(0);
 	}
 }
