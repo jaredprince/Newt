@@ -783,6 +783,7 @@ public class Parser {
 			case CLASS:
 			case FUNC:
 			case FOR:
+			case UNDEC:
 			case IF:
 			case WHILE:
 			case PRINT:

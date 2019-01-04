@@ -187,13 +187,13 @@ println("Function test (no return):");
 fTest(2, 3);
 println("Function test (return):");
 println(fTest2());
-/*
+
 func fTest2(){
 	return "success";
 }
 
 //class tests
-
+/*
 class cTest {
 	int x = 0;
 	

@@ -45,6 +45,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	private final Environment globals = new Environment();
 	private Environment environment = globals;
+	
+	public Environment getEnvironment() {
+		return environment;
+	}
+	
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
 
 	public Interpreter() {
 		defineNatives();
@@ -984,7 +992,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionStmt(Function stmt) {
-		// TODO Auto-generated method stub
+		
+		environment.define(stmt.name, new NewtFunction(stmt));
+		
 		return null;
 	}
 

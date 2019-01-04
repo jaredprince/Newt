@@ -4,6 +4,7 @@ import interpreter.Expr.Assign;
 import interpreter.Expr.Call;
 import interpreter.Expr.Conditional;
 import interpreter.Expr.Logical;
+import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
 
 /**
@@ -99,6 +100,12 @@ public class ASTPrinter implements Expr.Visitor<String> {
 
 	@Override
 	public String visitCallExpr(Call expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitUnaryAssignExpr(UnaryAssign expr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
