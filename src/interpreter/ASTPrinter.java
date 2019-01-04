@@ -18,7 +18,7 @@ public class ASTPrinter implements Expr.Visitor<String> {
 	public static void main(String[] args) {
 		
 		Expr expression = new Expr.Binary(
-				new Expr.Unary(new Token(TokenType.MINUS, "-", null, 1, 0), new Expr.Literal(123)),
+				new Expr.UnaryAssign(new Token(TokenType.IDENTIFIER, "Cat", null, 1, 0), new Token(TokenType.MINUS, "-", null, 1, 0)),
 				new Token(TokenType.STAR, "*", null, 1, 0),
 				new Expr.Grouping(new Token(TokenType.LEFT_PAREN, "(", null, 1, 0), new Expr.Literal(45.67)));
 
@@ -78,7 +78,6 @@ public class ASTPrinter implements Expr.Visitor<String> {
 
 	@Override
 	public String visitVariableExpr(Variable expr) {
-		// TODO Auto-generated method stub
 		return expr.name.lexeme;
 	}
 
@@ -94,8 +93,7 @@ public class ASTPrinter implements Expr.Visitor<String> {
 
 	@Override
 	public String visitAssignExpr(Assign expr) {
-		// TODO Auto-generated method stub
-		return null;
+		return "(" + expr.operator.lexeme + " " + expr.name.lexeme + " " + print(expr.value) + " ";
 	}
 
 	@Override
@@ -106,8 +104,7 @@ public class ASTPrinter implements Expr.Visitor<String> {
 
 	@Override
 	public String visitUnaryAssignExpr(UnaryAssign expr) {
-		// TODO Auto-generated method stub
-		return null;
+		return "(" + expr.operator.lexeme + " " + expr.name.lexeme + ")";
 	}
 
 }

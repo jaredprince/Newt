@@ -65,9 +65,22 @@ public class Parser {
 				return undecStatement();
 			}
 
-			if (match(BREAK, CONTINUE, EXIT, RETURN)) {
+			if (match(BREAK, CONTINUE, EXIT)) {
 				Stmt.Keyword word = new Stmt.Keyword(previous());
 				consume(SEMICOLON, "Expect ';' after keyword '" + word.word.lexeme + "'.");
+				return word;
+			}
+			
+			if(match(RETURN)) {
+				Stmt.Keyword word = new Stmt.Keyword(previous());
+				
+				if(!match(SEMICOLON)) {
+					Expr expression = expression();
+					consume(SEMICOLON, "Expect ';' after keyword '" + word.word.lexeme + "'.");
+					
+					return word;
+				}
+				
 				return word;
 			}
 
@@ -343,7 +356,7 @@ public class Parser {
 		Expr condition = expression();
 		consume(RIGHT_PAREN, "Expect ')' after condition.");
 
-		return new Stmt.Do(condition, block());
+		return new Stmt.Do(condition, block);
 	}
 
 	/**

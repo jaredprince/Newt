@@ -748,7 +748,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitPrintStmt(Print stmt) {
 		Object value = evaluate(stmt.expression);
-		System.out.println(stringify(value));
+		System.out.print(stringify(value));
 		return null;
 	}
 
@@ -1016,7 +1016,34 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitDoStmt(Do stmt) {
-		// TODO Auto-generated method stub
+		
+		do {
+			visitBlockStmt((Stmt.Block) stmt.block);
+
+			int flag = (int) globals.get(new Token(null, "$exit_flag", 0, 0, 0));
+
+			/* nothing happens when there is no exit condition */
+			if (flag == EXIT_NORMAL) {
+				continue;
+			}
+
+			/* for a continue, the while continues and resets the flag */
+			if (flag == EXIT_CONTINUE) {
+				globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_NORMAL);
+				continue;
+			}
+
+			/* for a break, the while breaks and resets the flag */
+			if (flag == EXIT_BREAK) {
+				globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_NORMAL);
+				break;
+			}
+
+			if (flag == EXIT_EXIT || flag == EXIT_RETURN) {
+				break;
+			}
+		} while ((boolean) evaluate(stmt.condition));
+		
 		return null;
 	}
 

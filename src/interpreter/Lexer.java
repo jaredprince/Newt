@@ -27,7 +27,7 @@ public class Lexer {
 		keywords.put("undec", UNDEC);
 		
 		keywords.put("exprint", EXPRINT);
-		keywords.put("print", PRINT);
+//		keywords.put("print", PRINT);
 
 		//Structs
 		keywords.put("catch", CATCH);
