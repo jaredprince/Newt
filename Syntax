@@ -23,7 +23,7 @@ foreach(int x : array){
 	redo: //repeats the loop from the beginning
 }
 
-forever(){	//infinite loop
+forever{	//infinite loop
 
 }
 

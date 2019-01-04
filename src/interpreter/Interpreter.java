@@ -1027,7 +1027,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			if(validCase) {
 				caseFound = true;
 				visitCaseStmt(caseStmt);
-				//TODO: handle breaks, returns, etc.
+
+				int flag = (int) globals.get(new Token(null, "$exit_flag", 0, 0, 0));
+
+				/* nothing happens when there is no exit condition */
+				if (flag == EXIT_NORMAL) {
+					continue;
+				}
+
+				/* for a break, the switch breaks and resets the flag */
+				if (flag == EXIT_BREAK) {
+					globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_NORMAL);
+					break;
+				}
+
+				/* and exit, return, or continue flag is not resolved by the switch */
+				if (flag == EXIT_EXIT || flag == EXIT_RETURN || flag == EXIT_CONTINUE) {
+					break;
+				}
 			}
 		}
 		
