@@ -42,7 +42,7 @@ public class GenerateAST {
 			    "Do : Expr condition, Stmt block",
 			    "For : Stmt declaration, Expr condition, Expr incrementor, Stmt block",
 			    "Switch : ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase",
-			    "Case : ArrayList<Expr> tests, Stmt Block",
+			    "Case : ArrayList<Expr> tests, Stmt block",
 			    "If : Expr condition, Stmt ifBlock, Stmt elseBlock",
 			    "Undec : ArrayList<Expr> variables",
 			    "Function : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));

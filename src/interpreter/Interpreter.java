@@ -1001,8 +1001,39 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitSwitchStmt(Switch stmt) {
 
-		for (Stmt.Case switchCase : stmt.cases) {
-			// test the case
+		boolean caseFound = false;
+		
+		//for each case
+		for (int i = 0; i < stmt.cases.size(); i++) {
+			//get the case
+			Stmt.Case caseStmt = stmt.cases.get(i);
+			
+			boolean validCase = true;
+			
+			//for each value
+			for(int j = 0; j < stmt.controls.size(); j++) {
+				//create expression comparing control and test values
+				Expr.Binary expr = new Expr.Binary(stmt.controls.get(j), new Token(TokenType.EQUAL_EQUAL, "==", null, 0, 0), caseStmt.tests.get(j));
+				
+				Boolean bool = (Boolean) evaluate(expr);
+				
+				if(!bool) {
+					validCase = false;
+					break;
+				}
+			}
+			
+			//execute the case
+			if(validCase) {
+				caseFound = true;
+				visitCaseStmt(caseStmt);
+				//TODO: handle breaks, returns, etc.
+			}
+		}
+		
+		//execute default
+		if(!caseFound && stmt.defaultCase != null) {
+			visitBlockStmt((Stmt.Block) stmt.defaultCase);
 		}
 
 		return null;
@@ -1010,7 +1041,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitCaseStmt(Case stmt) {
-		// TODO Auto-generated method stub
+		//for now, all the work is done in the switch statement
+		//In later versions, I may change the parsing such that each case gets a copy of the control value.
+		//At that point the work will need to shift to the case.
+		visitBlockStmt((Stmt.Block) stmt.block);
 		return null;
 	}
 

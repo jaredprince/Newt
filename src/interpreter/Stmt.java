@@ -249,9 +249,9 @@ public abstract class Stmt {
 	}
 
 	public static class Case extends Stmt {
-		public Case(ArrayList<Expr> tests, Stmt Block) {
+		public Case(ArrayList<Expr> tests, Stmt block) {
 			this.tests = tests;
-			this.Block = Block;
+			this.block = block;
 		}
 
 		public String toString(int depth) {
@@ -260,7 +260,7 @@ public abstract class Stmt {
 				str = str + "   ";
 			}
 
-			return str + arrayListToString(tests) + Block.toString(depth + 1);
+			return str + arrayListToString(tests) + block.toString(depth + 1);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -268,7 +268,7 @@ public abstract class Stmt {
 		}
 
 		public final ArrayList<Expr> tests;
-		public final Stmt Block;
+		public final Stmt block;
 	}
 
 	public static class If extends Stmt {
