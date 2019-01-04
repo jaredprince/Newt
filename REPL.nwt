@@ -1,11 +1,11 @@
-/* Read Evaluate Print Loop for Newt */
+/* Read Evaluate Print Loop for Newt, written in Newt */
 
-boolean running = true;
+bool running = true;
 
 while(running) {
 
 	string input = "";
-	boolean accepting_input = true;
+	bool accepting_input = true;
 	println("Input:");
 	
 	while(accepting_input){

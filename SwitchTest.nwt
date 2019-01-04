@@ -1,4 +1,4 @@
-print "Switch Test";
+print("Switch Test");
 
 int i = 0;
 switch(i){

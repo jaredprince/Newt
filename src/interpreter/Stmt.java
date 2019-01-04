@@ -11,10 +11,12 @@ public abstract class Stmt {
 		T visitDeclareStmt(Declare stmt);
 		T visitBlockStmt(Block stmt);
 		T visitWhileStmt(While stmt);
+		T visitDoStmt(Do stmt);
 		T visitForStmt(For stmt);
 		T visitSwitchStmt(Switch stmt);
 		T visitCaseStmt(Case stmt);
 		T visitIfStmt(If stmt);
+		T visitUndecStmt(Undec stmt);
 		T visitFunctionStmt(Function stmt);
 	}
 
@@ -171,6 +173,29 @@ public abstract class Stmt {
 		public final Stmt block;
 	}
 
+	public static class Do extends Stmt {
+		public Do(Expr condition, Stmt block) {
+			this.condition = condition;
+			this.block = block;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + condition.toString(depth + 1) + "\n" + block.toString(depth + 1);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitDoStmt(this);
+		}
+
+		public final Expr condition;
+		public final Stmt block;
+	}
+
 	public static class For extends Stmt {
 		public For(Stmt declaration, Expr condition, Expr incrementor, Stmt block) {
 			this.declaration = declaration;
@@ -269,6 +294,27 @@ public abstract class Stmt {
 		public final Expr condition;
 		public final Stmt ifBlock;
 		public final Stmt elseBlock;
+	}
+
+	public static class Undec extends Stmt {
+		public Undec(ArrayList<Expr> variables) {
+			this.variables = variables;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + arrayListToString(variables);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitUndecStmt(this);
+		}
+
+		public final ArrayList<Expr> variables;
 	}
 
 	public static class Function extends Stmt {

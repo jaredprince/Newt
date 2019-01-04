@@ -19,37 +19,44 @@ public class Lexer {
 	 */
 	static {
 		keywords = new HashMap<>();
-		keywords.put("class", CLASS);
-		keywords.put("else", ELSE);
 		keywords.put("false", FALSE);
-		keywords.put("for", FOR);
-		keywords.put("if", IF);
-		keywords.put("print", PRINT);
-		keywords.put("exprint", EXPRINT);
 		keywords.put("construct", CONSTRUCT);
-		keywords.put("return", RETURN);
 		keywords.put("super", SUPER);
 		keywords.put("this", THIS);
 		keywords.put("true", TRUE);
-		keywords.put("var", VAR_TYPE);
-		keywords.put("while", WHILE);
-		keywords.put("try", TRY);
-		keywords.put("continue", CONTINUE);
-		keywords.put("break", BREAK);
+		keywords.put("undec", UNDEC);
+		
+		keywords.put("exprint", EXPRINT);
+		keywords.put("print", PRINT);
+
+		//Structs
 		keywords.put("catch", CATCH);
 		keywords.put("finally", FINALLY);
 		keywords.put("switch", SWITCH);
 		keywords.put("case", CASE);
 		keywords.put("default", DEFAULT);
 		keywords.put("do", DO);
+		keywords.put("func", FUNC);
+		keywords.put("while", WHILE);
+		keywords.put("try", TRY);
+		keywords.put("class", CLASS);
+		keywords.put("else", ELSE);
+		keywords.put("for", FOR);
+		keywords.put("if", IF);
+		
+		//statements
+		keywords.put("continue", CONTINUE);
+		keywords.put("break", BREAK);
+		keywords.put("exit", EXIT);
+		keywords.put("return", RETURN);
+		
+		//Types
 		keywords.put("int", INT_TYPE);
 		keywords.put("double", DOUBLE_TYPE);
 		keywords.put("string", STRING_TYPE);
 		keywords.put("char", CHAR_TYPE);
 		keywords.put("bool", BOOL_TYPE);
 		keywords.put("var", VAR_TYPE);
-		keywords.put("func", FUNC);
-		keywords.put("exit", EXIT);
 		keywords.put("null", NULL);
 	}
 
@@ -66,7 +73,7 @@ public class Lexer {
 	/**
 	 * The current line being lexed.
 	 */
-	public int line = 0;
+	public int line = 1;
 
 	/**
 	 * The current character being lexed.
@@ -256,7 +263,7 @@ public class Lexer {
 	 */
 	public void lexIdentifier() {
 
-		while ((peek() == '_' || Character.isAlphabetic(peek())) && !sourceEmpty()) {
+		while ((peek() == '_' || Character.isDigit(peek()) || Character.isAlphabetic(peek())) && !sourceEmpty()) {
 			advance();
 		}
 
@@ -372,7 +379,7 @@ public class Lexer {
 			return;
 		}
 
-		// The closing ".
+		// The closing '"'.
 		advance();
 
 		// Trim the surrounding quotes.

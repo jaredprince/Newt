@@ -1,0 +1,122 @@
+(* Literal Components*)
+
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+<upper_case_letter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z";
+<lower_case_letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z";
+<letter> ::= <upper_case_letter> | <lower_case_letter>;
+<symbol> ::= "|" | " " | "!" | "#" | "$" | "%" | "&" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | ">" | "=" | "<" | "?" | "@" | "[" | "]" | "^" | "_" | "`" | "{" | "}" | "~";
+<escaped_character> ::= "\'" | "\"" | "\\";
+<special_escaped_character> ::= "\n" | "\t";
+<character> ::= <letter> | <digit> | <symbol> | <escaped_character> | <special_escaped_character>;
+<white_space> ::= {<white_space>} (" " | "\t" | "\n");
+
+
+(* Literals *)
+
+<boolean> ::= "true" | "false";
+<positive_int> ::= "0" | ( ( "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ) {digit} );
+<int> ::= ["-"] <positive_int>;
+<double> ::= [<int>] "." <digit> { <digit> };
+<char> ::= "'" <character> "'";
+<string> ::= """ { <character> } """;
+(*<dict> ::= "#(" { ( <string> | <int> ) ":" <value> } ")";*)
+(*<array> ::= "[" [<value> {"," <value>}] "]";  array format still in question*)
+<special_literal> ::= "inf" | "neginf" | "null";
+<literal> ::= <boolean> | <int> | <double> | <char> | <string> | <special_literal>;
+
+
+(* Types *)
+
+<class_type> ::= <upper_case_letter> {<letter>};
+<primitive_type> ::= "boolean" | "int" | "double" | "string" | "char" | (<type> "[]") | "var";
+<type> ::= <class_type> | <primitive_type>;
+
+
+(* Identifiers *)
+
+<underscore_seq> ::= "_" ( <letter> | <digit> );
+<identifier> ::= ["_"] <letter> {(<underscore_seq> | <digit> | <letter>)} ["_"];
+<member_identifier> ::= identifier "." identifier;
+(*<identifier> ::= <member_identifier> | <simple_identifier> | <array_access_identifier>;*)
+
+
+<keyword> ::= ;
+
+
+(* Operators *)
+
+<additive_operator> ::= "+" | "-";
+<multiplicative_operator> ::= "*" | "/" | "%";
+<mathematical_operator> ::= <additive_operator> | <multiplicative_operator> | "^";
+<logical_or_operator> ::= "||" | "~NOR";
+<logical_and_operator> ::= "&&" | "~NAND";
+<logical_operator> ::= <logical_or_operator> | <logical_and_operator>;
+<comparative_operator> ::= ">" | "<" | ">=" | "<=" | "!=";
+<equality_operator> ::= "==" | "===" | "!=";
+
+<body> ::= ("{" <body_component> { <body_component> } "}") | <body_component>;
+<body_component> ::= <statement> | <structure>;
+<statement> ::= ( <assignment> | <declaration> | <method_call> ) ";" ;
+
+<complex_assignment_op> ::= <mathematical_operator> "=";
+<assignment> ::= <identifier> ("=" | <complex_assignment_op>) <expression>;
+<declaration> ::= <type> (<identifier> | <assignment>);
+
+<value> ::= <method_call> | <literal> | <identifier>;
+<method_call> ::= ( <identifier> | <member_identifier> ) "(" <argument_list> ")";
+<argument_list> ::= [ <value> {"," <value>} ];
+<parameter_list> ::= [ <type> <identifier> {"," <type> <identifier>} ];
+
+
+(* Expressions *)
+<expression> ::= <conditional_expression>;
+
+<conditional_expression> ::= <logical_or_expression> | ( <logical_or_expression> "?" <expression> ":" <conditional_expression> ) ;
+<logical_or_expression> ::= <logical_and_expression> | ( <logical_or_expression> <logical_or_operator> <logical_and_expression> );
+<logical_and_expression> ::= <equality_expression> | ( <logical_and_expression> <logical_and_operator> <equality_expression> );
+<equality_expression> ::= <comparative_expression> | ( <equality_expression> <equality_operator> <comparative_expression> );
+<comparative_expression> ::= <additive_expression> | ( <comparative_expression> <comparative_operator> <additive_expression> );
+<additive_expression> ::= <multiplicative_expression> | ( <additive_expression> <additive_operator> <multiplicative_expression> );
+<multiplicative_expression> ::= <exponential_expression> | ( <multiplicative_expression> <multiplicative_operator> <exponential_expression> );
+<exponential_expression> ::= <unary_expression> | ( <exponential_expression> "^" <unary_expression> );
+<unary_expression> ::= <membership_expression> | ( <unary_expression> <unary_operator> <membership_expression> );
+<membership_expression> ::= <primary_expression> | ( <membership_expression> "." <primary_expression>);
+<primary_expression> ::= <literal> | <method_call> | <parenthesized_expression> | <absolute_value_expression> | <array_access_expression>;
+
+<parenthesized_expression> ::= "(" <expression> ")";
+<absolute_value_expression> ::= "|" <expression> "|";
+
+<array_access_expression> ::= <identifier> "[" <positive_int> "]";
+
+
+(* Structures *)
+
+<structure> ::= <loop_structure> | <conditional_structure> | <format_structure>;
+<loop_structure> ::= <for> | <while> | <do_while>;
+<conditional_structure> ::= <switch> | <if> | <try>;
+<format_structure> := <class> | <method>;
+
+<while> ::= "while" "(" <boolean_expression> ")" <body> ;
+<do_while> ::= "do" <body> "while" "(" <boolean_expression> ")";
+<for> ::= "for" "(" (<declaration> ":" <boolean_expression> [":" <statement>]) | ([<declaration> ":"] <boolean_expression> ":" <statement>) ")" <body>;
+
+<if> ::= "if" "(" <boolean_expression> ")" {<else_if>} [<else>];
+<else_if> ::= "else" <if>;
+<else> ::= "else" <body>;
+
+<switch> ::= "switch" "(" <value> {"," <value>} ")" <switch_body>;
+<switch_body> ::= "{" <case> {<case>} [<default>] "}";
+<case> ::= "case" "(" <value> {"," <value>} ")" ":" <body>;
+<default> ::= "default" ":" <body>;
+
+<try> ::= "try" <body> (({<catch>} [<default_catch>]) | <default_catch>) [<finally>];
+<catch> ::= "catch" "(" <class_type> <identifier> ")" <body>;
+<default_catch> ::= "catch" <body>;
+<finally> ::= "finally" <body>;
+
+<class> ::= "class" <class_type> <body>;
+
+<access_modifier> ::= "private" | "protected" | "derived";
+<static_modifier> ::= "static";
+
+<method> ::= [<access_modifier>] [static_modifier] <type> <identifier> "(" <parameter_list> ")";

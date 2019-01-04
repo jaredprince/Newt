@@ -81,6 +81,10 @@ public class Environment {
 	public void undefine(Token name) {
 		values.remove(name.lexeme);
 	}
+	
+	public void undefine(String name) {
+		values.remove(name);
+	}
 
 	/**
 	 * Assigns a value to a pre-defined variable.

@@ -28,6 +28,7 @@ public class GenerateAST {
 				"Unary    : Token operator, Expr right",
 				"Variable : Token name",
 				"Assign : Token name, Token operator, Expr value",
+				"UnaryAssign : Token name, Token operator",
 				"Call : Expr callee, Token parenthesis, ArrayList<Expr> arguments"));
 		
 		defineAst(outputDir, "Stmt", Arrays.asList(
@@ -38,10 +39,12 @@ public class GenerateAST {
 			    "Declare : Token type, Token name, Expr value",
 			    "Block : ArrayList<Stmt> statements",
 			    "While : Expr condition, Stmt block",
+			    "Do : Expr condition, Stmt block",
 			    "For : Stmt declaration, Expr condition, Expr incrementor, Stmt block",
 			    "Switch : ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase",
 			    "Case : ArrayList<Expr> tests, Stmt Block",
 			    "If : Expr condition, Stmt ifBlock, Stmt elseBlock",
+			    "Undec : ArrayList<Expr> variables",
 			    "Function : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
 	}
 

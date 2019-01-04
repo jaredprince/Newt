@@ -18,10 +18,12 @@ import interpreter.Expr.Grouping;
 import interpreter.Expr.Literal;
 import interpreter.Expr.Logical;
 import interpreter.Expr.Unary;
+import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
 import interpreter.Stmt.Block;
 import interpreter.Stmt.Case;
 import interpreter.Stmt.Declare;
+import interpreter.Stmt.Do;
 import interpreter.Stmt.ExPrint;
 import interpreter.Stmt.Expression;
 import interpreter.Stmt.For;
@@ -30,6 +32,7 @@ import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
 import interpreter.Stmt.Print;
 import interpreter.Stmt.Switch;
+import interpreter.Stmt.Undec;
 import interpreter.Stmt.While;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
@@ -97,7 +100,25 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			@Override
 			public Object call(Interpreter interpreter, ArrayList<Object> arguments) {
 				System.out.print(arguments.get(0));
+				return null;
+			}
 
+			@Override
+			public String toString() {
+				return "<native fn>";
+			}
+		});
+		
+		/* prints an expression to standard output, followed by a new line */
+		globals.define("println", new NewtCallable() {
+			@Override
+			public int arity() {
+				return 1;
+			}
+
+			@Override
+			public Object call(Interpreter interpreter, ArrayList<Object> arguments) {
+				System.out.println(arguments.get(0));
 				return null;
 			}
 
@@ -765,6 +786,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitForStmt(For stmt) {
 
+		Environment previous = environment;
+		
+		//a wrapper environment for the declaration variable
+		environment = new Environment(environment);
+		
 		// this declaration needs to be scoped
 		if (stmt.declaration != null) {
 			execute(stmt.declaration);
@@ -800,6 +826,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				break;
 			}
 		}
+		
+		//reset the environment
+		environment = previous;
 
 		return null;
 	}
@@ -972,6 +1001,45 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitCaseStmt(Case stmt) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitDoStmt(Do stmt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitUndecStmt(Undec stmt) {
+
+		for(Expr expr : stmt.variables) {
+			environment.undefine(((Expr.Variable)expr).name);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public Object visitUnaryAssignExpr(UnaryAssign expr) {
+		/* make a duplicate with the same lexeme and location for error reporting */
+		Token operator = new Token(null, expr.operator.lexeme, expr.operator.literal, expr.operator.line,
+				expr.operator.character);
+
+		/* set the new token to have the mathematical operator type */
+		switch (expr.operator.type) {
+		case MINUS_MINUS:
+			operator.type = MINUS;
+			break;
+		case PLUS_PLUS:
+			operator.type = PLUS;
+			break;
+		default:
+			break;
+		}
+
+		environment.assign(expr.name, evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, new Expr.Literal(new Integer(1)))));
+
 		return null;
 	}
 }

@@ -28,9 +28,6 @@ println(" as this.");
 println("This should be on a different line...");
 println("from this.");
 
-println(nativeTest());
-
-
 //if statement tests
 if(true){
 	println("If test #1: success");
@@ -55,6 +52,9 @@ if(false){
 	println("If test #3: success");
 }
 
+undec{
+	j, i
+}
 
 //for loop tests
 println("For loop test (0 - 10):");
@@ -122,7 +122,7 @@ int y = 0;
 do {
 	print(y + " ");
 	y++;
-} while (y < 10);
+} while (y < 10)
 println("");
 
 println("Do-While break test (0 - 10, break at 5):");
@@ -133,7 +133,7 @@ do {
 	
 	if(y == 5)
 		break;
-} while (y < 10);
+} while (y < 10)
 println("");
 
 println("Do-While continue test (0 - 10, continue at 5):");
@@ -146,7 +146,7 @@ do {
 	
 	print(z + " ");
 	z++;
-} while (z < 10);
+} while (z < 10)
 println("");
 
 //switch tests
@@ -187,7 +187,7 @@ println("Function test (no return):");
 fTest(2, 3);
 println("Function test (return):");
 println(fTest2());
-
+/*
 func fTest2(){
 	return "success";
 }
@@ -198,4 +198,4 @@ class cTest {
 	int x = 0;
 	
 	
-}
+}*/

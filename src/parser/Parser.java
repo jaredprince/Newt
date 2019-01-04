@@ -47,6 +47,9 @@ public class Parser {
 
 			if (match(WHILE))
 				return whileStatement();
+			
+			if (match(DO))
+				return doStatement();
 
 			if (match(SWITCH))
 				return switchStatement();
@@ -56,6 +59,10 @@ public class Parser {
 
 			if (match(IF)) {
 				return ifStatement();
+			}
+			
+			if (match(UNDEC)) {
+				return undecStatement();
 			}
 
 			if (match(BREAK, CONTINUE, EXIT, RETURN)) {
@@ -92,8 +99,7 @@ public class Parser {
 		}
 
 		consume(RIGHT_PAREN, "Expect ')' after parameters.");
-		consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
-
+		
 		return new Stmt.Function(name, types, parameters, block());
 	}
 
@@ -119,14 +125,16 @@ public class Parser {
 			cases.add(caseStatement());
 		}
 
+		Stmt.Block block = null;
+		
 		if (match(DEFAULT)) {
-			consume(COLON, "Expect ':' after 'default'.");
-			return new Stmt.Switch(list, cases, block());
+//			consume(COLON, "Expect ':' after 'default'.");
+			block = block();
 		}
 
 		consume(RIGHT_BRACE, "Expect '}' after last case.");
 
-		return new Stmt.Switch(list, cases, null);
+		return new Stmt.Switch(list, cases, block);
 	}
 
 	/**
@@ -147,7 +155,7 @@ public class Parser {
 			list.add(expression());
 		}
 
-		consume(COLON, "Expect ':' after case header.");
+//		consume(COLON, "Expect ':' after case header.");
 
 		return new Stmt.Case(list, block());
 	}
@@ -189,6 +197,13 @@ public class Parser {
 			}
 
 			error(equals, "Invalid assignment target.");
+		}
+		
+		if (match(PLUS_PLUS, MINUS_MINUS)) {
+			Token equals = previous();
+			
+			Token name = ((Expr.Variable) expr).name;
+			return new Expr.UnaryAssign(name, equals);
 		}
 
 		return expr;
@@ -255,6 +270,30 @@ public class Parser {
 
 		return new Stmt.If(condition, ifBlock, null);
 	}
+	
+	/**
+	 * Parses an undec statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt undecStatement() {
+
+		consume(LEFT_BRACE, "Expect '{' after undec.");
+
+		ArrayList<Expr> variables = new ArrayList<Expr>();
+		
+		
+		do {
+			variables.add(new Expr.Variable(consume(IDENTIFIER, "Expect variable name.")));
+		} while (match(COMMA));
+		
+		Stmt statement = new Stmt.Undec(variables);
+
+		consume(RIGHT_BRACE, "Expect '}' variables in undec.");
+
+		return statement;
+	}
 
 	/**
 	 * Parses a block statement.
@@ -279,7 +318,7 @@ public class Parser {
 	/**
 	 * Parses a while statement.
 	 * Precedence Level:
-	 * Examples: a
+	 * Examples: 
 	 * @return the parsed statement
 	 */
 	private Stmt whileStatement() {
@@ -288,6 +327,23 @@ public class Parser {
 		consume(RIGHT_PAREN, "Expect ')' after condition.");
 
 		return new Stmt.While(condition, block());
+	}
+	
+	/**
+	 * Parses a do statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt doStatement() {
+		Stmt.Block block = block();
+		
+		consume(WHILE, "Expect 'while' after do body.");
+		consume(LEFT_PAREN, "Expect '(' after while.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+
+		return new Stmt.Do(condition, block());
 	}
 
 	/**

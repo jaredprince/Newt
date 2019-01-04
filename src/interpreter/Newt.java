@@ -104,7 +104,7 @@ public class Newt {
 		Lexer lexer = new Lexer(source);
 		List<Token> tokens = lexer.lex();
 
-		// For now, just print the tokens.
+//		// For now, just print the tokens.
 //		for (Token token : tokens) {
 //			System.out.println(token);
 //		}
@@ -182,7 +182,7 @@ public class Newt {
 	 * @param error the error produced
 	 */
 	static void runtimeError(RuntimeError error) {
-		System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+		System.err.println("[line " + error.token.line + "]\n" + error.getMessage());
 		hadRuntimeError = true;
 	}
 }

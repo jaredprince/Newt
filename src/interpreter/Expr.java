@@ -12,6 +12,7 @@ public abstract class Expr {
 		T visitUnaryExpr(Unary expr);
 		T visitVariableExpr(Variable expr);
 		T visitAssignExpr(Assign expr);
+		T visitUnaryAssignExpr(UnaryAssign expr);
 		T visitCallExpr(Call expr);
 	}
 
@@ -203,6 +204,29 @@ public abstract class Expr {
 		public final Token name;
 		public final Token operator;
 		public final Expr value;
+	}
+
+	public static class UnaryAssign extends Expr {
+		public UnaryAssign(Token name, Token operator) {
+			this.name = name;
+			this.operator = operator;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + operator.lexeme + "\n" + name.lexeme;
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitUnaryAssignExpr(this);
+		}
+
+		public final Token name;
+		public final Token operator;
 	}
 
 	public static class Call extends Expr {
