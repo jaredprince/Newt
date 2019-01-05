@@ -1136,13 +1136,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitStructStmt(Struct stmt) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Void visitTemplateStmt(Template stmt) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

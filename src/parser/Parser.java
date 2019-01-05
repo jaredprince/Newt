@@ -175,28 +175,35 @@ public class Parser {
 		ArrayList<Object> template = new ArrayList<Object>();
 		
 		//TODO: For now, assume all structures start with a keyword and have no internal identifiers
-		if(match(IDENTIFIER)) {
-			template.add(consume(IDENTIFIER, "Expect identifier as first argument of template."));
-		}
+		template.add(consume(IDENTIFIER, "Expect identifier as first argument of template."));
 
 		//loop until the template is closed
-		boolean internalBraceOpen = false;
-		while(!match(RIGHT_BRACE) || internalBraceOpen) {
+		int internalBracesOpen = 0;
+		while(!check(RIGHT_BRACE) || internalBracesOpen > 0) {
 			
 			//token is '<', so we need a <name : type> pair
 			if(match(LESS)) {
 				Token name = consume(IDENTIFIER, "Expect identifier after '<'.");
 				consume(COLON, "Expect ':' after name.");
-				Token type = consume(IDENTIFIER, "Expect identifier after '<'.");
+				Token type = consume(IDENTIFIER, "Expect identifier after ':'.");
 				
 				//add the placeholder to the template
 				template.add(new Placeholder(name.lexeme, type.lexeme));
+				
+				consume(GREATER, "Expect '>' after type in placeholder.");
 			}
 			
 			//take the delimiter token as given
 			else {
 				if(match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET)) {
-					template.add(previous());
+					Token token = previous();
+					template.add(token);
+					
+					if(token.type == LEFT_BRACE) {
+						internalBracesOpen++;
+					} else if(token.type == RIGHT_BRACE) {
+						internalBracesOpen--;
+					}
 				} else {
 					//TODO: better expect
 					consume(COMMA, "Expect ':' ';' '(' ')' '[' ']' '{' '}' ',' or '<'");
@@ -204,15 +211,20 @@ public class Parser {
 			}
 		}
 		
+		consume(RIGHT_BRACE, "Expect '}' after template body.");
+		
 		return new Stmt.Template(template);
 	}
 	
 	private Stmt.Mold moldStatement(){
 		consume(MOLD, "Expect 'mold' after template.");
 		consume(LEFT_BRACE, "Expect '{' after 'mold'.");
+		
+		
+		
 		consume(RIGHT_BRACE, "Expect '}' after mold body.");
-		
-		
+
+		return new Stmt.Mold(null);
 	}
 
 	/**

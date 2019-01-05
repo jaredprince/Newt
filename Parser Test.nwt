@@ -1,3 +1,20 @@
+struct {
+	template {
+		fort(<dec : statement> <cond : expression>; <inc : statement>){
+			<statement : statement>
+		}
+	}
+	
+	mold {
+		/*
+		#(dec)
+		while(#(cond)){
+			#(statement)
+			#(inc)
+		}*/
+	}
+}
+
 //import testclass.nwt
 
 //declaration and assignment
