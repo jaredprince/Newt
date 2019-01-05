@@ -7,6 +7,7 @@ import java.util.List;
 
 import interpreter.Expr;
 import interpreter.Newt;
+import interpreter.Placeholder;
 import interpreter.Stmt;
 import interpreter.Token;
 import interpreter.TokenType;
@@ -59,6 +60,10 @@ public class Parser {
 
 			if (match(IF)) {
 				return ifStatement();
+			}
+			
+			if (match(STRUCT)) {
+				return structStatement();
 			}
 			
 			if (match(UNDEC)) {
@@ -148,6 +153,66 @@ public class Parser {
 		consume(RIGHT_BRACE, "Expect '}' after last case.");
 
 		return new Stmt.Switch(list, cases, block);
+	}
+	
+	private Stmt.Struct structStatement(){
+		
+		consume(LEFT_BRACE, "Expect '{' after 'struct'.");
+		
+		Stmt.Template template = templateStatement();
+		Stmt.Mold mold = moldStatement();
+		
+		consume(RIGHT_BRACE, "Expect '}' after 'mold'.");
+		
+		return new Stmt.Struct(template, mold);
+	}
+	
+	private Stmt.Template templateStatement(){
+		consume(TEMPLATE, "Expect 'template' inside struct.");
+		consume(LEFT_BRACE, "Expect '{' after 'template'.");
+		
+		//template consists of tokens and Placeholders (which are <name, type> pairs of Strings)
+		ArrayList<Object> template = new ArrayList<Object>();
+		
+		//TODO: For now, assume all structures start with a keyword and have no internal identifiers
+		if(match(IDENTIFIER)) {
+			template.add(consume(IDENTIFIER, "Expect identifier as first argument of template."));
+		}
+
+		//loop until the template is closed
+		boolean internalBraceOpen = false;
+		while(!match(RIGHT_BRACE) || internalBraceOpen) {
+			
+			//token is '<', so we need a <name : type> pair
+			if(match(LESS)) {
+				Token name = consume(IDENTIFIER, "Expect identifier after '<'.");
+				consume(COLON, "Expect ':' after name.");
+				Token type = consume(IDENTIFIER, "Expect identifier after '<'.");
+				
+				//add the placeholder to the template
+				template.add(new Placeholder(name.lexeme, type.lexeme));
+			}
+			
+			//take the delimiter token as given
+			else {
+				if(match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET)) {
+					template.add(previous());
+				} else {
+					//TODO: better expect
+					consume(COMMA, "Expect ':' ';' '(' ')' '[' ']' '{' '}' ',' or '<'");
+				}
+			}
+		}
+		
+		return new Stmt.Template(template);
+	}
+	
+	private Stmt.Mold moldStatement(){
+		consume(MOLD, "Expect 'mold' after template.");
+		consume(LEFT_BRACE, "Expect '{' after 'mold'.");
+		consume(RIGHT_BRACE, "Expect '}' after mold body.");
+		
+		
 	}
 
 	/**

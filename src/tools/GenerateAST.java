@@ -12,40 +12,45 @@ import java.util.List;
  */
 public class GenerateAST {
 	public static void main(String[] args) throws IOException {
+		
 		/* the class takes a single argument, the output directory */
 		if (args.length != 1) {
 			System.err.println("Usage: generate_ast <output directory>");
 			System.exit(1);
 		}
+		
 		String outputDir = args[0];
 
 		defineAst(outputDir, "Expr", Arrays.asList(
 				"Conditional : Expr condition, Token operator, Expr first, Expr second",
-				"Binary : Expr left, Token operator, Expr right",
-				"Logical : Expr left, Token operator, Expr right",
-				"Grouping : Token grouping, Expr expression", 
-				"Literal  : Object value", 
-				"Unary    : Token operator, Expr right",
-				"Variable : Token name",
-				"Assign : Token name, Token operator, Expr value",
+				"Binary      : Expr left, Token operator, Expr right",
+				"Logical     : Expr left, Token operator, Expr right",
+				"Grouping    : Token grouping, Expr expression", 
+				"Literal     : Object value", 
+				"Unary       : Token operator, Expr right",
+				"Variable    : Token name",
+				"Assign      : Token name, Token operator, Expr value",
 				"UnaryAssign : Token name, Token operator",
-				"Call : Expr callee, Token parenthesis, ArrayList<Expr> arguments"));
-		
+				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments"));
+
 		defineAst(outputDir, "Stmt", Arrays.asList(
-				"Keyword : Token word",
+				"Keyword    : Token word",
 				"Expression : Expr expression",
-				"ExPrint : Expr expression",
-			    "Print : Expr expression",
-			    "Declare : Token type, Token name, Expr value",
-			    "Block : ArrayList<Stmt> statements",
-			    "While : Expr condition, Stmt block",
-			    "Do : Expr condition, Stmt block",
-			    "For : Stmt declaration, Expr condition, Expr incrementor, Stmt block",
-			    "Switch : ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase",
-			    "Case : ArrayList<Expr> tests, Stmt block",
-			    "If : Expr condition, Stmt ifBlock, Stmt elseBlock",
-			    "Undec : ArrayList<Expr> variables",
-			    "Function : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
+				"ExPrint    : Expr expression",
+			    "Print      : Expr expression",
+			    "Declare    : Token type, Token name, Expr value",
+			    "Block      : ArrayList<Stmt> statements",
+			    "While      : Expr condition, Stmt block",
+			    "Do         : Expr condition, Stmt block",
+			    "For        : Stmt declaration, Expr condition, Expr incrementor, Stmt block",
+			    "Switch     : ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase",
+			    "Case       : ArrayList<Expr> tests, Stmt block",
+			    "If         : Expr condition, Stmt ifBlock, Stmt elseBlock",
+			    "Undec      : ArrayList<Expr> variables",
+			    "Struct     : Stmt template, Stmt mold",
+			    "Template   : ArrayList<Object> template",
+			    "Mold       : Stmt function",
+			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
 	}
 
 	/**

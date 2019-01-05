@@ -176,6 +176,17 @@ default{ print("failure ");}
 }
 println("");
 
+println("Switch test multiple inputs: ");
+int u2 = 1;
+u = 0;
+switch(u, u2){
+case(0, 1){ print("success 1 - "); u++;}
+case(1, 1){ print("success 2 - "); u++; break;}
+case(2, 1){ print("failure");}
+default{ print("failure ");}
+}
+println("");
+
 //function tests
 
 string cat = "cat";

@@ -17,6 +17,9 @@ public abstract class Stmt {
 		T visitCaseStmt(Case stmt);
 		T visitIfStmt(If stmt);
 		T visitUndecStmt(Undec stmt);
+		T visitStructStmt(Struct stmt);
+		T visitTemplateStmt(Template stmt);
+		T visitMoldStmt(Mold stmt);
 		T visitFunctionStmt(Function stmt);
 	}
 
@@ -315,6 +318,71 @@ public abstract class Stmt {
 		}
 
 		public final ArrayList<Expr> variables;
+	}
+
+	public static class Struct extends Stmt {
+		public Struct(Stmt template, Stmt mold) {
+			this.template = template;
+			this.mold = mold;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + template.toString(depth + 1) + "\n" + mold.toString(depth + 1);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitStructStmt(this);
+		}
+
+		public final Stmt template;
+		public final Stmt mold;
+	}
+
+	public static class Template extends Stmt {
+		public Template(ArrayList<Object> template) {
+			this.template = template;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + arrayListToString(template);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitTemplateStmt(this);
+		}
+
+		public final ArrayList<Object> template;
+	}
+
+	public static class Mold extends Stmt {
+		public Mold(Stmt function) {
+			this.function = function;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + function.toString(depth + 1);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitMoldStmt(this);
+		}
+
+		public final Stmt function;
 	}
 
 	public static class Function extends Stmt {

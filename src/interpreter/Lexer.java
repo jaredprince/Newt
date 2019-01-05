@@ -21,6 +21,10 @@ public class Lexer {
 		keywords = new HashMap<>();
 		keywords.put("false", FALSE);
 		keywords.put("construct", CONSTRUCT);
+		keywords.put("static", STATIC);
+		keywords.put("struct", STRUCT);
+		keywords.put("template", TEMPLATE);
+		keywords.put("mold", MOLD);
 		keywords.put("super", SUPER);
 		keywords.put("this", THIS);
 		keywords.put("true", TRUE);
@@ -43,6 +47,7 @@ public class Lexer {
 		keywords.put("else", ELSE);
 		keywords.put("for", FOR);
 		keywords.put("if", IF);
+		
 		
 		//statements
 		keywords.put("continue", CONTINUE);
@@ -122,6 +127,12 @@ public class Lexer {
 	private void lexToken() {
 		char c = advance();
 		switch (c) {
+		case '[':
+			addToken(LEFT_BRACKET);
+			break;
+		case ']':
+			addToken(RIGHT_BRACKET);
+			break;
 		case '(':
 			addToken(LEFT_PAREN);
 			break;
@@ -174,6 +185,8 @@ public class Lexer {
 		case '!':
 			addToken(match('=') ? BANG_EQUAL : BANG);
 			break;
+		case '#':
+			addToken(SHARP);
 		case ':':
 			addToken(COLON);
 			break;

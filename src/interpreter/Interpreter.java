@@ -30,8 +30,11 @@ import interpreter.Stmt.For;
 import interpreter.Stmt.Function;
 import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
+import interpreter.Stmt.Mold;
 import interpreter.Stmt.Print;
+import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
+import interpreter.Stmt.Template;
 import interpreter.Stmt.Undec;
 import interpreter.Stmt.While;
 
@@ -1128,6 +1131,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 		environment.assign(expr.name, evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, new Expr.Literal(new Integer(1)))));
 
+		return null;
+	}
+
+	@Override
+	public Void visitStructStmt(Struct stmt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitTemplateStmt(Template stmt) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Void visitMoldStmt(Mold stmt) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }
