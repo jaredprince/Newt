@@ -13,6 +13,8 @@ import parser.Parser;
 
 public class Newt {
 
+	//TODO: Just a general note: I need to be able to evaluate code from a string.
+	
 	private static final Interpreter interpreter = new Interpreter();
 
 	/**

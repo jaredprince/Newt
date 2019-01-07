@@ -15,6 +15,11 @@ import interpreter.TokenType;
 public class Parser {
 	private final List<Token> tokens;
 	private int current = 0;
+	
+	/**
+	 * Nessessary to to distinguish proper and improper uses of the #[] expression;
+	 */
+	private boolean inMold = false;
 
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
@@ -28,7 +33,7 @@ public class Parser {
 
 		return statements;
 	}
-
+	
 	public Stmt statement() {
 
 		try {
@@ -68,6 +73,26 @@ public class Parser {
 			
 			if (match(UNDEC)) {
 				return undecStatement();
+			}
+			
+			if (match(SEMICOLON)) {
+				error(previous(), "Extra semicolon found.");
+			}
+			
+			//if a statement is expected, parse the sharp expression and bundle it as a statement
+			//TODO: Note - expression is used inside the #[]. This means that the argument can either be a string name (ex. #["name"])
+			//or an expression which would evaluate to a name (ex. str = "name"; #[str] or #["na" + "me"])
+			// This should allow some interesting examples. The name of the # to replace will be evaluated at runtime.
+			//This is fun, but it might need to be changed later.
+			if (match(SHARP)) {
+				if(!inMold) {
+					error(previous(), "# is only valid in a mold statement.");
+				}
+				
+				consume(LEFT_BRACKET, "Expect '[' after '#'.");
+				Expr expr = expression();
+				consume(RIGHT_BRACKET, "Expect ']' after expression.");
+				return new Stmt.Expression(new Expr.Sharp(expr));
 			}
 
 			if (match(BREAK, CONTINUE, EXIT)) {
@@ -160,7 +185,7 @@ public class Parser {
 		consume(LEFT_BRACE, "Expect '{' after 'struct'.");
 		
 		Stmt.Template template = templateStatement();
-		Stmt.Mold mold = moldStatement();
+		Stmt.Block mold = moldStatement();
 		
 		consume(RIGHT_BRACE, "Expect '}' after 'mold'.");
 		
@@ -216,15 +241,17 @@ public class Parser {
 		return new Stmt.Template(template);
 	}
 	
-	private Stmt.Mold moldStatement(){
+	private Stmt.Block moldStatement(){
+		inMold = true;
+		
 		consume(MOLD, "Expect 'mold' after template.");
-		consume(LEFT_BRACE, "Expect '{' after 'mold'.");
-		
-		
-		
-		consume(RIGHT_BRACE, "Expect '}' after mold body.");
 
-		return new Stmt.Mold(null);
+		//TODO: Right now, the mold can consist of a single statement with no braces. I might want to change this in future.
+		
+		Stmt.Block mold = block();
+
+		inMold = false;
+		return mold;
 	}
 
 	/**
@@ -757,6 +784,17 @@ public class Parser {
 			Expr expr = expression();
 			consume(BAR, "Expect '|' after expression.");
 			return new Expr.Grouping(previous(), expr);
+		}
+		
+		if (match(SHARP)) {
+			if(!inMold) {
+				error(previous(), "# is only valid in a mold statement.");
+			}
+			
+			consume(LEFT_BRACKET, "Expect '[' after '#'.");
+			Expr expr = expression();
+			consume(RIGHT_BRACKET, "Expect ']' after expression.");
+			return new Expr.Sharp(expr);
 		}
 
 		/* throw an error if no primary expression was found */

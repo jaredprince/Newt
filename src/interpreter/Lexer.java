@@ -48,7 +48,6 @@ public class Lexer {
 		keywords.put("for", FOR);
 		keywords.put("if", IF);
 		
-		
 		//statements
 		keywords.put("continue", CONTINUE);
 		keywords.put("break", BREAK);
@@ -187,6 +186,7 @@ public class Lexer {
 			break;
 		case '#':
 			addToken(SHARP);
+			break;
 		case ':':
 			addToken(COLON);
 			break;

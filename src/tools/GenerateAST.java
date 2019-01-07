@@ -31,7 +31,8 @@ public class GenerateAST {
 				"Variable    : Token name",
 				"Assign      : Token name, Token operator, Expr value",
 				"UnaryAssign : Token name, Token operator",
-				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments"));
+				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments",
+				"Sharp       : Expr name"));
 
 		defineAst(outputDir, "Stmt", Arrays.asList(
 				"Keyword    : Token word",
@@ -49,7 +50,6 @@ public class GenerateAST {
 			    "Undec      : ArrayList<Expr> variables",
 			    "Struct     : Stmt template, Stmt mold",
 			    "Template   : ArrayList<Object> template",
-			    "Mold       : Stmt function",
 			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
 	}
 

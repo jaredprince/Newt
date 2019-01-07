@@ -6,12 +6,11 @@ struct {
 	}
 	
 	mold {
-		/*
-		#(dec)
-		while(#(cond)){
-			#(statement)
-			#(inc)
-		}*/
+		#["dec"]
+		while(#["cond"]){
+			#["statement"]:
+			#["inc" + "cas"]
+		}
 	}
 }
 

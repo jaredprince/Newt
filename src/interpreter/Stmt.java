@@ -19,7 +19,6 @@ public abstract class Stmt {
 		T visitUndecStmt(Undec stmt);
 		T visitStructStmt(Struct stmt);
 		T visitTemplateStmt(Template stmt);
-		T visitMoldStmt(Mold stmt);
 		T visitFunctionStmt(Function stmt);
 	}
 
@@ -362,27 +361,6 @@ public abstract class Stmt {
 		}
 
 		public final ArrayList<Object> template;
-	}
-
-	public static class Mold extends Stmt {
-		public Mold(Stmt function) {
-			this.function = function;
-		}
-
-		public String toString(int depth) {
-			String str = "";
-			for(int i = 0; i < depth; i++) {
-				str = str + "   ";
-			}
-
-			return str + function.toString(depth + 1);
-		}
-
-		<T> T accept(Visitor<T> visitor) {
-			return visitor.visitMoldStmt(this);
-		}
-
-		public final Stmt function;
 	}
 
 	public static class Function extends Stmt {

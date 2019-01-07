@@ -17,6 +17,7 @@ import interpreter.Expr.Conditional;
 import interpreter.Expr.Grouping;
 import interpreter.Expr.Literal;
 import interpreter.Expr.Logical;
+import interpreter.Expr.Sharp;
 import interpreter.Expr.Unary;
 import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
@@ -30,7 +31,6 @@ import interpreter.Stmt.For;
 import interpreter.Stmt.Function;
 import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
-import interpreter.Stmt.Mold;
 import interpreter.Stmt.Print;
 import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
@@ -1143,9 +1143,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitTemplateStmt(Template stmt) {
 		return null;
 	}
-
+	
 	@Override
-	public Void visitMoldStmt(Mold stmt) {
+	public Object visitSharpExpr(Sharp expr) {
 		// TODO Auto-generated method stub
 		return null;
 	}

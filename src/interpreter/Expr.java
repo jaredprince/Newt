@@ -14,6 +14,7 @@ public abstract class Expr {
 		T visitAssignExpr(Assign expr);
 		T visitUnaryAssignExpr(UnaryAssign expr);
 		T visitCallExpr(Call expr);
+		T visitSharpExpr(Sharp expr);
 	}
 
 	public static class Conditional extends Expr {
@@ -252,6 +253,27 @@ public abstract class Expr {
 		public final Expr callee;
 		public final Token parenthesis;
 		public final ArrayList<Expr> arguments;
+	}
+
+	public static class Sharp extends Expr {
+		public Sharp(Expr name) {
+			this.name = name;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + name.toString(depth + 1);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitSharpExpr(this);
+		}
+
+		public final Expr name;
 	}
 
 
