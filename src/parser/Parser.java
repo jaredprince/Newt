@@ -20,6 +20,11 @@ public class Parser {
 	 * Nessessary to to distinguish proper and improper uses of the #[] expression;
 	 */
 	private boolean inMold = false;
+	
+	/**
+	 * The molds that have been parsed.
+	 */
+	private List<Stmt.Struct> molds = new ArrayList<Stmt.Struct>();
 
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
@@ -68,7 +73,9 @@ public class Parser {
 			}
 			
 			if (match(STRUCT)) {
-				return structStatement();
+				Stmt.Struct stmt = structStatement();
+				molds.add(stmt);
+				return stmt;
 			}
 			
 			if (match(UNDEC)) {
@@ -113,6 +120,18 @@ public class Parser {
 				
 				return word;
 			}
+			
+			//if an identifier, check for user defined structures
+			if(peek().type == IDENTIFIER) {
+				Token next = peek();
+				
+				for(Stmt.Struct stmt : molds) {
+					//check if the identifier matches the struct
+					if(((Token)((Stmt.Template)stmt.template).template.get(0)).equals(next)) {
+						return parseStruct(stmt);
+					}
+				}
+			}
 
 		} catch (ParseError error) {
 			synchronize();
@@ -120,6 +139,38 @@ public class Parser {
 		}
 
 		return expressionStatement();
+	}
+	
+	public Stmt.Block parseStruct(Stmt.Struct struct){		
+		String previous = "";
+		ArrayList<Object> placeholders = new ArrayList<Object>();
+		
+		//fill the template
+		for(Object obj : ((Stmt.Template)struct.template).template) {
+			//match token exactly
+			if(obj instanceof Token) {
+				Token token = (Token)obj;
+				consume(token.type, "Expect '" + token.lexeme + "' after " + previous + ".");
+				previous = "'" + token.lexeme + "'";
+			}
+			
+			//fill placeholders
+			else {
+				Placeholder p = (Placeholder)obj;
+				String name = p.name;
+				String type = p.type;
+				
+				if(p.type.equals("expression")) {
+					placeholders.add(expression());
+				} else if (p.type.equals("statement")) {
+					placeholders.add(statement());
+				}
+			}
+		}
+		
+		//fill the mold from the placeholders
+		
+		return null;
 	}
 
 	private Stmt.Function function(String kind) {
@@ -911,6 +962,9 @@ public class Parser {
 			case CLASS:
 			case FUNC:
 			case FOR:
+			case DO:
+			case SWITCH:
+			case CASE:
 			case UNDEC:
 			case IF:
 			case WHILE:

@@ -39,4 +39,8 @@ public class Token {
 	public String toString() {
 		return "Type: " + type + " Value: " + (literal == null ? lexeme : literal) + " Location: " + line + "-" + character;
 	}
+	
+	public boolean equals(Token t) {
+		return t.lexeme.equals(lexeme) && t.type == type;
+	}
 }

@@ -4,6 +4,7 @@ import interpreter.Expr.Assign;
 import interpreter.Expr.Call;
 import interpreter.Expr.Conditional;
 import interpreter.Expr.Logical;
+import interpreter.Expr.Sharp;
 import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
 
@@ -105,6 +106,11 @@ public class ASTPrinter implements Expr.Visitor<String> {
 	@Override
 	public String visitUnaryAssignExpr(UnaryAssign expr) {
 		return "(" + expr.operator.lexeme + " " + expr.name.lexeme + ")";
+	}
+
+	@Override
+	public String visitSharpExpr(Sharp expr) {
+		return "(# " + print(expr.name) + ")";
 	}
 
 }

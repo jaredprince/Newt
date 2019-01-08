@@ -8,7 +8,7 @@ struct {
 	mold {
 		#["dec"]
 		while(#["cond"]){
-			#["statement"]:
+			#["statement"]
 			#["inc" + "cas"]
 		}
 	}
@@ -28,6 +28,9 @@ println("Declaration and assignment test:");
 println("    Expected: 0 cat 1 hat");
 println("    Received: " + i + " " + j + " " + k + " " + l);
 
+fort(int i = 0; i < 2; i++;){
+	print("structure success!");
+}
 
 //type change tests
 println("Dynamic type test:");
