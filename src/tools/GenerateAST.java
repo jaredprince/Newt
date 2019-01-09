@@ -5,8 +5,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import interpreter.Stmt;
-
 /**
  * The GenerateAST class is used to automatically generate the Expr and Stmt files, given only
  * a list of the subclasses and their fields.
@@ -43,17 +41,17 @@ public class GenerateAST {
 			    "Print      : Expr expression",
 			    "Declare    : Token type, Token name, Expr value",
 			    "Block      : ArrayList<Stmt> statements",
-			    "While      : Expr condition, Stmt block",
-			    "Do         : Expr condition, Stmt block",
-			    "For        : Stmt declaration, Expr condition, Expr incrementor, Stmt block",
-			    "Switch     : ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase",
-			    "Case       : ArrayList<Expr> tests, Stmt block",
-			    "If         : Expr condition, Stmt ifBlock, Stmt elseBlock",
-			    "Undec      : ArrayList<Expr> variables",
-			    "Struct     : Stmt.Sculpture sculpture, Stmt.Mould mould",
+			    "While      : Expr condition, Block body",
+			    "Do         : Expr condition, Block body",
+			    "For        : Declare declaration, Expr condition, Expr incrementor, Block body",
+			    "Switch     : ArrayList<Expr> controls, ArrayList<Case> cases, Block defaultBody",
+			    "Case       : ArrayList<Expr> tests, Block body",
+			    "If         : Expr condition, Block ifBody, Block elseBody",
+			    "Undec      : ArrayList<Expr.Variable> variables",
+			    "Struct     : Sculpture sculpture, Mould mould",
 			    "Sculpture  : ArrayList<Object> sculpture",
-			    "Mould      : ArrayList<Placeholder> placeholders, Stmt.Block mould",
-			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
+			    "Mould      : ArrayList<Placeholder> placeholders, Block body",
+			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body"));
 	}
 
 	/**

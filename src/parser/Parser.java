@@ -1,6 +1,80 @@
 package parser;
 
-import static interpreter.TokenType.*;
+import static interpreter.TokenType.AND;
+import static interpreter.TokenType.ARROW;
+import static interpreter.TokenType.BANG;
+import static interpreter.TokenType.BANG_EQUAL;
+import static interpreter.TokenType.BAR;
+import static interpreter.TokenType.BOOL_TYPE;
+import static interpreter.TokenType.BREAK;
+import static interpreter.TokenType.CARAT;
+import static interpreter.TokenType.CARAT_EQUAL;
+import static interpreter.TokenType.CASE;
+import static interpreter.TokenType.CHARACTER;
+import static interpreter.TokenType.CHAR_TYPE;
+import static interpreter.TokenType.COLON;
+import static interpreter.TokenType.COMMA;
+import static interpreter.TokenType.CONTINUE;
+import static interpreter.TokenType.DEFAULT;
+import static interpreter.TokenType.DO;
+import static interpreter.TokenType.DOUBLE;
+import static interpreter.TokenType.DOUBLE_TYPE;
+import static interpreter.TokenType.ELSE;
+import static interpreter.TokenType.EOF;
+import static interpreter.TokenType.EQUAL;
+import static interpreter.TokenType.EQUAL_EQUAL;
+import static interpreter.TokenType.EXIT;
+import static interpreter.TokenType.EXPRINT;
+import static interpreter.TokenType.FALSE;
+import static interpreter.TokenType.FOR;
+import static interpreter.TokenType.FORGE;
+import static interpreter.TokenType.FUNC;
+import static interpreter.TokenType.GREATER;
+import static interpreter.TokenType.GREATER_EQUAL;
+import static interpreter.TokenType.IDENTIFIER;
+import static interpreter.TokenType.IF;
+import static interpreter.TokenType.INTEGER;
+import static interpreter.TokenType.INT_TYPE;
+import static interpreter.TokenType.LEFT_BRACE;
+import static interpreter.TokenType.LEFT_BRACKET;
+import static interpreter.TokenType.LEFT_PAREN;
+import static interpreter.TokenType.LESS;
+import static interpreter.TokenType.LESS_EQUAL;
+import static interpreter.TokenType.MINUS;
+import static interpreter.TokenType.MINUS_EQUAL;
+import static interpreter.TokenType.MINUS_MINUS;
+import static interpreter.TokenType.NAND;
+import static interpreter.TokenType.NOR;
+import static interpreter.TokenType.NULL;
+import static interpreter.TokenType.OR;
+import static interpreter.TokenType.PERCENT;
+import static interpreter.TokenType.PERCENT_EQUAL;
+import static interpreter.TokenType.PLUS;
+import static interpreter.TokenType.PLUS_EQUAL;
+import static interpreter.TokenType.PLUS_PLUS;
+import static interpreter.TokenType.PRINT;
+import static interpreter.TokenType.QUESTION;
+import static interpreter.TokenType.RETURN;
+import static interpreter.TokenType.RIGHT_BRACE;
+import static interpreter.TokenType.RIGHT_BRACKET;
+import static interpreter.TokenType.RIGHT_PAREN;
+import static interpreter.TokenType.ROOT;
+import static interpreter.TokenType.ROOT_EQUAL;
+import static interpreter.TokenType.SCULPT;
+import static interpreter.TokenType.SEMICOLON;
+import static interpreter.TokenType.SHARP;
+import static interpreter.TokenType.SLASH;
+import static interpreter.TokenType.SLASH_EQUAL;
+import static interpreter.TokenType.STAR;
+import static interpreter.TokenType.STAR_EQUAL;
+import static interpreter.TokenType.STRING;
+import static interpreter.TokenType.STRING_TYPE;
+import static interpreter.TokenType.STRUCT;
+import static interpreter.TokenType.SWITCH;
+import static interpreter.TokenType.TRUE;
+import static interpreter.TokenType.UNDEC;
+import static interpreter.TokenType.VAR_TYPE;
+import static interpreter.TokenType.WHILE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +83,9 @@ import interpreter.Expr;
 import interpreter.Newt;
 import interpreter.Placeholder;
 import interpreter.Stmt;
+
+import interpreter.Expr.*;
+import interpreter.Stmt.*;
 import interpreter.Token;
 import interpreter.TokenType;
 
@@ -24,94 +101,50 @@ public class Parser {
 	/**
 	 * The moulds that have been parsed.
 	 */
-	private List<Stmt.Struct> moulds = new ArrayList<Stmt.Struct>();
+	private List<Struct> moulds = new ArrayList<Struct>();
 
+	/**
+	 * The Parser constructor.
+	 * @param tokens the list of tokens to be parsed
+	 */
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
 	}
 
+	/**
+	 * Parses the token list into a series of statements.
+	 * @return the statement list
+	 */
 	public List<Stmt> parse() {
 		List<Stmt> statements = new ArrayList<>();
+		
 		while (!isAtEnd()) {
 			statements.add(statement());
 		}
-
+	
 		return statements;
 	}
-	
+
+	/**
+	 * Parses a single statement.
+	 * @return the parsed statement
+	 */
 	public Stmt statement() {
 
+		//attempt to parse a structure
 		try {
 
-			if (match(FUNC)) {
-				return function("function");
-			}
-
-			if (match(VAR_TYPE, INT_TYPE, STRING_TYPE, DOUBLE_TYPE, CHAR_TYPE, BOOL_TYPE))
-				return declaration();
-
-			if (match(PRINT))
-				return printStatement();
-
-			if (match(EXPRINT))
-				return exPrintStatement();
-
-			if (match(WHILE))
-				return whileStatement();
-			
-			if (match(DO))
-				return doStatement();
-
-			if (match(SWITCH))
-				return switchStatement();
-
-			if (match(FOR))
-				return forStatement();
-
-			if (match(IF)) {
-				return ifStatement();
-			}
-			
-			if (match(STRUCT)) {
-				Stmt.Struct stmt = structStatement();
-				moulds.add(stmt);
-				return stmt;
-			}
-			
-			if (match(UNDEC)) {
-				return undecStatement();
-			}
-			
-			if (match(SEMICOLON)) {
-				error(previous(), "Extra semicolon found.");
-			}
-			
-			//if a statement is expected, parse the sharp expression and bundle it as a statement
-			//TODO: Note - expression is used inside the #[]. This means that the argument can either be a string name (ex. #["name"])
-			//or an expression which would evaluate to a name (ex. str = "name"; #[str] or #["na" + "me"])
-			// This should allow some interesting examples. The name of the # to replace will be evaluated at runtime.
-			//This is fun, but it might need to be changed later.
-			if (match(SHARP)) {
-				if(!inMould) {
-					error(previous(), "# is only valid in a mould statement.");
-				}
-				
-				consume(LEFT_BRACKET, "Expect '[' after '#'.");
-				Expr expr = expression();
-				consume(RIGHT_BRACKET, "Expect ']' after expression.");
-				return new Stmt.Expression(new Expr.Sharp(expr));
-			}
-
 			if (match(BREAK, CONTINUE, EXIT)) {
-				Stmt.Keyword word = new Stmt.Keyword(previous());
+				Keyword word = new Keyword(previous());
 				consume(SEMICOLON, "Expect ';' after keyword '" + word.word.lexeme + "'.");
 				return word;
 			}
 			
 			if(match(RETURN)) {
-				Stmt.Keyword word = new Stmt.Keyword(previous());
+				Keyword word = new Keyword(previous());
 				
 				if(!match(SEMICOLON)) {
+					//TODO: return the return value
 					Expr expression = expression();
 					consume(SEMICOLON, "Expect ';' after keyword '" + word.word.lexeme + "'.");
 					
@@ -121,17 +154,69 @@ public class Parser {
 				return word;
 			}
 			
+			if (match(UNDEC))
+				return undecStatement();
+			
+			if (match(VAR_TYPE, INT_TYPE, STRING_TYPE, DOUBLE_TYPE, CHAR_TYPE, BOOL_TYPE))
+				return declaration();
+			
+			//if a statement is expected, parse the sharp expression and bundle it as a statement
+			if (match(SHARP)) {
+				if(!inMould) {
+					error(previous(), "# is only valid in a mould statement.");
+				}
+				
+				consume(LEFT_BRACKET, "Expect '[' after '#'.");
+				Expr expr = expression();
+				consume(RIGHT_BRACKET, "Expect ']' after expression.");
+				return new Expression(new Sharp(expr));
+			}
+			
+			if (match(IF))
+				return ifStatement();
+			
+			if (match(WHILE))
+				return whileStatement();
+			
+			if (match(DO))
+				return doStatement();
+			
+			if (match(FOR))
+				return forStatement();
+			
+			if (match(FUNC))
+				return functionStatement("function");
+
+			if (match(SWITCH))
+				return switchStatement();
+			
+			if (match(STRUCT)) {
+				Struct stmt = structStatement();
+				moulds.add(stmt);
+				return stmt;
+			}
+			
 			//if an identifier, check for user defined structures
 			if(peek().type == IDENTIFIER) {
 				Token next = peek();
 				
-				for(Stmt.Struct stmt : moulds) {
+				for(Struct stmt : moulds) {
 					//check if the identifier matches the struct
-					if(((Token)((Stmt.Sculpture)stmt.sculpture).sculpture.get(0)).equals(next)) {
-						return parseStruct(stmt);
+					if(((Token)((Sculpture)stmt.sculpture).sculpture.get(0)).equals(next)) {
+						return userStructStatement(stmt);
 					}
 				}
 			}
+			
+//			if (match(PRINT))
+//				return printStatement();
+//
+//			if (match(EXPRINT))
+//				return exPrintStatement();
+			
+			//TODO: account for unexplained delimiters
+			if (match(SEMICOLON))
+				error(previous(), "Extra semicolon found.");
 
 		} catch (ParseError error) {
 			synchronize();
@@ -141,49 +226,153 @@ public class Parser {
 		return expressionStatement();
 	}
 	
-	public Stmt.Mould parseStruct(Stmt.Struct struct){
-		
-		//fill the sculpture with the user given components
-		ArrayList<Placeholder> placeholders = fillSculpture((Stmt.Sculpture) struct.sculpture);
-
-		//create a copy of the mould and add the placeholders from the user given components
-		Stmt.Mould mouldClone = ((Stmt.Mould) struct.mould).mouldClone();
-		mouldClone = new Stmt.Mould(placeholders, mouldClone.mould);
-		
-		return mouldClone;
-	}
+	/**
+	 * Parses an undec statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt undecStatement() {
 	
-	public ArrayList<Placeholder> fillSculpture(Stmt.Sculpture sculpture){
-		String previous = "";
-		ArrayList<Placeholder> placeholders = new ArrayList<Placeholder>();
+		consume(LEFT_BRACE, "Expect '{' after undec.");
+	
+		ArrayList<Variable> variables = new ArrayList<Variable>();
 		
-		//fill the sculpture
-		for(Object obj : sculpture.sculpture) {
-			//match token exactly
-			if(obj instanceof Token) {
-				Token token = (Token)obj;
-				consume(token.type, "Expect '" + token.lexeme + "' after " + previous + ".");
-				previous = "'" + token.lexeme + "'";
-			}
-			
-			//fill placeholders
-			else {
-				Placeholder p = (Placeholder)obj;
-				String name = p.name;
-				String type = (String)p.value;
-				
-				if(type.equals("expression")) {
-					placeholders.add(new Placeholder(name, expression()));
-				} else if (type.equals("statement")) {
-					placeholders.add(new Placeholder(name, statement()));
-				}
-			}
-		}
 		
-		return placeholders;
+		do {
+			variables.add(new Variable(consume(IDENTIFIER, "Expect variable name.")));
+		} while (match(COMMA));
+		
+		Stmt statement = new Undec(variables);
+	
+		consume(RIGHT_BRACE, "Expect '}' variables in undec.");
+	
+		return statement;
 	}
 
-	private Stmt.Function function(String kind) {
+	/**
+	 * Parses a declaration statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Declare declaration() {
+		Token type = previous();
+		Token name = advance();
+		Expr value = null;
+	
+		if (match(EQUAL)) {
+			value = expression();
+		}
+	
+		consume(SEMICOLON, "Expect ';' after value.");
+	
+		return new Declare(type, name, value);
+	}
+
+	/**
+	 * Parses a block statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Block block() {
+		ArrayList<Stmt> statements = new ArrayList<Stmt>();
+	
+		if (match(LEFT_BRACE)) {
+			while (!match(RIGHT_BRACE)) {
+				statements.add(statement());
+			}
+		} else {
+			statements.add(statement());
+		}
+	
+		return new Block(statements);
+	}
+
+	/**
+	 * Parses an if statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt ifStatement() {
+	
+		consume(LEFT_PAREN, "Expect '(' after if.");
+	
+		Expr condition = expression();
+	
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+	
+		Block ifBody = block();
+	
+		if (match(ELSE)) {
+			return new If(condition, ifBody, block());
+		}
+	
+		return new If(condition, ifBody, null);
+	}
+
+	/**
+	 * Parses a while statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt whileStatement() {
+		consume(LEFT_PAREN, "Expect '(' after while.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+	
+		return new While(condition, block());
+	}
+
+	/**
+	 * Parses a do statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt doStatement() {
+		Block block = block();
+		
+		consume(WHILE, "Expect 'while' after do body.");
+		consume(LEFT_PAREN, "Expect '(' after while.");
+		Expr condition = expression();
+		consume(RIGHT_PAREN, "Expect ')' after condition.");
+	
+		return new Do(condition, block);
+	}
+
+	/**
+	 * Parses a for statement.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return the parsed statement
+	 */
+	private Stmt forStatement() {
+		//TODO: allow missing declarations or incrementors
+		consume(LEFT_PAREN, "Expect '(' after for.");
+		advance(); //necessary because declaration assumes the type has already been read
+		Declare declaration = declaration();
+		Expr condition = expression();
+		consume(SEMICOLON, "Expect ';' after condition.");
+		Expr incrementation = assignment();
+		consume(RIGHT_PAREN, "Expect ')' after incrementation.");
+	
+		return new For(declaration, condition, incrementation, block());
+	}
+
+	/**
+	 * Parses a function statement.
+	 * 
+	 * Example:
+	 * [visibility] [static] function functionName(Type name, Type name, ...) { statements }
+	 * 
+	 * @param kind the type of function to parse
+	 * @return the parsed Function
+	 */
+	private Function functionStatement(String kind) {
 		Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
 		consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
 		ArrayList<Token> types = new ArrayList<>();
@@ -193,18 +382,18 @@ public class Parser {
 				if (parameters.size() >= 32) {
 					error(peek(), "Cannot have more than 32 parameters.");
 				}
-
+	
 				if (match(INT_TYPE, DOUBLE_TYPE, STRING_TYPE, CHAR_TYPE, BOOL_TYPE, VAR_TYPE, IDENTIFIER)) {
 					types.add(previous());
 				}
-
+	
 				parameters.add(consume(IDENTIFIER, "Expect parameter name."));
 			} while (match(COMMA));
 		}
-
+	
 		consume(RIGHT_PAREN, "Expect ')' after parameters.");
 		
-		return new Stmt.Function(name, types, parameters, block());
+		return new Function(name, types, parameters, block());
 	}
 
 	// TODO: Switches should have automatic breaks between blocks
@@ -220,39 +409,80 @@ public class Parser {
 		consume(LEFT_PAREN, "Expect '(' after 'switch'.");
 		ArrayList<Expr> list = expressionList();
 		consume(RIGHT_PAREN, "Expect ')' after expression list.");
-
+	
 		consume(LEFT_BRACE, "Expect '{' after switch header.");
-
-		ArrayList<Stmt.Case> cases = new ArrayList<Stmt.Case>();
-
+	
+		ArrayList<Case> cases = new ArrayList<Case>();
+	
 		while (match(CASE)) {
 			cases.add(caseStatement());
 		}
-
-		Stmt.Block block = null;
+	
+		Block block = null;
 		
 		if (match(DEFAULT)) {
 			block = block();
 		}
-
-		consume(RIGHT_BRACE, "Expect '}' after last case.");
-
-		return new Stmt.Switch(list, cases, block);
-	}
 	
-	private Stmt.Struct structStatement(){
+		consume(RIGHT_BRACE, "Expect '}' after last case.");
+	
+		return new Switch(list, cases, block);
+	}
+
+	/**
+		 * Parses a case statement.
+		 * Precedence Level:
+		 * Examples: 
+		 * @return the parsed statement
+		 */
+		private Case caseStatement() {
+	
+			ArrayList<Expr> list;
+	
+			if (match(LEFT_PAREN)) {
+				list = expressionList();
+				consume(RIGHT_PAREN, "Expect ')' after expression list.");
+			} else {
+				list = new ArrayList<Expr>();
+				list.add(expression());
+			}
+	
+	//		consume(COLON, "Expect ':' after case header.");
+	
+			return new Case(list, block());
+		}
+
+	/**
+	 * Parses a list of expressions.
+	 * Precedence Level:
+	 * Examples: 
+	 * @return an ArrayList containing the expressions
+	 */
+	private ArrayList<Expr> expressionList() {
+		ArrayList<Expr> list = new ArrayList<Expr>();
+	
+		list.add(expression());
+	
+		while (match(COMMA)) {
+			list.add(expression());
+		}
+	
+		return list;
+	}
+
+	private Struct structStatement(){
 		
 		consume(LEFT_BRACE, "Expect '{' after 'struct'.");
 		
-		Stmt.Sculpture sculpture = sculptureStatement();
-		Stmt.Mould mould = mouldStatement();
+		Sculpture sculpture = sculptureStatement();
+		Mould mould = forgeStatement();
 		
 		consume(RIGHT_BRACE, "Expect '}' after 'mould'.");
 		
-		return new Stmt.Struct(sculpture, mould);
+		return new Struct(sculpture, mould);
 	}
-	
-	private Stmt.Sculpture sculptureStatement(){
+
+	private Sculpture sculptureStatement(){
 		consume(SCULPT, "Expect 'sculpt' inside struct.");
 		consume(LEFT_BRACE, "Expect '{' after 'sculpt'.");
 		
@@ -261,7 +491,7 @@ public class Parser {
 		
 		//TODO: For now, assume all structures start with a keyword and have no internal identifiers
 		sculpture.add(consume(IDENTIFIER, "Expect identifier as first element of sculpt."));
-
+	
 		//loop until the sculpture is closed
 		int internalBracesOpen = 0;
 		while(!check(RIGHT_BRACE) || internalBracesOpen > 0) {
@@ -298,61 +528,118 @@ public class Parser {
 		
 		consume(RIGHT_BRACE, "Expect '}' after sculpt body.");
 		
-		return new Stmt.Sculpture(sculpture);
+		return new Sculpture(sculpture);
 	}
-	
-	private Stmt.Mould mouldStatement(){
+
+	private Mould forgeStatement(){
 		inMould = true;
 		
 		consume(FORGE, "Expect 'forge' after sculpt.");
-
+	
 		//TODO: Right now, the mould can consist of a single statement with no braces. I might want to change this in future.
 		
-		Stmt.Block mould = block();
-
+		Block mould = block();
+	
 		inMould = false;
-		return new Stmt.Mould(null, mould);
+		return new Mould(null, mould);
 	}
 
 	/**
-	 * Parses a case statement.
+	 * Parses a structure from a user-defined template.
+	 * 
+	 * @param struct the structure to be parsed
+	 * @return a Mould statement
+	 */
+	private Mould userStructStatement(Struct struct){
+		
+		//fill the sculpture with the user given components
+		ArrayList<Placeholder> placeholders = fillSculpture((Sculpture) struct.sculpture);
+
+		//create a copy of the mould and add the placeholders from the user given components
+		Mould mouldClone = ((Mould) struct.mould).mouldClone();
+		mouldClone = new Mould(placeholders, mouldClone.body);
+		
+		return mouldClone;
+	}
+	
+	/**
+	 * Parses a structure into a list of components using the sculpture as a model.
+	 * 
+	 * @param sculpture the sculpture belonging to the structure
+	 * @return the list of Placeholder components
+	 */
+	private ArrayList<Placeholder> fillSculpture(Sculpture sculpture){
+		String previous = "";
+		ArrayList<Placeholder> placeholders = new ArrayList<Placeholder>();
+		
+		//fill the sculpture
+		for(Object obj : sculpture.sculpture) {
+			//match token exactly
+			if(obj instanceof Token) {
+				Token token = (Token)obj;
+				consume(token.type, "Expect '" + token.lexeme + "' after " + previous + ".");
+				previous = "'" + token.lexeme + "'";
+			}
+			
+			//fill placeholders
+			else {
+				Placeholder p = (Placeholder)obj;
+				String name = p.name;
+				String type = (String)p.value;
+				
+				if(type.equals("expression")) {
+					placeholders.add(new Placeholder(name, expression()));
+				} else if (type.equals("statement")) {
+					placeholders.add(new Placeholder(name, statement()));
+				}
+			}
+		}
+		
+		return placeholders;
+	}
+
+	/**
+	 * Parses a print statement.
+	 * Precedence Level:
+	 * Examples: print 1 + 3
+	 * @return the parsed statement
+	 */
+	private Stmt printStatement() {
+		Expr value = expression();
+		consume(SEMICOLON, "Expect ';' after value.");
+		return new Print(value);
+	}
+
+	/**
+	 * Parses an exprint statement.
+	 * Precedence Level:
+	 * Examples: exprint 1 + 3
+	 * @return the parsed statement
+	 */
+	private Stmt exPrintStatement() {
+		Expr value = expression();
+		consume(SEMICOLON, "Expect ';' after value.");
+		return new ExPrint(value);
+	}
+
+	/**
+	 * Parses an expression statement.
 	 * Precedence Level:
 	 * Examples: 
 	 * @return the parsed statement
 	 */
-	private Stmt.Case caseStatement() {
-
-		ArrayList<Expr> list;
-
-		if (match(LEFT_PAREN)) {
-			list = expressionList();
-			consume(RIGHT_PAREN, "Expect ')' after expression list.");
-		} else {
-			list = new ArrayList<Expr>();
-			list.add(expression());
-		}
-
-//		consume(COLON, "Expect ':' after case header.");
-
-		return new Stmt.Case(list, block());
+	private Stmt expressionStatement() {
+		Expr expr = expression();
+		consume(SEMICOLON, "Expect ';' after expression.");
+		return new Expression(expr);
 	}
 
 	/**
-	 * Parses a list of expressions.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return an ArrayList containing the expressions
+	 * Parses an expression.
+	 * @return the parsed expression
 	 */
-	private ArrayList<Expr> expressionList() {
-		ArrayList<Expr> list = new ArrayList<Expr>();
-
-		list.add(expression());
-
-		while (match(COMMA)) {
-			list.add(expression());
-		}
-
-		return list;
+	private Expr expression() {
+		return assignment();
 	}
 
 	/**
@@ -368,9 +655,9 @@ public class Parser {
 			Token equals = previous();
 			Expr value = assignment();
 
-			if (expr instanceof Expr.Variable) {
-				Token name = ((Expr.Variable) expr).name;
-				return new Expr.Assign(name, equals, value);
+			if (expr instanceof Variable) {
+				Token name = ((Variable) expr).name;
+				return new Assign(name, equals, value);
 			}
 
 			error(equals, "Invalid assignment target.");
@@ -379,198 +666,17 @@ public class Parser {
 		if (match(PLUS_PLUS, MINUS_MINUS)) {
 			Token equals = previous();
 			
-			Token name = ((Expr.Variable) expr).name;
-			return new Expr.UnaryAssign(name, equals);
+			Token name = ((Variable) expr).name;
+			return new UnaryAssign(name, equals);
 		}
 
 		return expr;
 	}
 
 	/**
-	 * Parses a declaration statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt declaration() {
-		Token type = previous();
-		Token name = advance();
-		Expr value = null;
-
-		if (match(EQUAL)) {
-			value = expression();
-		}
-
-		consume(SEMICOLON, "Expect ';' after value.");
-
-		return new Stmt.Declare(type, name, value);
-	}
-
-	/**
-	 * Parses a for statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt forStatement() {
-		//TODO: allow missing declarations or incrementors
-		consume(LEFT_PAREN, "Expect '(' after for.");
-		advance(); //necessary because declaration assumes the type has already been read
-		Stmt declaration = declaration();
-		Expr condition = expression();
-		consume(SEMICOLON, "Expect ';' after condition.");
-		Expr incrementation = assignment();
-		consume(RIGHT_PAREN, "Expect ')' after incrementation.");
-
-		return new Stmt.For(declaration, condition, incrementation, block());
-	}
-
-	/**
-	 * Parses an if statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt ifStatement() {
-
-		consume(LEFT_PAREN, "Expect '(' after if.");
-
-		Expr condition = expression();
-
-		consume(RIGHT_PAREN, "Expect ')' after condition.");
-
-		Stmt ifBlock = block();
-
-		if (match(ELSE)) {
-			return new Stmt.If(condition, ifBlock, block());
-		}
-
-		return new Stmt.If(condition, ifBlock, null);
-	}
-	
-	/**
-	 * Parses an undec statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt undecStatement() {
-
-		consume(LEFT_BRACE, "Expect '{' after undec.");
-
-		ArrayList<Expr> variables = new ArrayList<Expr>();
-		
-		
-		do {
-			variables.add(new Expr.Variable(consume(IDENTIFIER, "Expect variable name.")));
-		} while (match(COMMA));
-		
-		Stmt statement = new Stmt.Undec(variables);
-
-		consume(RIGHT_BRACE, "Expect '}' variables in undec.");
-
-		return statement;
-	}
-
-	/**
-	 * Parses a block statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt.Block block() {
-		ArrayList<Stmt> statements = new ArrayList<Stmt>();
-
-		if (match(LEFT_BRACE)) {
-			while (!match(RIGHT_BRACE)) {
-				statements.add(statement());
-			}
-		} else {
-			statements.add(statement());
-		}
-
-		return new Stmt.Block(statements);
-	}
-
-	/**
-	 * Parses a while statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt whileStatement() {
-		consume(LEFT_PAREN, "Expect '(' after while.");
-		Expr condition = expression();
-		consume(RIGHT_PAREN, "Expect ')' after condition.");
-
-		return new Stmt.While(condition, block());
-	}
-	
-	/**
-	 * Parses a do statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt doStatement() {
-		Stmt.Block block = block();
-		
-		consume(WHILE, "Expect 'while' after do body.");
-		consume(LEFT_PAREN, "Expect '(' after while.");
-		Expr condition = expression();
-		consume(RIGHT_PAREN, "Expect ')' after condition.");
-
-		return new Stmt.Do(condition, block);
-	}
-
-	/**
-	 * Parses a print statement.
-	 * Precedence Level:
-	 * Examples: print 1 + 3
-	 * @return the parsed statement
-	 */
-	private Stmt printStatement() {
-		Expr value = expression();
-		consume(SEMICOLON, "Expect ';' after value.");
-		return new Stmt.Print(value);
-	}
-
-	/**
-	 * Parses an exprint statement.
-	 * Precedence Level:
-	 * Examples: exprint 1 + 3
-	 * @return the parsed statement
-	 */
-	private Stmt exPrintStatement() {
-		Expr value = expression();
-		consume(SEMICOLON, "Expect ';' after value.");
-		return new Stmt.ExPrint(value);
-	}
-
-	/**
-	 * Parses an expression statement.
-	 * Precedence Level:
-	 * Examples: 
-	 * @return the parsed statement
-	 */
-	private Stmt expressionStatement() {
-		Expr expr = expression();
-		consume(SEMICOLON, "Expect ';' after expression.");
-		return new Stmt.Expression(expr);
-	}
-
-	/**
-	 * Parses and expression.
-	 * @return the parsed expression
-	 */
-	public Expr expression() {
-		return assignment();
-	}
-
-	/**
 	 * Parses a conditional expression.
 	 * Precedence Level:
-	 * Examples: ? :
+	 * Example: true ? 1 : 0
 	 * @return the parsed expression
 	 */
 	private Expr conditional() {
@@ -581,7 +687,7 @@ public class Parser {
 			Expr first = expression();
 			consume(COLON, "Expect ':' after expression.");
 
-			expr = new Expr.Conditional(expr, operator, first, expression());
+			expr = new Conditional(expr, operator, first, expression());
 		}
 
 		return expr;
@@ -599,7 +705,7 @@ public class Parser {
 		while (match(OR)) {
 			Token operator = previous();
 			Expr right = logicalNAND();
-			expr = new Expr.Logical(expr, operator, right);
+			expr = new Logical(expr, operator, right);
 		}
 
 		return expr;
@@ -617,7 +723,7 @@ public class Parser {
 		while (match(NAND)) {
 			Token operator = previous();
 			Expr right = logicalNOR();
-			expr = new Expr.Logical(expr, operator, right);
+			expr = new Logical(expr, operator, right);
 		}
 
 		return expr;
@@ -626,7 +732,7 @@ public class Parser {
 	/**
 	 * Parses a nor expression.
 	 * Precedence Level:
-	 * Examples: nor
+	 * Example: true nor false
 	 * @return the parsed expression
 	 */
 	private Expr logicalNOR() {
@@ -635,7 +741,7 @@ public class Parser {
 		while (match(NOR)) {
 			Token operator = previous();
 			Expr right = logicalAND();
-			expr = new Expr.Logical(expr, operator, right);
+			expr = new Logical(expr, operator, right);
 		}
 
 		return expr;
@@ -644,7 +750,7 @@ public class Parser {
 	/**
 	 * Parses an and expression.
 	 * Precedence Level:
-	 * Examples: &&
+	 * Example: true && false
 	 * @return the parsed expression
 	 */
 	private Expr logicalAND() {
@@ -653,7 +759,7 @@ public class Parser {
 		while (match(AND)) {
 			Token operator = previous();
 			Expr right = logicalImplies();
-			expr = new Expr.Logical(expr, operator, right);
+			expr = new Logical(expr, operator, right);
 		}
 
 		return expr;
@@ -662,7 +768,7 @@ public class Parser {
 	/**
 	 * Parses an implication expression.
 	 * Precedence Level:
-	 * Examples: ->
+	 * Example: true -> false
 	 * @return the parsed expression
 	 */
 	private Expr logicalImplies() {
@@ -671,7 +777,7 @@ public class Parser {
 		while (match(ARROW)) {
 			Token operator = previous();
 			Expr right = equality();
-			expr = new Expr.Logical(expr, operator, right);
+			expr = new Logical(expr, operator, right);
 		}
 
 		return expr;
@@ -689,7 +795,7 @@ public class Parser {
 		while (match(BANG_EQUAL, EQUAL_EQUAL)) {
 			Token operator = previous();
 			Expr right = comparison();
-			expr = new Expr.Binary(expr, operator, right);
+			expr = new Binary(expr, operator, right);
 		}
 
 		return expr;
@@ -701,13 +807,13 @@ public class Parser {
 	 * Examples: >, <, <=, >=
 	 * @return the parsed expression
 	 */
-	public Expr comparison() {
+	private Expr comparison() {
 		Expr expr = addition();
 
 		while (match(GREATER, LESS, GREATER_EQUAL, LESS_EQUAL)) {
 			Token operator = previous();
 			Expr right = addition();
-			expr = new Expr.Binary(expr, operator, right);
+			expr = new Binary(expr, operator, right);
 		}
 
 		return expr;
@@ -719,13 +825,13 @@ public class Parser {
 	 * Examples: +, -
 	 * @return the parsed expression
 	 */
-	public Expr addition() {
+	private Expr addition() {
 		Expr expr = multiplication();
 
 		while (match(PLUS, MINUS)) {
 			Token operator = previous();
 			Expr right = multiplication();
-			expr = new Expr.Binary(expr, operator, right);
+			expr = new Binary(expr, operator, right);
 		}
 
 		return expr;
@@ -737,13 +843,13 @@ public class Parser {
 	 * Examples: *, /, %
 	 * @return the parsed expression
 	 */
-	public Expr multiplication() {
+	private Expr multiplication() {
 		Expr expr = exponentiation();
 
 		while (match(STAR, SLASH, PERCENT)) {
 			Token operator = previous();
 			Expr right = exponentiation();
-			expr = new Expr.Binary(expr, operator, right);
+			expr = new Binary(expr, operator, right);
 		}
 
 		return expr;
@@ -755,13 +861,13 @@ public class Parser {
 	 * Examples: ^, root
 	 * @return the parsed expression
 	 */
-	public Expr exponentiation() {
+	private Expr exponentiation() {
 		Expr expr = unary();
 
 		while (match(CARAT, ROOT)) {
 			Token operator = previous();
 			Expr right = unary();
-			expr = new Expr.Binary(expr, operator, right);
+			expr = new Binary(expr, operator, right);
 		}
 
 		return expr;
@@ -773,17 +879,17 @@ public class Parser {
 	 * Examples: !, -
 	 * @return the parsed expression
 	 */
-	public Expr unary() {
+	private Expr unary() {
 		if (match(BANG, MINUS)) {
 			Token operator = previous();
 			Expr right = unary();
-			return new Expr.Unary(operator, right);
+			return new Unary(operator, right);
 		}
 
 		return call();
 	}
 
-	public Expr call() {
+	private Expr call() {
 		Expr expr = primary();
 
 		while (true) {
@@ -812,7 +918,7 @@ public class Parser {
 
 		Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
 
-		return new Expr.Call(callee, paren, arguments);
+		return new Call(callee, paren, arguments);
 	}
 
 	/**
@@ -820,30 +926,30 @@ public class Parser {
 	 * 
 	 * @return the parsed expression
 	 */
-	public Expr primary() {
+	private Expr primary() {
 		if (match(IDENTIFIER))
-			return new Expr.Variable(previous());
+			return new Variable(previous());
 		if (match(FALSE))
-			return new Expr.Literal(false);
+			return new Literal(false);
 		if (match(TRUE))
-			return new Expr.Literal(true);
+			return new Literal(true);
 		if (match(NULL))
-			return new Expr.Literal(null);
+			return new Literal(null);
 		if (match(INTEGER, DOUBLE, STRING, CHARACTER))
-			return new Expr.Literal(previous().literal);
+			return new Literal(previous().literal);
 
 		/* a '(' must be paired with ')' and enclose an expression */
 		if (match(LEFT_PAREN)) {
 			Expr expr = expression();
 			consume(RIGHT_PAREN, "Expect ')' after expression.");
-			return new Expr.Grouping(previous(), expr);
+			return new Grouping(previous(), expr);
 		}
 
 		/* a '|' must be paired with another and enclose an expression */
 		if (match(BAR)) {
 			Expr expr = expression();
 			consume(BAR, "Expect '|' after expression.");
-			return new Expr.Grouping(previous(), expr);
+			return new Grouping(previous(), expr);
 		}
 		
 		if (match(SHARP)) {
@@ -854,7 +960,7 @@ public class Parser {
 			consume(LEFT_BRACKET, "Expect '[' after '#'.");
 			Expr expr = expression();
 			consume(RIGHT_BRACKET, "Expect ']' after expression.");
-			return new Expr.Sharp(expr);
+			return new Sharp(expr);
 		}
 
 		/* throw an error if no primary expression was found */
@@ -957,7 +1063,7 @@ public class Parser {
 
 	/**
 	 * Advances through the code to a point that begins a new statement. This is
-	 * used to exit an unknown state when an error is found.
+	 * used to exit an unknown state when an error is found. 
 	 */
 	private void synchronize() {
 		advance();

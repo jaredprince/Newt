@@ -30,7 +30,7 @@ public class Lexer {
 		keywords.put("true", TRUE);
 		keywords.put("undec", UNDEC);
 		
-		keywords.put("exprint", EXPRINT);
+//		keywords.put("exprint", EXPRINT);
 //		keywords.put("print", PRINT);
 
 		//Structs

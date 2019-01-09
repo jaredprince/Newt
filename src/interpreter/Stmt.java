@@ -178,9 +178,9 @@ public abstract class Stmt implements Cloneable {
 	}
 
 	public static class While extends Stmt {
-		public While(Expr condition, Stmt block) {
+		public While(Expr condition, Block body) {
 			this.condition = condition;
-			this.block = block;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -189,11 +189,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + condition.toString(depth + 1) + "\n" + block.toString(depth + 1);
+			return str + condition.toString(depth + 1) + "\n" + body.toString(depth + 1);
 		}
 
 		public While mouldClone() {
-			return new While(condition.mouldClone(), block.mouldClone());
+			return new While(condition.mouldClone(), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -201,13 +201,13 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr condition;
-		public final Stmt block;
+		public final Block body;
 	}
 
 	public static class Do extends Stmt {
-		public Do(Expr condition, Stmt block) {
+		public Do(Expr condition, Block body) {
 			this.condition = condition;
-			this.block = block;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -216,11 +216,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + condition.toString(depth + 1) + "\n" + block.toString(depth + 1);
+			return str + condition.toString(depth + 1) + "\n" + body.toString(depth + 1);
 		}
 
 		public Do mouldClone() {
-			return new Do(condition.mouldClone(), block.mouldClone());
+			return new Do(condition.mouldClone(), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -228,15 +228,15 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr condition;
-		public final Stmt block;
+		public final Block body;
 	}
 
 	public static class For extends Stmt {
-		public For(Stmt declaration, Expr condition, Expr incrementor, Stmt block) {
+		public For(Declare declaration, Expr condition, Expr incrementor, Block body) {
 			this.declaration = declaration;
 			this.condition = condition;
 			this.incrementor = incrementor;
-			this.block = block;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -245,28 +245,28 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + declaration.toString(depth + 1) + "\n" + condition.toString(depth + 1) + "\n" + incrementor.toString(depth + 1) + "\n" + block.toString(depth + 1);
+			return str + declaration.toString(depth + 1) + "\n" + condition.toString(depth + 1) + "\n" + incrementor.toString(depth + 1) + "\n" + body.toString(depth + 1);
 		}
 
 		public For mouldClone() {
-			return new For(declaration.mouldClone(), condition.mouldClone(), incrementor.mouldClone(), block.mouldClone());
+			return new For(declaration, condition.mouldClone(), incrementor.mouldClone(), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitForStmt(this);
 		}
 
-		public final Stmt declaration;
+		public final Declare declaration;
 		public final Expr condition;
 		public final Expr incrementor;
-		public final Stmt block;
+		public final Block body;
 	}
 
 	public static class Switch extends Stmt {
-		public Switch(ArrayList<Expr> controls, ArrayList<Stmt.Case> cases, Stmt defaultCase) {
+		public Switch(ArrayList<Expr> controls, ArrayList<Case> cases, Block defaultBody) {
 			this.controls = controls;
 			this.cases = cases;
-			this.defaultCase = defaultCase;
+			this.defaultBody = defaultBody;
 		}
 
 		public String toString(int depth) {
@@ -275,11 +275,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + arrayListToString(controls) + arrayListToString(cases) + defaultCase.toString(depth + 1);
+			return str + arrayListToString(controls) + arrayListToString(cases) + defaultBody.toString(depth + 1);
 		}
 
 		public Switch mouldClone() {
-			return new Switch(arrayListClone(controls), arrayListClone(cases), defaultCase.mouldClone());
+			return new Switch(arrayListClone(controls), arrayListClone(cases), defaultBody);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -287,14 +287,14 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Expr> controls;
-		public final ArrayList<Stmt.Case> cases;
-		public final Stmt defaultCase;
+		public final ArrayList<Case> cases;
+		public final Block defaultBody;
 	}
 
 	public static class Case extends Stmt {
-		public Case(ArrayList<Expr> tests, Stmt block) {
+		public Case(ArrayList<Expr> tests, Block body) {
 			this.tests = tests;
-			this.block = block;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -303,11 +303,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + arrayListToString(tests) + block.toString(depth + 1);
+			return str + arrayListToString(tests) + body.toString(depth + 1);
 		}
 
 		public Case mouldClone() {
-			return new Case(arrayListClone(tests), block.mouldClone());
+			return new Case(arrayListClone(tests), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -315,14 +315,14 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Expr> tests;
-		public final Stmt block;
+		public final Block body;
 	}
 
 	public static class If extends Stmt {
-		public If(Expr condition, Stmt ifBlock, Stmt elseBlock) {
+		public If(Expr condition, Block ifBody, Block elseBody) {
 			this.condition = condition;
-			this.ifBlock = ifBlock;
-			this.elseBlock = elseBlock;
+			this.ifBody = ifBody;
+			this.elseBody = elseBody;
 		}
 
 		public String toString(int depth) {
@@ -331,11 +331,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + condition.toString(depth + 1) + "\n" + ifBlock.toString(depth + 1) + "\n" + elseBlock.toString(depth + 1);
+			return str + condition.toString(depth + 1) + "\n" + ifBody.toString(depth + 1) + "\n" + elseBody.toString(depth + 1);
 		}
 
 		public If mouldClone() {
-			return new If(condition.mouldClone(), ifBlock.mouldClone(), elseBlock.mouldClone());
+			return new If(condition.mouldClone(), ifBody, elseBody);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -343,12 +343,12 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr condition;
-		public final Stmt ifBlock;
-		public final Stmt elseBlock;
+		public final Block ifBody;
+		public final Block elseBody;
 	}
 
 	public static class Undec extends Stmt {
-		public Undec(ArrayList<Expr> variables) {
+		public Undec(ArrayList<Expr.Variable> variables) {
 			this.variables = variables;
 		}
 
@@ -369,11 +369,11 @@ public abstract class Stmt implements Cloneable {
 			return visitor.visitUndecStmt(this);
 		}
 
-		public final ArrayList<Expr> variables;
+		public final ArrayList<Expr.Variable> variables;
 	}
 
 	public static class Struct extends Stmt {
-		public Struct(Stmt.Sculpture sculpture, Stmt.Mould mould) {
+		public Struct(Sculpture sculpture, Mould mould) {
 			this.sculpture = sculpture;
 			this.mould = mould;
 		}
@@ -388,15 +388,15 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public Struct mouldClone() {
-			return new Struct(sculpture.mouldClone(), mould.mouldClone());
+			return new Struct(sculpture, mould);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitStructStmt(this);
 		}
 
-		public final Stmt.Sculpture sculpture;
-		public final Stmt.Mould mould;
+		public final Sculpture sculpture;
+		public final Mould mould;
 	}
 
 	public static class Sculpture extends Stmt {
@@ -425,9 +425,9 @@ public abstract class Stmt implements Cloneable {
 	}
 
 	public static class Mould extends Stmt {
-		public Mould(ArrayList<Placeholder> placeholders, Stmt.Block mould) {
+		public Mould(ArrayList<Placeholder> placeholders, Block body) {
 			this.placeholders = placeholders;
-			this.mould = mould;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -436,11 +436,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + arrayListToString(placeholders) + mould.toString(depth + 1);
+			return str + arrayListToString(placeholders) + body.toString(depth + 1);
 		}
 
 		public Mould mouldClone() {
-			return new Mould(arrayListClone(placeholders), mould.mouldClone());
+			return new Mould(arrayListClone(placeholders), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -448,15 +448,15 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Placeholder> placeholders;
-		public final Stmt.Block mould;
+		public final Block body;
 	}
 
 	public static class Function extends Stmt {
-		public Function(Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block) {
+		public Function(Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body) {
 			this.name = name;
 			this.types = types;
 			this.parameters = parameters;
-			this.block = block;
+			this.body = body;
 		}
 
 		public String toString(int depth) {
@@ -465,11 +465,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + name.lexeme + "\n" + arrayListToString(types) + arrayListToString(parameters) + block.toString(depth + 1);
+			return str + name.lexeme + "\n" + arrayListToString(types) + arrayListToString(parameters) + body.toString(depth + 1);
 		}
 
 		public Function mouldClone() {
-			return new Function(name, arrayListClone(types), arrayListClone(parameters), block.mouldClone());
+			return new Function(name, arrayListClone(types), arrayListClone(parameters), body);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -479,7 +479,7 @@ public abstract class Stmt implements Cloneable {
 		public final Token name;
 		public final ArrayList<Token> types;
 		public final ArrayList<Token> parameters;
-		public final Stmt.Block block;
+		public final Block body;
 	}
 
 

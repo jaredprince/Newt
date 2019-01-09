@@ -761,7 +761,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitWhileStmt(While stmt) {
 
 		while ((boolean) evaluate(stmt.condition)) {
-			visitBlockStmt((Stmt.Block) stmt.block);
+			visitBlockStmt((Stmt.Block) stmt.body);
 
 			int flag = (int) globals.get(new Token(null, "$exit_flag", 0, 0, 0));
 
@@ -810,7 +810,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		}
 
 		while ((boolean) evaluate(stmt.condition)) {
-			execute(stmt.block);
+			execute(stmt.body);
 
 			if (stmt.incrementor != null) {
 				evaluate(stmt.incrementor);
@@ -904,9 +904,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitIfStmt(If stmt) {
 
 		if ((boolean) evaluate(stmt.condition)) {
-			visitBlockStmt((Block) stmt.ifBlock);
-		} else if (stmt.elseBlock != null) {
-			visitBlockStmt((Block) stmt.elseBlock);
+			visitBlockStmt((Block) stmt.ifBody);
+		} else if (stmt.elseBody != null) {
+			visitBlockStmt((Block) stmt.elseBody);
 		}
 
 		return null;
@@ -1054,8 +1054,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		}
 		
 		//execute default
-		if(!caseFound && stmt.defaultCase != null) {
-			visitBlockStmt((Stmt.Block) stmt.defaultCase);
+		if(!caseFound && stmt.defaultBody != null) {
+			visitBlockStmt((Stmt.Block) stmt.defaultBody);
 		}
 
 		return null;
@@ -1066,7 +1066,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		//for now, all the work is done in the switch statement
 		//In later versions, I may change the parsing such that each case gets a copy of the control value.
 		//At that point the work will need to shift to the case.
-		visitBlockStmt((Stmt.Block) stmt.block);
+		visitBlockStmt((Stmt.Block) stmt.body);
 		return null;
 	}
 
@@ -1074,7 +1074,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitDoStmt(Do stmt) {
 		
 		do {
-			visitBlockStmt((Stmt.Block) stmt.block);
+			visitBlockStmt((Stmt.Block) stmt.body);
 
 			int flag = (int) globals.get(new Token(null, "$exit_flag", 0, 0, 0));
 
@@ -1154,8 +1154,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitMouldStmt(Mould stmt) {
-		fillMould(stmt.mould, stmt.placeholders);
-		execute(stmt.mould);
+		fillMould(stmt.body, stmt.placeholders);
+		execute(stmt.body);
 		return null;
 	}
 	
