@@ -9,6 +9,7 @@ import static interpreter.TokenType.ROOT;
 import static interpreter.TokenType.SLASH;
 import static interpreter.TokenType.STAR;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import interpreter.Stmt.For;
 import interpreter.Stmt.Function;
 import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
+import interpreter.Stmt.Mold;
 import interpreter.Stmt.Print;
 import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
@@ -808,7 +810,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		}
 
 		while ((boolean) evaluate(stmt.condition)) {
-			visitBlockStmt((Stmt.Block) stmt.block);
+			execute(stmt.block);
 
 			if (stmt.incrementor != null) {
 				evaluate(stmt.incrementor);
@@ -1149,4 +1151,87 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Void visitMoldStmt(Mold stmt) {
+		
+		fillMold(stmt.mold, stmt.placeholders);
+		
+		execute(stmt.mold);
+		
+		return null;
+	}
+	
+	public void fillMold(Object moldElement, ArrayList<Placeholder> placeholders){
+		//for each of the object's fields (without knowing the class)
+		for (Field field : moldElement.getClass().getDeclaredFields()) {
+		    field.setAccessible(true); // You might want to set modifier to public first.
+		    
+		    try {
+				Object value = field.get(moldElement);
+				
+				//replace a sharp with the appropriate component
+				if(value instanceof Expr.Sharp) {
+					
+					//evaluate the expression of the sharp to get the name of the placeholder
+					String name = (String) evaluate(((Expr.Sharp) value).name);
+					
+					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+					int index = placeholders.indexOf(new Placeholder(name, null));
+					field.set(moldElement, placeholders.get(index).value);
+				}
+				
+				else if (value instanceof Stmt.Expression && ((Stmt.Expression) value).expression instanceof Expr.Sharp) {
+					Expr.Sharp expression = (Sharp) ((Stmt.Expression) value).expression;
+					String name = (String) evaluate(expression.name);
+					
+					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+					int index = placeholders.indexOf(new Placeholder(name, null));
+					field.set(moldElement, placeholders.get(index).value);
+				}
+				
+				//only expressions and statements can hold a sharp
+				else if (value instanceof Expr || value instanceof Stmt) {
+					fillMold(value, placeholders);
+				}
+				
+				else if (value instanceof ArrayList) {
+					for(int i = 0; i < ((ArrayList) value).size(); i++) {
+						Object element = ((ArrayList) value).get(i);
+						
+						if(element instanceof Expr.Sharp) {
+							//evaluate the expression of the sharp to get the name of the placeholder
+							String name = (String) evaluate(((Expr.Sharp) element));
+							
+							//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+							int index = placeholders.indexOf(new Placeholder(name, null));
+							field.set(moldElement, placeholders.get(index).value);
+						}
+						
+						else if (element instanceof Stmt.Expression && ((Stmt.Expression) element).expression instanceof Expr.Sharp) {
+							Expr.Sharp expression = (Sharp) ((Stmt.Expression) element).expression;
+							String name = (String) evaluate(expression.name);
+							
+							//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+							int index = placeholders.indexOf(new Placeholder(name, null));
+							
+							((ArrayList) value).remove(i);
+							((ArrayList) value).add(i, placeholders.get(index).value);
+//							field.set(element, placeholders.get(index).value);
+						}
+						
+						else if(element instanceof ArrayList || element instanceof Expr || element instanceof Stmt) {
+							fillMold(element, placeholders);
+						}
+					}
+				}
+				
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} 
+		}
+	}
+	
 }

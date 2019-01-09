@@ -1,7 +1,82 @@
 package parser;
 
-import static interpreter.TokenType.*;
+import static interpreter.TokenType.AND;
+import static interpreter.TokenType.ARROW;
+import static interpreter.TokenType.BANG;
+import static interpreter.TokenType.BANG_EQUAL;
+import static interpreter.TokenType.BAR;
+import static interpreter.TokenType.BOOL_TYPE;
+import static interpreter.TokenType.BREAK;
+import static interpreter.TokenType.CARAT;
+import static interpreter.TokenType.CARAT_EQUAL;
+import static interpreter.TokenType.CASE;
+import static interpreter.TokenType.CHARACTER;
+import static interpreter.TokenType.CHAR_TYPE;
+import static interpreter.TokenType.COLON;
+import static interpreter.TokenType.COMMA;
+import static interpreter.TokenType.CONTINUE;
+import static interpreter.TokenType.DEFAULT;
+import static interpreter.TokenType.DO;
+import static interpreter.TokenType.DOUBLE;
+import static interpreter.TokenType.DOUBLE_TYPE;
+import static interpreter.TokenType.ELSE;
+import static interpreter.TokenType.EOF;
+import static interpreter.TokenType.EQUAL;
+import static interpreter.TokenType.EQUAL_EQUAL;
+import static interpreter.TokenType.EXIT;
+import static interpreter.TokenType.EXPRINT;
+import static interpreter.TokenType.FALSE;
+import static interpreter.TokenType.FOR;
+import static interpreter.TokenType.FUNC;
+import static interpreter.TokenType.GREATER;
+import static interpreter.TokenType.GREATER_EQUAL;
+import static interpreter.TokenType.IDENTIFIER;
+import static interpreter.TokenType.IF;
+import static interpreter.TokenType.INTEGER;
+import static interpreter.TokenType.INT_TYPE;
+import static interpreter.TokenType.LEFT_BRACE;
+import static interpreter.TokenType.LEFT_BRACKET;
+import static interpreter.TokenType.LEFT_PAREN;
+import static interpreter.TokenType.LESS;
+import static interpreter.TokenType.LESS_EQUAL;
+import static interpreter.TokenType.MINUS;
+import static interpreter.TokenType.MINUS_EQUAL;
+import static interpreter.TokenType.MINUS_MINUS;
+import static interpreter.TokenType.MOLD;
+import static interpreter.TokenType.NAND;
+import static interpreter.TokenType.NOR;
+import static interpreter.TokenType.NULL;
+import static interpreter.TokenType.OR;
+import static interpreter.TokenType.PERCENT;
+import static interpreter.TokenType.PERCENT_EQUAL;
+import static interpreter.TokenType.PLUS;
+import static interpreter.TokenType.PLUS_EQUAL;
+import static interpreter.TokenType.PLUS_PLUS;
+import static interpreter.TokenType.PRINT;
+import static interpreter.TokenType.QUESTION;
+import static interpreter.TokenType.RETURN;
+import static interpreter.TokenType.RIGHT_BRACE;
+import static interpreter.TokenType.RIGHT_BRACKET;
+import static interpreter.TokenType.RIGHT_PAREN;
+import static interpreter.TokenType.ROOT;
+import static interpreter.TokenType.ROOT_EQUAL;
+import static interpreter.TokenType.SEMICOLON;
+import static interpreter.TokenType.SHARP;
+import static interpreter.TokenType.SLASH;
+import static interpreter.TokenType.SLASH_EQUAL;
+import static interpreter.TokenType.STAR;
+import static interpreter.TokenType.STAR_EQUAL;
+import static interpreter.TokenType.STRING;
+import static interpreter.TokenType.STRING_TYPE;
+import static interpreter.TokenType.STRUCT;
+import static interpreter.TokenType.SWITCH;
+import static interpreter.TokenType.TEMPLATE;
+import static interpreter.TokenType.TRUE;
+import static interpreter.TokenType.UNDEC;
+import static interpreter.TokenType.VAR_TYPE;
+import static interpreter.TokenType.WHILE;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -141,12 +216,24 @@ public class Parser {
 		return expressionStatement();
 	}
 	
-	public Stmt.Block parseStruct(Stmt.Struct struct){		
+	public Stmt.Mold parseStruct(Stmt.Struct struct){
+		
+		//fill the template with the user given components
+		ArrayList<Placeholder> placeholders = fillTemplate((Stmt.Template) struct.template);
+
+		//create a copy of the mold and add the placeholders from the user given components
+		Stmt.Mold moldClone = ((Stmt.Mold) struct.mold).moldClone();
+		moldClone = new Stmt.Mold(placeholders, moldClone.mold);
+		
+		return moldClone;
+	}
+	
+	public ArrayList<Placeholder> fillTemplate(Stmt.Template template){
 		String previous = "";
-		ArrayList<Object> placeholders = new ArrayList<Object>();
+		ArrayList<Placeholder> placeholders = new ArrayList<Placeholder>();
 		
 		//fill the template
-		for(Object obj : ((Stmt.Template)struct.template).template) {
+		for(Object obj : template.template) {
 			//match token exactly
 			if(obj instanceof Token) {
 				Token token = (Token)obj;
@@ -158,19 +245,17 @@ public class Parser {
 			else {
 				Placeholder p = (Placeholder)obj;
 				String name = p.name;
-				String type = p.type;
+				String type = (String)p.value;
 				
-				if(p.type.equals("expression")) {
-					placeholders.add(expression());
-				} else if (p.type.equals("statement")) {
-					placeholders.add(statement());
+				if(type.equals("expression")) {
+					placeholders.add(new Placeholder(name, expression()));
+				} else if (type.equals("statement")) {
+					placeholders.add(new Placeholder(name, statement()));
 				}
 			}
 		}
 		
-		//fill the mold from the placeholders
-		
-		return null;
+		return placeholders;
 	}
 
 	private Stmt.Function function(String kind) {
@@ -222,7 +307,6 @@ public class Parser {
 		Stmt.Block block = null;
 		
 		if (match(DEFAULT)) {
-//			consume(COLON, "Expect ':' after 'default'.");
 			block = block();
 		}
 
@@ -236,7 +320,7 @@ public class Parser {
 		consume(LEFT_BRACE, "Expect '{' after 'struct'.");
 		
 		Stmt.Template template = templateStatement();
-		Stmt.Block mold = moldStatement();
+		Stmt.Mold mold = moldStatement();
 		
 		consume(RIGHT_BRACE, "Expect '}' after 'mold'.");
 		
@@ -292,7 +376,7 @@ public class Parser {
 		return new Stmt.Template(template);
 	}
 	
-	private Stmt.Block moldStatement(){
+	private Stmt.Mold moldStatement(){
 		inMold = true;
 		
 		consume(MOLD, "Expect 'mold' after template.");
@@ -302,7 +386,7 @@ public class Parser {
 		Stmt.Block mold = block();
 
 		inMold = false;
-		return mold;
+		return new Stmt.Mold(null, mold);
 	}
 
 	/**

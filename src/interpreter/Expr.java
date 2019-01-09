@@ -2,7 +2,7 @@ package interpreter;
 
 import java.util.ArrayList;
 
-public abstract class Expr {
+public abstract class Expr implements Cloneable {
 	interface Visitor<T> {
 		T visitConditionalExpr(Conditional expr);
 		T visitBinaryExpr(Binary expr);
@@ -34,6 +34,10 @@ public abstract class Expr {
 			return str + operator.lexeme + "\n" + condition.toString(depth + 1) + "\n" + first.toString(depth + 1) + "\n" + second.toString(depth + 1);
 		}
 
+		public Conditional moldClone() {
+			return new Conditional(condition.moldClone(), operator, first.moldClone(), second.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitConditionalExpr(this);
 		}
@@ -58,6 +62,10 @@ public abstract class Expr {
 			}
 
 			return str + operator.lexeme + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
+		}
+
+		public Binary moldClone() {
+			return new Binary(left.moldClone(), operator, right.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -85,6 +93,10 @@ public abstract class Expr {
 			return str + operator.lexeme + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
 		}
 
+		public Logical moldClone() {
+			return new Logical(left.moldClone(), operator, right.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitLogicalExpr(this);
 		}
@@ -109,6 +121,10 @@ public abstract class Expr {
 			return str + grouping.lexeme + "\n" + expression.toString(depth + 1);
 		}
 
+		public Grouping moldClone() {
+			return new Grouping(grouping, expression.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitGroupingExpr(this);
 		}
@@ -129,6 +145,10 @@ public abstract class Expr {
 			}
 
 			return str + value;
+		}
+
+		public Literal moldClone() {
+			return new Literal(value);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -153,6 +173,10 @@ public abstract class Expr {
 			return str + operator.lexeme + "\n" + right.toString(depth + 1);
 		}
 
+		public Unary moldClone() {
+			return new Unary(operator, right.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitUnaryExpr(this);
 		}
@@ -173,6 +197,10 @@ public abstract class Expr {
 			}
 
 			return str + name.lexeme;
+		}
+
+		public Variable moldClone() {
+			return new Variable(name);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -196,6 +224,10 @@ public abstract class Expr {
 			}
 
 			return str + operator.lexeme + "\n" + name.lexeme + "\n" + value.toString(depth + 1);
+		}
+
+		public Assign moldClone() {
+			return new Assign(name, operator, value.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -222,6 +254,10 @@ public abstract class Expr {
 			return str + operator.lexeme + "\n" + name.lexeme;
 		}
 
+		public UnaryAssign moldClone() {
+			return new UnaryAssign(name, operator);
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitUnaryAssignExpr(this);
 		}
@@ -244,6 +280,10 @@ public abstract class Expr {
 			}
 
 			return str + parenthesis.lexeme + "\n" + callee.toString(depth + 1) + "\n" + arrayListToString(arguments);
+		}
+
+		public Call moldClone() {
+			return new Call(callee.moldClone(), parenthesis, arrayListClone(arguments));
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -269,6 +309,10 @@ public abstract class Expr {
 			return str + name.toString(depth + 1);
 		}
 
+		public Sharp moldClone() {
+			return new Sharp(name.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitSharpExpr(this);
 		}
@@ -279,6 +323,7 @@ public abstract class Expr {
 
 	abstract <T> T accept(Visitor<T> visitor);
 	abstract String toString(int i);
+	abstract Expr moldClone();
 
 	public String toString() {
 		return this.toString(0);
@@ -286,10 +331,33 @@ public abstract class Expr {
 
 	public static String arrayListToString(ArrayList<?> list) {
 		String str = "";
+
 		for(int i = 0; i < list.size(); i++) {
 			str = str + "\n" + list.get(i);
 		}
 
 		return str;
+	}
+
+	public static <T> ArrayList<T> arrayListClone(ArrayList<T> list) {
+		if(list == null) { 
+			return null;
+		}
+
+		ArrayList<T> newList = new ArrayList<T>();
+
+		for(int i = 0; i < list.size(); i++) {
+			T obj = list.get(i);
+
+			if(obj instanceof Expr) {
+				newList.add((T) ((Expr) obj).moldClone());
+			} else if (obj instanceof Stmt){
+				newList.add((T) ((Stmt) obj).moldClone());
+			} else {
+				newList.add(obj);
+			}
+		}
+
+		return newList;
 	}
 }

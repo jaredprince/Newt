@@ -9,7 +9,7 @@ struct {
 		#["dec"]
 		while(#["cond"]){
 			#["statement"]
-			#["inc" + "cas"]
+			#["inc"]
 		}
 	}
 }

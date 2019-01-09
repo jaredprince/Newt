@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import interpreter.Stmt;
+
 /**
  * The GenerateAST class is used to automatically generate the Expr and Stmt files, given only
  * a list of the subclasses and their fields.
@@ -48,8 +50,9 @@ public class GenerateAST {
 			    "Case       : ArrayList<Expr> tests, Stmt block",
 			    "If         : Expr condition, Stmt ifBlock, Stmt elseBlock",
 			    "Undec      : ArrayList<Expr> variables",
-			    "Struct     : Stmt template, Stmt mold",
+			    "Struct     : Stmt template, Stmt.Mold mold",
 			    "Template   : ArrayList<Object> template",
+			    "Mold       : ArrayList<Placeholder> placeholders, Stmt.Block mold",
 			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
 	}
 
@@ -68,7 +71,7 @@ public class GenerateAST {
 		writer.println();
 		writer.println("import java.util.ArrayList;");
 		writer.println();
-		writer.println("public abstract class " + baseName + " {");
+		writer.println("public abstract class " + baseName + " implements Cloneable {");
 
 		defineVisitor(writer, baseName, types);
 
@@ -81,6 +84,7 @@ public class GenerateAST {
 		writer.println();
 		writer.println("\tabstract <T> T accept(Visitor<T> visitor);");
 		writer.println("\tabstract String toString(int i);");
+		writer.println("\tabstract " + baseName + " moldClone();");
 		writer.println();
 		
 		writer.println("\tpublic String toString() {");
@@ -91,11 +95,37 @@ public class GenerateAST {
 		//arraylist toString method
 		writer.println("\tpublic static String arrayListToString(ArrayList<?> list) {");
 		writer.println("\t\tString str = \"\";");
+		writer.println();
 		writer.println("\t\tfor(int i = 0; i < list.size(); i++) {");
 		writer.println("\t\t\tstr = str + \"\\n\" + list.get(i);");
 		writer.println("\t\t}");
 		writer.println();
 		writer.println("\t\treturn str;");
+		writer.println("\t}");
+		writer.println();
+		
+		
+		//arraylist clone method
+		writer.println("\tpublic static <T> ArrayList<T> arrayListClone(ArrayList<T> list) {");
+		writer.println("\t\tif(list == null) { ");
+		writer.println("\t\t\treturn null;");
+		writer.println("\t\t}");
+		writer.println();
+		writer.println("\t\tArrayList<T> newList = new ArrayList<T>();");
+		writer.println();
+		writer.println("\t\tfor(int i = 0; i < list.size(); i++) {");
+		writer.println("\t\t\tT obj = list.get(i);");
+		writer.println();
+		writer.println("\t\t\tif(obj instanceof Expr) {");
+		writer.println("\t\t\t\tnewList.add((T) ((Expr) obj).moldClone());");
+		writer.println("\t\t\t} else if (obj instanceof Stmt){");
+		writer.println("\t\t\t\tnewList.add((T) ((Stmt) obj).moldClone());");
+		writer.println("\t\t\t} else {");
+		writer.println("\t\t\t\tnewList.add(obj);");
+		writer.println("\t\t\t}");
+		writer.println("\t\t}");
+		writer.println();
+		writer.println("\t\treturn newList;");
 		writer.println("\t}");
 		
 		writer.println("}");
@@ -145,6 +175,7 @@ public class GenerateAST {
 		writer.println();
 		
 		defineToString(writer, printTracker, arrayListName);
+		defineClone(writer, fieldList, className);
 
 		writer.println();
 		writer.println("\t\t<T> T accept(Visitor<T> visitor) {");
@@ -159,6 +190,31 @@ public class GenerateAST {
 
 		writer.println("\t}");
 		writer.println();
+	}
+	
+	public static void defineClone(PrintWriter writer, String fieldList, String className) {
+		
+		String[] fields = fieldList.split(", ");
+		String newFieldList = "";
+		
+		for(String field : fields) {
+			String[] str = field.split(" ");
+			
+			if(str[0].startsWith("Stmt") || str[0].startsWith("Expr")) {
+				newFieldList = newFieldList + ", " + str[1] + ".moldClone()";
+			} else if (str[0].startsWith("ArrayList")){
+				newFieldList = newFieldList + ", arrayListClone(" + str[1] + ")";
+			} else {
+				newFieldList = newFieldList + ", " + str[1];
+			}
+		}
+		
+		newFieldList = newFieldList.substring(2);
+		
+		writer.println();
+		writer.println("\t\tpublic " + className + " moldClone() {");
+		writer.println("\t\t\treturn new " + className + "(" + newFieldList + ");");
+		writer.println("\t\t}");
 	}
 	
 	/**

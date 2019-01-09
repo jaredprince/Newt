@@ -2,7 +2,7 @@ package interpreter;
 
 import java.util.ArrayList;
 
-public abstract class Stmt {
+public abstract class Stmt implements Cloneable {
 	interface Visitor<T> {
 		T visitKeywordStmt(Keyword stmt);
 		T visitExpressionStmt(Expression stmt);
@@ -19,6 +19,7 @@ public abstract class Stmt {
 		T visitUndecStmt(Undec stmt);
 		T visitStructStmt(Struct stmt);
 		T visitTemplateStmt(Template stmt);
+		T visitMoldStmt(Mold stmt);
 		T visitFunctionStmt(Function stmt);
 	}
 
@@ -34,6 +35,10 @@ public abstract class Stmt {
 			}
 
 			return str + word.lexeme;
+		}
+
+		public Keyword moldClone() {
+			return new Keyword(word);
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -57,6 +62,10 @@ public abstract class Stmt {
 			return str + expression.toString(depth + 1);
 		}
 
+		public Expression moldClone() {
+			return new Expression(expression.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitExpressionStmt(this);
 		}
@@ -78,6 +87,10 @@ public abstract class Stmt {
 			return str + expression.toString(depth + 1);
 		}
 
+		public ExPrint moldClone() {
+			return new ExPrint(expression.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitExPrintStmt(this);
 		}
@@ -97,6 +110,10 @@ public abstract class Stmt {
 			}
 
 			return str + expression.toString(depth + 1);
+		}
+
+		public Print moldClone() {
+			return new Print(expression.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -122,6 +139,10 @@ public abstract class Stmt {
 			return str + name.lexeme + "\n" + type.lexeme + "\n" + value.toString(depth + 1);
 		}
 
+		public Declare moldClone() {
+			return new Declare(type, name, value.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitDeclareStmt(this);
 		}
@@ -145,6 +166,10 @@ public abstract class Stmt {
 			return str + arrayListToString(statements);
 		}
 
+		public Block moldClone() {
+			return new Block(arrayListClone(statements));
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitBlockStmt(this);
 		}
@@ -165,6 +190,10 @@ public abstract class Stmt {
 			}
 
 			return str + condition.toString(depth + 1) + "\n" + block.toString(depth + 1);
+		}
+
+		public While moldClone() {
+			return new While(condition.moldClone(), block.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -190,6 +219,10 @@ public abstract class Stmt {
 			return str + condition.toString(depth + 1) + "\n" + block.toString(depth + 1);
 		}
 
+		public Do moldClone() {
+			return new Do(condition.moldClone(), block.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitDoStmt(this);
 		}
@@ -213,6 +246,10 @@ public abstract class Stmt {
 			}
 
 			return str + declaration.toString(depth + 1) + "\n" + condition.toString(depth + 1) + "\n" + incrementor.toString(depth + 1) + "\n" + block.toString(depth + 1);
+		}
+
+		public For moldClone() {
+			return new For(declaration.moldClone(), condition.moldClone(), incrementor.moldClone(), block.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -241,6 +278,10 @@ public abstract class Stmt {
 			return str + arrayListToString(controls) + arrayListToString(cases) + defaultCase.toString(depth + 1);
 		}
 
+		public Switch moldClone() {
+			return new Switch(arrayListClone(controls), arrayListClone(cases), defaultCase.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitSwitchStmt(this);
 		}
@@ -263,6 +304,10 @@ public abstract class Stmt {
 			}
 
 			return str + arrayListToString(tests) + block.toString(depth + 1);
+		}
+
+		public Case moldClone() {
+			return new Case(arrayListClone(tests), block.moldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -289,6 +334,10 @@ public abstract class Stmt {
 			return str + condition.toString(depth + 1) + "\n" + ifBlock.toString(depth + 1) + "\n" + elseBlock.toString(depth + 1);
 		}
 
+		public If moldClone() {
+			return new If(condition.moldClone(), ifBlock.moldClone(), elseBlock.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitIfStmt(this);
 		}
@@ -312,6 +361,10 @@ public abstract class Stmt {
 			return str + arrayListToString(variables);
 		}
 
+		public Undec moldClone() {
+			return new Undec(arrayListClone(variables));
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitUndecStmt(this);
 		}
@@ -320,7 +373,7 @@ public abstract class Stmt {
 	}
 
 	public static class Struct extends Stmt {
-		public Struct(Stmt template, Stmt mold) {
+		public Struct(Stmt template, Stmt.Mold mold) {
 			this.template = template;
 			this.mold = mold;
 		}
@@ -334,12 +387,16 @@ public abstract class Stmt {
 			return str + template.toString(depth + 1) + "\n" + mold.toString(depth + 1);
 		}
 
+		public Struct moldClone() {
+			return new Struct(template.moldClone(), mold.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitStructStmt(this);
 		}
 
 		public final Stmt template;
-		public final Stmt mold;
+		public final Stmt.Mold mold;
 	}
 
 	public static class Template extends Stmt {
@@ -356,11 +413,42 @@ public abstract class Stmt {
 			return str + arrayListToString(template);
 		}
 
+		public Template moldClone() {
+			return new Template(arrayListClone(template));
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitTemplateStmt(this);
 		}
 
 		public final ArrayList<Object> template;
+	}
+
+	public static class Mold extends Stmt {
+		public Mold(ArrayList<Placeholder> placeholders, Stmt.Block mold) {
+			this.placeholders = placeholders;
+			this.mold = mold;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + arrayListToString(placeholders) + mold.toString(depth + 1);
+		}
+
+		public Mold moldClone() {
+			return new Mold(arrayListClone(placeholders), mold.moldClone());
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitMoldStmt(this);
+		}
+
+		public ArrayList<Placeholder> placeholders;
+		public final Stmt.Block mold;
 	}
 
 	public static class Function extends Stmt {
@@ -380,6 +468,10 @@ public abstract class Stmt {
 			return str + name.lexeme + "\n" + arrayListToString(types) + arrayListToString(parameters) + block.toString(depth + 1);
 		}
 
+		public Function moldClone() {
+			return new Function(name, arrayListClone(types), arrayListClone(parameters), block.moldClone());
+		}
+
 		<T> T accept(Visitor<T> visitor) {
 			return visitor.visitFunctionStmt(this);
 		}
@@ -393,6 +485,7 @@ public abstract class Stmt {
 
 	abstract <T> T accept(Visitor<T> visitor);
 	abstract String toString(int i);
+	abstract Stmt moldClone();
 
 	public String toString() {
 		return this.toString(0);
@@ -400,10 +493,33 @@ public abstract class Stmt {
 
 	public static String arrayListToString(ArrayList<?> list) {
 		String str = "";
+
 		for(int i = 0; i < list.size(); i++) {
 			str = str + "\n" + list.get(i);
 		}
 
 		return str;
+	}
+
+	public static <T> ArrayList<T> arrayListClone(ArrayList<T> list) {
+		if(list == null) { 
+			return null;
+		}
+
+		ArrayList<T> newList = new ArrayList<T>();
+
+		for(int i = 0; i < list.size(); i++) {
+			T obj = list.get(i);
+
+			if(obj instanceof Expr) {
+				newList.add((T) ((Expr) obj).moldClone());
+			} else if (obj instanceof Stmt){
+				newList.add((T) ((Stmt) obj).moldClone());
+			} else {
+				newList.add(obj);
+			}
+		}
+
+		return newList;
 	}
 }
