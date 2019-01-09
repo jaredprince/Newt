@@ -32,11 +32,11 @@ import interpreter.Stmt.For;
 import interpreter.Stmt.Function;
 import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
-import interpreter.Stmt.Mold;
+import interpreter.Stmt.Mould;
 import interpreter.Stmt.Print;
+import interpreter.Stmt.Sculpture;
 import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
-import interpreter.Stmt.Template;
 import interpreter.Stmt.Undec;
 import interpreter.Stmt.While;
 
@@ -1142,33 +1142,30 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
-	public Void visitTemplateStmt(Template stmt) {
+	public Void visitSculptureStmt(Sculpture stmt) {
 		return null;
 	}
 	
 	@Override
 	public Object visitSharpExpr(Sharp expr) {
-		// TODO Auto-generated method stub
+		//sharp expressions should never be visited - they are only placeholders
 		return null;
 	}
 
 	@Override
-	public Void visitMoldStmt(Mold stmt) {
-		
-		fillMold(stmt.mold, stmt.placeholders);
-		
-		execute(stmt.mold);
-		
+	public Void visitMouldStmt(Mould stmt) {
+		fillMould(stmt.mould, stmt.placeholders);
+		execute(stmt.mould);
 		return null;
 	}
 	
-	public void fillMold(Object moldElement, ArrayList<Placeholder> placeholders){
+	public void fillMould(Object mouldElement, ArrayList<Placeholder> placeholders){
 		//for each of the object's fields (without knowing the class)
-		for (Field field : moldElement.getClass().getDeclaredFields()) {
+		for (Field field : mouldElement.getClass().getDeclaredFields()) {
 		    field.setAccessible(true); // You might want to set modifier to public first.
 		    
 		    try {
-				Object value = field.get(moldElement);
+				Object value = field.get(mouldElement);
 				
 				//replace a sharp with the appropriate component
 				if(value instanceof Expr.Sharp) {
@@ -1178,7 +1175,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 					
 					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
 					int index = placeholders.indexOf(new Placeholder(name, null));
-					field.set(moldElement, placeholders.get(index).value);
+					field.set(mouldElement, placeholders.get(index).value);
 				}
 				
 				else if (value instanceof Stmt.Expression && ((Stmt.Expression) value).expression instanceof Expr.Sharp) {
@@ -1187,12 +1184,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 					
 					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
 					int index = placeholders.indexOf(new Placeholder(name, null));
-					field.set(moldElement, placeholders.get(index).value);
+					field.set(mouldElement, placeholders.get(index).value);
 				}
 				
 				//only expressions and statements can hold a sharp
 				else if (value instanceof Expr || value instanceof Stmt) {
-					fillMold(value, placeholders);
+					fillMould(value, placeholders);
 				}
 				
 				else if (value instanceof ArrayList) {
@@ -1201,11 +1198,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 						
 						if(element instanceof Expr.Sharp) {
 							//evaluate the expression of the sharp to get the name of the placeholder
-							String name = (String) evaluate(((Expr.Sharp) element));
+							String name = (String) evaluate(((Expr.Sharp) element).name);
 							
 							//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
 							int index = placeholders.indexOf(new Placeholder(name, null));
-							field.set(moldElement, placeholders.get(index).value);
+							
+							((ArrayList) value).remove(i);
+							((ArrayList) value).add(i, placeholders.get(index).value);
 						}
 						
 						else if (element instanceof Stmt.Expression && ((Stmt.Expression) element).expression instanceof Expr.Sharp) {
@@ -1217,11 +1216,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 							
 							((ArrayList) value).remove(i);
 							((ArrayList) value).add(i, placeholders.get(index).value);
-//							field.set(element, placeholders.get(index).value);
 						}
 						
 						else if(element instanceof ArrayList || element instanceof Expr || element instanceof Stmt) {
-							fillMold(element, placeholders);
+							fillMould(element, placeholders);
 						}
 					}
 				}

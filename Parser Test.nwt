@@ -1,15 +1,19 @@
 struct {
-	template {
-		fort(<dec : statement> <cond : expression>; <inc : statement>){
+
+	//TODO: allow user-defined components (ie. <name : assignment_statement> or <name : boolean_expression>)
+	sculpt {
+		fort(<dec : statement> <cond : expression>; <inc : statement> <decrement : statement>){
 			<statement : statement>
+			<statement2 : statement>
 		}
 	}
 	
-	mold {
+	forge {
 		#["dec"]
 		while(#["cond"]){
 			#["statement"]
-			#["inc"]
+			#["statement2"]
+			#[carp]
 		}
 	}
 }
@@ -27,10 +31,6 @@ string l = "hat";
 println("Declaration and assignment test:");
 println("    Expected: 0 cat 1 hat");
 println("    Received: " + i + " " + j + " " + k + " " + l);
-
-fort(int i = 0; i < 2; i++;){
-	print("structure success!");
-}
 
 //type change tests
 println("Dynamic type test:");

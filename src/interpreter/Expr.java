@@ -34,8 +34,8 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + condition.toString(depth + 1) + "\n" + first.toString(depth + 1) + "\n" + second.toString(depth + 1);
 		}
 
-		public Conditional moldClone() {
-			return new Conditional(condition.moldClone(), operator, first.moldClone(), second.moldClone());
+		public Conditional mouldClone() {
+			return new Conditional(condition.mouldClone(), operator, first.mouldClone(), second.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -64,8 +64,8 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
 		}
 
-		public Binary moldClone() {
-			return new Binary(left.moldClone(), operator, right.moldClone());
+		public Binary mouldClone() {
+			return new Binary(left.mouldClone(), operator, right.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -93,8 +93,8 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + left.toString(depth + 1) + "\n" + right.toString(depth + 1);
 		}
 
-		public Logical moldClone() {
-			return new Logical(left.moldClone(), operator, right.moldClone());
+		public Logical mouldClone() {
+			return new Logical(left.mouldClone(), operator, right.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -121,8 +121,8 @@ public abstract class Expr implements Cloneable {
 			return str + grouping.lexeme + "\n" + expression.toString(depth + 1);
 		}
 
-		public Grouping moldClone() {
-			return new Grouping(grouping, expression.moldClone());
+		public Grouping mouldClone() {
+			return new Grouping(grouping, expression.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -147,7 +147,7 @@ public abstract class Expr implements Cloneable {
 			return str + value;
 		}
 
-		public Literal moldClone() {
+		public Literal mouldClone() {
 			return new Literal(value);
 		}
 
@@ -173,8 +173,8 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + right.toString(depth + 1);
 		}
 
-		public Unary moldClone() {
-			return new Unary(operator, right.moldClone());
+		public Unary mouldClone() {
+			return new Unary(operator, right.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -199,7 +199,7 @@ public abstract class Expr implements Cloneable {
 			return str + name.lexeme;
 		}
 
-		public Variable moldClone() {
+		public Variable mouldClone() {
 			return new Variable(name);
 		}
 
@@ -226,8 +226,8 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + name.lexeme + "\n" + value.toString(depth + 1);
 		}
 
-		public Assign moldClone() {
-			return new Assign(name, operator, value.moldClone());
+		public Assign mouldClone() {
+			return new Assign(name, operator, value.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -254,7 +254,7 @@ public abstract class Expr implements Cloneable {
 			return str + operator.lexeme + "\n" + name.lexeme;
 		}
 
-		public UnaryAssign moldClone() {
+		public UnaryAssign mouldClone() {
 			return new UnaryAssign(name, operator);
 		}
 
@@ -282,8 +282,8 @@ public abstract class Expr implements Cloneable {
 			return str + parenthesis.lexeme + "\n" + callee.toString(depth + 1) + "\n" + arrayListToString(arguments);
 		}
 
-		public Call moldClone() {
-			return new Call(callee.moldClone(), parenthesis, arrayListClone(arguments));
+		public Call mouldClone() {
+			return new Call(callee.mouldClone(), parenthesis, arrayListClone(arguments));
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -309,8 +309,8 @@ public abstract class Expr implements Cloneable {
 			return str + name.toString(depth + 1);
 		}
 
-		public Sharp moldClone() {
-			return new Sharp(name.moldClone());
+		public Sharp mouldClone() {
+			return new Sharp(name.mouldClone());
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -323,7 +323,7 @@ public abstract class Expr implements Cloneable {
 
 	abstract <T> T accept(Visitor<T> visitor);
 	abstract String toString(int i);
-	abstract Expr moldClone();
+	abstract Expr mouldClone();
 
 	public String toString() {
 		return this.toString(0);
@@ -350,9 +350,9 @@ public abstract class Expr implements Cloneable {
 			T obj = list.get(i);
 
 			if(obj instanceof Expr) {
-				newList.add((T) ((Expr) obj).moldClone());
+				newList.add((T) ((Expr) obj).mouldClone());
 			} else if (obj instanceof Stmt){
-				newList.add((T) ((Stmt) obj).moldClone());
+				newList.add((T) ((Stmt) obj).mouldClone());
 			} else {
 				newList.add(obj);
 			}

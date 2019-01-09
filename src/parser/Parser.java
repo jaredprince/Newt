@@ -1,82 +1,7 @@
 package parser;
 
-import static interpreter.TokenType.AND;
-import static interpreter.TokenType.ARROW;
-import static interpreter.TokenType.BANG;
-import static interpreter.TokenType.BANG_EQUAL;
-import static interpreter.TokenType.BAR;
-import static interpreter.TokenType.BOOL_TYPE;
-import static interpreter.TokenType.BREAK;
-import static interpreter.TokenType.CARAT;
-import static interpreter.TokenType.CARAT_EQUAL;
-import static interpreter.TokenType.CASE;
-import static interpreter.TokenType.CHARACTER;
-import static interpreter.TokenType.CHAR_TYPE;
-import static interpreter.TokenType.COLON;
-import static interpreter.TokenType.COMMA;
-import static interpreter.TokenType.CONTINUE;
-import static interpreter.TokenType.DEFAULT;
-import static interpreter.TokenType.DO;
-import static interpreter.TokenType.DOUBLE;
-import static interpreter.TokenType.DOUBLE_TYPE;
-import static interpreter.TokenType.ELSE;
-import static interpreter.TokenType.EOF;
-import static interpreter.TokenType.EQUAL;
-import static interpreter.TokenType.EQUAL_EQUAL;
-import static interpreter.TokenType.EXIT;
-import static interpreter.TokenType.EXPRINT;
-import static interpreter.TokenType.FALSE;
-import static interpreter.TokenType.FOR;
-import static interpreter.TokenType.FUNC;
-import static interpreter.TokenType.GREATER;
-import static interpreter.TokenType.GREATER_EQUAL;
-import static interpreter.TokenType.IDENTIFIER;
-import static interpreter.TokenType.IF;
-import static interpreter.TokenType.INTEGER;
-import static interpreter.TokenType.INT_TYPE;
-import static interpreter.TokenType.LEFT_BRACE;
-import static interpreter.TokenType.LEFT_BRACKET;
-import static interpreter.TokenType.LEFT_PAREN;
-import static interpreter.TokenType.LESS;
-import static interpreter.TokenType.LESS_EQUAL;
-import static interpreter.TokenType.MINUS;
-import static interpreter.TokenType.MINUS_EQUAL;
-import static interpreter.TokenType.MINUS_MINUS;
-import static interpreter.TokenType.MOLD;
-import static interpreter.TokenType.NAND;
-import static interpreter.TokenType.NOR;
-import static interpreter.TokenType.NULL;
-import static interpreter.TokenType.OR;
-import static interpreter.TokenType.PERCENT;
-import static interpreter.TokenType.PERCENT_EQUAL;
-import static interpreter.TokenType.PLUS;
-import static interpreter.TokenType.PLUS_EQUAL;
-import static interpreter.TokenType.PLUS_PLUS;
-import static interpreter.TokenType.PRINT;
-import static interpreter.TokenType.QUESTION;
-import static interpreter.TokenType.RETURN;
-import static interpreter.TokenType.RIGHT_BRACE;
-import static interpreter.TokenType.RIGHT_BRACKET;
-import static interpreter.TokenType.RIGHT_PAREN;
-import static interpreter.TokenType.ROOT;
-import static interpreter.TokenType.ROOT_EQUAL;
-import static interpreter.TokenType.SEMICOLON;
-import static interpreter.TokenType.SHARP;
-import static interpreter.TokenType.SLASH;
-import static interpreter.TokenType.SLASH_EQUAL;
-import static interpreter.TokenType.STAR;
-import static interpreter.TokenType.STAR_EQUAL;
-import static interpreter.TokenType.STRING;
-import static interpreter.TokenType.STRING_TYPE;
-import static interpreter.TokenType.STRUCT;
-import static interpreter.TokenType.SWITCH;
-import static interpreter.TokenType.TEMPLATE;
-import static interpreter.TokenType.TRUE;
-import static interpreter.TokenType.UNDEC;
-import static interpreter.TokenType.VAR_TYPE;
-import static interpreter.TokenType.WHILE;
+import static interpreter.TokenType.*;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,14 +17,14 @@ public class Parser {
 	private int current = 0;
 	
 	/**
-	 * Nessessary to to distinguish proper and improper uses of the #[] expression;
+	 * Necessary to to distinguish proper and improper uses of the #[] expression;
 	 */
-	private boolean inMold = false;
+	private boolean inMould = false;
 	
 	/**
-	 * The molds that have been parsed.
+	 * The moulds that have been parsed.
 	 */
-	private List<Stmt.Struct> molds = new ArrayList<Stmt.Struct>();
+	private List<Stmt.Struct> moulds = new ArrayList<Stmt.Struct>();
 
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
@@ -149,7 +74,7 @@ public class Parser {
 			
 			if (match(STRUCT)) {
 				Stmt.Struct stmt = structStatement();
-				molds.add(stmt);
+				moulds.add(stmt);
 				return stmt;
 			}
 			
@@ -167,8 +92,8 @@ public class Parser {
 			// This should allow some interesting examples. The name of the # to replace will be evaluated at runtime.
 			//This is fun, but it might need to be changed later.
 			if (match(SHARP)) {
-				if(!inMold) {
-					error(previous(), "# is only valid in a mold statement.");
+				if(!inMould) {
+					error(previous(), "# is only valid in a mould statement.");
 				}
 				
 				consume(LEFT_BRACKET, "Expect '[' after '#'.");
@@ -200,9 +125,9 @@ public class Parser {
 			if(peek().type == IDENTIFIER) {
 				Token next = peek();
 				
-				for(Stmt.Struct stmt : molds) {
+				for(Stmt.Struct stmt : moulds) {
 					//check if the identifier matches the struct
-					if(((Token)((Stmt.Template)stmt.template).template.get(0)).equals(next)) {
+					if(((Token)((Stmt.Sculpture)stmt.sculpture).sculpture.get(0)).equals(next)) {
 						return parseStruct(stmt);
 					}
 				}
@@ -216,24 +141,24 @@ public class Parser {
 		return expressionStatement();
 	}
 	
-	public Stmt.Mold parseStruct(Stmt.Struct struct){
+	public Stmt.Mould parseStruct(Stmt.Struct struct){
 		
-		//fill the template with the user given components
-		ArrayList<Placeholder> placeholders = fillTemplate((Stmt.Template) struct.template);
+		//fill the sculpture with the user given components
+		ArrayList<Placeholder> placeholders = fillSculpture((Stmt.Sculpture) struct.sculpture);
 
-		//create a copy of the mold and add the placeholders from the user given components
-		Stmt.Mold moldClone = ((Stmt.Mold) struct.mold).moldClone();
-		moldClone = new Stmt.Mold(placeholders, moldClone.mold);
+		//create a copy of the mould and add the placeholders from the user given components
+		Stmt.Mould mouldClone = ((Stmt.Mould) struct.mould).mouldClone();
+		mouldClone = new Stmt.Mould(placeholders, mouldClone.mould);
 		
-		return moldClone;
+		return mouldClone;
 	}
 	
-	public ArrayList<Placeholder> fillTemplate(Stmt.Template template){
+	public ArrayList<Placeholder> fillSculpture(Stmt.Sculpture sculpture){
 		String previous = "";
 		ArrayList<Placeholder> placeholders = new ArrayList<Placeholder>();
 		
-		//fill the template
-		for(Object obj : template.template) {
+		//fill the sculpture
+		for(Object obj : sculpture.sculpture) {
 			//match token exactly
 			if(obj instanceof Token) {
 				Token token = (Token)obj;
@@ -319,25 +244,25 @@ public class Parser {
 		
 		consume(LEFT_BRACE, "Expect '{' after 'struct'.");
 		
-		Stmt.Template template = templateStatement();
-		Stmt.Mold mold = moldStatement();
+		Stmt.Sculpture sculpture = sculptureStatement();
+		Stmt.Mould mould = mouldStatement();
 		
-		consume(RIGHT_BRACE, "Expect '}' after 'mold'.");
+		consume(RIGHT_BRACE, "Expect '}' after 'mould'.");
 		
-		return new Stmt.Struct(template, mold);
+		return new Stmt.Struct(sculpture, mould);
 	}
 	
-	private Stmt.Template templateStatement(){
-		consume(TEMPLATE, "Expect 'template' inside struct.");
-		consume(LEFT_BRACE, "Expect '{' after 'template'.");
+	private Stmt.Sculpture sculptureStatement(){
+		consume(SCULPT, "Expect 'sculpt' inside struct.");
+		consume(LEFT_BRACE, "Expect '{' after 'sculpt'.");
 		
-		//template consists of tokens and Placeholders (which are <name, type> pairs of Strings)
-		ArrayList<Object> template = new ArrayList<Object>();
+		//sculpture consists of tokens and Placeholders (which are <name, type> pairs of Strings)
+		ArrayList<Object> sculpture = new ArrayList<Object>();
 		
 		//TODO: For now, assume all structures start with a keyword and have no internal identifiers
-		template.add(consume(IDENTIFIER, "Expect identifier as first argument of template."));
+		sculpture.add(consume(IDENTIFIER, "Expect identifier as first element of sculpt."));
 
-		//loop until the template is closed
+		//loop until the sculpture is closed
 		int internalBracesOpen = 0;
 		while(!check(RIGHT_BRACE) || internalBracesOpen > 0) {
 			
@@ -347,17 +272,17 @@ public class Parser {
 				consume(COLON, "Expect ':' after name.");
 				Token type = consume(IDENTIFIER, "Expect identifier after ':'.");
 				
-				//add the placeholder to the template
-				template.add(new Placeholder(name.lexeme, type.lexeme));
+				//add the placeholder to the sculpture
+				sculpture.add(new Placeholder(name.lexeme, type.lexeme));
 				
-				consume(GREATER, "Expect '>' after type in placeholder.");
+				consume(GREATER, "Expect '>' after type in component.");
 			}
 			
 			//take the delimiter token as given
 			else {
 				if(match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET)) {
 					Token token = previous();
-					template.add(token);
+					sculpture.add(token);
 					
 					if(token.type == LEFT_BRACE) {
 						internalBracesOpen++;
@@ -371,22 +296,22 @@ public class Parser {
 			}
 		}
 		
-		consume(RIGHT_BRACE, "Expect '}' after template body.");
+		consume(RIGHT_BRACE, "Expect '}' after sculpt body.");
 		
-		return new Stmt.Template(template);
+		return new Stmt.Sculpture(sculpture);
 	}
 	
-	private Stmt.Mold moldStatement(){
-		inMold = true;
+	private Stmt.Mould mouldStatement(){
+		inMould = true;
 		
-		consume(MOLD, "Expect 'mold' after template.");
+		consume(FORGE, "Expect 'forge' after sculpt.");
 
-		//TODO: Right now, the mold can consist of a single statement with no braces. I might want to change this in future.
+		//TODO: Right now, the mould can consist of a single statement with no braces. I might want to change this in future.
 		
-		Stmt.Block mold = block();
+		Stmt.Block mould = block();
 
-		inMold = false;
-		return new Stmt.Mold(null, mold);
+		inMould = false;
+		return new Stmt.Mould(null, mould);
 	}
 
 	/**
@@ -922,8 +847,8 @@ public class Parser {
 		}
 		
 		if (match(SHARP)) {
-			if(!inMold) {
-				error(previous(), "# is only valid in a mold statement.");
+			if(!inMould) {
+				error(previous(), "# is only valid in a mould statement.");
 			}
 			
 			consume(LEFT_BRACKET, "Expect '[' after '#'.");

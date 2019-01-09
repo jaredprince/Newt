@@ -23,8 +23,8 @@ public class Lexer {
 		keywords.put("construct", CONSTRUCT);
 		keywords.put("static", STATIC);
 		keywords.put("struct", STRUCT);
-		keywords.put("template", TEMPLATE);
-		keywords.put("mold", MOLD);
+		keywords.put("sculpt", SCULPT);
+		keywords.put("forge", FORGE);
 		keywords.put("super", SUPER);
 		keywords.put("this", THIS);
 		keywords.put("true", TRUE);

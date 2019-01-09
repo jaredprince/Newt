@@ -50,9 +50,9 @@ public class GenerateAST {
 			    "Case       : ArrayList<Expr> tests, Stmt block",
 			    "If         : Expr condition, Stmt ifBlock, Stmt elseBlock",
 			    "Undec      : ArrayList<Expr> variables",
-			    "Struct     : Stmt template, Stmt.Mold mold",
-			    "Template   : ArrayList<Object> template",
-			    "Mold       : ArrayList<Placeholder> placeholders, Stmt.Block mold",
+			    "Struct     : Stmt.Sculpture sculpture, Stmt.Mould mould",
+			    "Sculpture  : ArrayList<Object> sculpture",
+			    "Mould      : ArrayList<Placeholder> placeholders, Stmt.Block mould",
 			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Stmt.Block block"));
 	}
 
@@ -84,7 +84,7 @@ public class GenerateAST {
 		writer.println();
 		writer.println("\tabstract <T> T accept(Visitor<T> visitor);");
 		writer.println("\tabstract String toString(int i);");
-		writer.println("\tabstract " + baseName + " moldClone();");
+		writer.println("\tabstract " + baseName + " mouldClone();");
 		writer.println();
 		
 		writer.println("\tpublic String toString() {");
@@ -117,9 +117,9 @@ public class GenerateAST {
 		writer.println("\t\t\tT obj = list.get(i);");
 		writer.println();
 		writer.println("\t\t\tif(obj instanceof Expr) {");
-		writer.println("\t\t\t\tnewList.add((T) ((Expr) obj).moldClone());");
+		writer.println("\t\t\t\tnewList.add((T) ((Expr) obj).mouldClone());");
 		writer.println("\t\t\t} else if (obj instanceof Stmt){");
-		writer.println("\t\t\t\tnewList.add((T) ((Stmt) obj).moldClone());");
+		writer.println("\t\t\t\tnewList.add((T) ((Stmt) obj).mouldClone());");
 		writer.println("\t\t\t} else {");
 		writer.println("\t\t\t\tnewList.add(obj);");
 		writer.println("\t\t\t}");
@@ -201,7 +201,7 @@ public class GenerateAST {
 			String[] str = field.split(" ");
 			
 			if(str[0].startsWith("Stmt") || str[0].startsWith("Expr")) {
-				newFieldList = newFieldList + ", " + str[1] + ".moldClone()";
+				newFieldList = newFieldList + ", " + str[1] + ".mouldClone()";
 			} else if (str[0].startsWith("ArrayList")){
 				newFieldList = newFieldList + ", arrayListClone(" + str[1] + ")";
 			} else {
@@ -212,7 +212,7 @@ public class GenerateAST {
 		newFieldList = newFieldList.substring(2);
 		
 		writer.println();
-		writer.println("\t\tpublic " + className + " moldClone() {");
+		writer.println("\t\tpublic " + className + " mouldClone() {");
 		writer.println("\t\t\treturn new " + className + "(" + newFieldList + ");");
 		writer.println("\t\t}");
 	}
