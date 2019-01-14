@@ -9,7 +9,7 @@ class NewtFunction implements NewtCallable {
 
 	NewtFunction(Stmt.Function func) {
 		this.arity = func.parameters.size();
-		this.statements = func.block.statements;
+		this.statements = func.body.statements;
 		this.params = func.parameters;
 	}
 
