@@ -1,83 +1,17 @@
 package parser;
 
-import static interpreter.TokenType.AND;
-import static interpreter.TokenType.ARROW;
-import static interpreter.TokenType.BANG;
-import static interpreter.TokenType.BANG_EQUAL;
-import static interpreter.TokenType.BAR;
-import static interpreter.TokenType.BOOL_TYPE;
-import static interpreter.TokenType.BREAK;
-import static interpreter.TokenType.CARAT;
-import static interpreter.TokenType.CARAT_EQUAL;
-import static interpreter.TokenType.CASE;
-import static interpreter.TokenType.CHARACTER;
-import static interpreter.TokenType.CHAR_TYPE;
-import static interpreter.TokenType.COLON;
-import static interpreter.TokenType.COMMA;
-import static interpreter.TokenType.CONTINUE;
-import static interpreter.TokenType.DEFAULT;
-import static interpreter.TokenType.DO;
-import static interpreter.TokenType.DOUBLE;
-import static interpreter.TokenType.DOUBLE_TYPE;
-import static interpreter.TokenType.ELSE;
-import static interpreter.TokenType.EOF;
-import static interpreter.TokenType.EQUAL;
-import static interpreter.TokenType.EQUAL_EQUAL;
-import static interpreter.TokenType.EXIT;
-import static interpreter.TokenType.FALSE;
-import static interpreter.TokenType.FOR;
-import static interpreter.TokenType.FORGE;
-import static interpreter.TokenType.FUNC;
-import static interpreter.TokenType.GREATER;
-import static interpreter.TokenType.GREATER_EQUAL;
-import static interpreter.TokenType.IDENTIFIER;
-import static interpreter.TokenType.IF;
-import static interpreter.TokenType.INTEGER;
-import static interpreter.TokenType.INT_TYPE;
-import static interpreter.TokenType.LEFT_BRACE;
-import static interpreter.TokenType.LEFT_BRACKET;
-import static interpreter.TokenType.LEFT_PAREN;
-import static interpreter.TokenType.LESS;
-import static interpreter.TokenType.LESS_EQUAL;
-import static interpreter.TokenType.MINUS;
-import static interpreter.TokenType.MINUS_EQUAL;
-import static interpreter.TokenType.MINUS_MINUS;
-import static interpreter.TokenType.NAND;
-import static interpreter.TokenType.NOR;
-import static interpreter.TokenType.NULL;
-import static interpreter.TokenType.OR;
-import static interpreter.TokenType.PERCENT;
-import static interpreter.TokenType.PERCENT_EQUAL;
-import static interpreter.TokenType.PLUS;
-import static interpreter.TokenType.PLUS_EQUAL;
-import static interpreter.TokenType.PLUS_PLUS;
-import static interpreter.TokenType.QUESTION;
-import static interpreter.TokenType.RETURN;
-import static interpreter.TokenType.RIGHT_BRACE;
-import static interpreter.TokenType.RIGHT_BRACKET;
-import static interpreter.TokenType.RIGHT_PAREN;
-import static interpreter.TokenType.ROOT;
-import static interpreter.TokenType.ROOT_EQUAL;
-import static interpreter.TokenType.SCULPT;
-import static interpreter.TokenType.SEMICOLON;
-import static interpreter.TokenType.SHARP;
-import static interpreter.TokenType.SLASH;
-import static interpreter.TokenType.SLASH_EQUAL;
-import static interpreter.TokenType.STAR;
-import static interpreter.TokenType.STAR_EQUAL;
-import static interpreter.TokenType.STRING;
-import static interpreter.TokenType.STRING_TYPE;
-import static interpreter.TokenType.STRUCT;
-import static interpreter.TokenType.SWITCH;
-import static interpreter.TokenType.TRUE;
-import static interpreter.TokenType.UNDEC;
-import static interpreter.TokenType.VAR_TYPE;
-import static interpreter.TokenType.WHILE;
+import static interpreter.TokenType.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import interpreter.Expr;
+import interpreter.Lexer;
 import interpreter.Expr.Assign;
 import interpreter.Expr.Binary;
 import interpreter.Expr.Call;
@@ -113,7 +47,7 @@ import interpreter.Token;
 import interpreter.TokenType;
 
 public class Parser {
-	private final List<Token> tokens;
+	private List<Token> tokens;
 	private int current = 0;
 	
 	/**
@@ -125,6 +59,8 @@ public class Parser {
 	 * The moulds that have been parsed.
 	 */
 	private List<Struct> moulds = new ArrayList<Struct>();
+	
+	private List<Stmt> statements = new ArrayList<>();
 
 	/**
 	 * The Parser constructor.
@@ -139,10 +75,12 @@ public class Parser {
 	 * @return the statement list
 	 */
 	public List<Stmt> parse() {
-		List<Stmt> statements = new ArrayList<>();
 		
 		while (!isAtEnd()) {
-			statements.add(statement());
+			Stmt statement = statement();
+			
+			if(statement != null)
+				statements.add(statement);
 		}
 	
 		return statements;
@@ -176,6 +114,9 @@ public class Parser {
 				
 				return word;
 			}
+			
+			if (match(IMPORT))
+				return importStatement();
 			
 			if (match(UNDEC))
 				return undecStatement();
@@ -222,7 +163,7 @@ public class Parser {
 			//if an identifier, check for user defined structures
 			if(peek().type == IDENTIFIER) {
 				Token next = peek();
-				
+
 				for(Struct stmt : moulds) {
 					//check if the identifier matches the struct
 					if(((Token)((Sculpture)stmt.sculpture).sculpture.get(0)).equals(next)) {
@@ -246,6 +187,43 @@ public class Parser {
 		}
 
 		return expressionStatement();
+	}
+	
+	private Stmt importStatement() {
+		String source = consume(IDENTIFIER, "Expect import source.").lexeme;
+		String fileData = null;
+		
+		try {
+			byte[] bytes = Files.readAllBytes(Paths.get(source + ".nwt"));
+			fileData = new String(bytes, Charset.defaultCharset());
+		} catch (FileNotFoundException exc) {
+			System.err.print("No file named '" + source + ".nwt' was found.");
+			throw new ParseError();
+		} catch (IOException e) {
+			System.err.print("Cannot read file named '" + source + ".nwt'.");
+			throw new ParseError();
+		}
+		
+		Lexer lexer = new Lexer(fileData);
+		
+		//substitute the old tokens with those of the imported file
+		List<Token> tokens = this.tokens;
+		this.tokens = lexer.lex();
+		
+		int current = this.current;
+		this.current = 0;
+	
+		//parse the new tokens
+		parse();
+		
+		//reset the tokens
+		this.tokens = tokens;
+		this.current = current;
+		
+		consume(SEMICOLON, "Expect ';' after import source.");
+		
+		//import statements are not interpreted; they only give a new source to parse
+		return null;
 	}
 	
 	/**

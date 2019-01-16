@@ -29,7 +29,7 @@ public class Lexer {
 		keywords.put("this", THIS);
 		keywords.put("true", TRUE);
 		keywords.put("undec", UNDEC);
-		
+
 //		keywords.put("exprint", EXPRINT);
 //		keywords.put("print", PRINT);
 
@@ -47,13 +47,14 @@ public class Lexer {
 		keywords.put("else", ELSE);
 		keywords.put("for", FOR);
 		keywords.put("if", IF);
-		
+
 		//statements
 		keywords.put("continue", CONTINUE);
 		keywords.put("break", BREAK);
 		keywords.put("exit", EXIT);
 		keywords.put("return", RETURN);
-		
+		keywords.put("import", IMPORT);
+
 		//Types
 		keywords.put("int", INT_TYPE);
 		keywords.put("double", DOUBLE_TYPE);

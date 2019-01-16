@@ -38,7 +38,6 @@ class NewtFunction implements NewtCallable {
 
 	@Override
 	public int arity() {
-		// TODO Auto-generated method stub
 		return arity;
 	}
 }

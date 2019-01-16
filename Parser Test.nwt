@@ -1,3 +1,5 @@
+import testimport;
+
 struct {
 
 	//TODO: allow user-defined components (ie. <name : assignment_statement> or <name : boolean_expression>)
@@ -18,7 +20,7 @@ struct {
 	}
 }
 
-//import testclass.nwt
+print(catapult);
 
 //declaration and assignment
 int i;
