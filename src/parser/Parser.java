@@ -24,7 +24,6 @@ import static interpreter.TokenType.EOF;
 import static interpreter.TokenType.EQUAL;
 import static interpreter.TokenType.EQUAL_EQUAL;
 import static interpreter.TokenType.EXIT;
-import static interpreter.TokenType.EXPRINT;
 import static interpreter.TokenType.FALSE;
 import static interpreter.TokenType.FOR;
 import static interpreter.TokenType.FORGE;
@@ -52,7 +51,6 @@ import static interpreter.TokenType.PERCENT_EQUAL;
 import static interpreter.TokenType.PLUS;
 import static interpreter.TokenType.PLUS_EQUAL;
 import static interpreter.TokenType.PLUS_PLUS;
-import static interpreter.TokenType.PRINT;
 import static interpreter.TokenType.QUESTION;
 import static interpreter.TokenType.RETURN;
 import static interpreter.TokenType.RIGHT_BRACE;
@@ -80,12 +78,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import interpreter.Expr;
+import interpreter.Expr.Assign;
+import interpreter.Expr.Binary;
+import interpreter.Expr.Call;
+import interpreter.Expr.Conditional;
+import interpreter.Expr.Grouping;
+import interpreter.Expr.Literal;
+import interpreter.Expr.Logical;
+import interpreter.Expr.Sharp;
+import interpreter.Expr.Unary;
+import interpreter.Expr.UnaryAssign;
+import interpreter.Expr.Variable;
 import interpreter.Newt;
 import interpreter.Placeholder;
 import interpreter.Stmt;
-
-import interpreter.Expr.*;
-import interpreter.Stmt.*;
+import interpreter.Stmt.Block;
+import interpreter.Stmt.Case;
+import interpreter.Stmt.Declare;
+import interpreter.Stmt.Do;
+import interpreter.Stmt.ExPrint;
+import interpreter.Stmt.Expression;
+import interpreter.Stmt.For;
+import interpreter.Stmt.Function;
+import interpreter.Stmt.If;
+import interpreter.Stmt.Keyword;
+import interpreter.Stmt.Mould;
+import interpreter.Stmt.Print;
+import interpreter.Stmt.Sculpture;
+import interpreter.Stmt.Struct;
+import interpreter.Stmt.Switch;
+import interpreter.Stmt.Undec;
+import interpreter.Stmt.While;
 import interpreter.Token;
 import interpreter.TokenType;
 
@@ -214,9 +237,8 @@ public class Parser {
 //			if (match(EXPRINT))
 //				return exPrintStatement();
 			
-			//TODO: account for unexplained delimiters
-			if (match(SEMICOLON))
-				error(previous(), "Extra semicolon found.");
+			if (match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET, ARROW, GREATER, LESS))
+				error(previous(), "Expect statement.");
 
 		} catch (ParseError error) {
 			synchronize();
@@ -351,14 +373,29 @@ public class Parser {
 	 * @return the parsed statement
 	 */
 	private Stmt forStatement() {
-		//TODO: allow missing declarations or incrementors
 		consume(LEFT_PAREN, "Expect '(' after for.");
-		advance(); //necessary because declaration assumes the type has already been read
-		Declare declaration = declaration();
+		
+		Declare declaration = null;
+		
+		//declaration can be skipped
+		if(!match(SEMICOLON)) {
+			if(!match(VAR_TYPE, INT_TYPE, STRING_TYPE, DOUBLE_TYPE, CHAR_TYPE, BOOL_TYPE)) {
+				error(advance(), "Expect data type. The first statement of a for header must be a declaration.");
+			}
+			
+			declaration = declaration();
+		}
+		
 		Expr condition = expression();
 		consume(SEMICOLON, "Expect ';' after condition.");
-		Expr incrementation = assignment();
-		consume(RIGHT_PAREN, "Expect ')' after incrementation.");
+		
+		Expr incrementation = null;
+		
+		//incrementation can be skipped
+		if(!match(RIGHT_PAREN)) {
+			incrementation = assignment();
+			consume(RIGHT_PAREN, "Expect ')' after incrementation.");
+		}
 	
 		return new For(declaration, condition, incrementation, block());
 	}
@@ -396,9 +433,7 @@ public class Parser {
 		return new Function(name, types, parameters, block());
 	}
 
-	// TODO: Switches should have automatic breaks between blocks
-	// Idea: special keyword for nonbreaking case - ?
-	// What to do about {}? in cases
+	// TODO: What to do about {}? in cases
 	/**
 	 * Parses a switch statement.
 	 * Precedence Level:
@@ -499,18 +534,18 @@ public class Parser {
 			//token is '<', so we need a <name : type> pair
 			if(match(LESS)) {
 				Token name = consume(IDENTIFIER, "Expect identifier after '<'.");
-				consume(COLON, "Expect ':' after name.");
+				consume(COLON, "Expect ':' after component name.");
 				Token type = consume(IDENTIFIER, "Expect identifier after ':'.");
 				
 				//add the placeholder to the sculpture
 				sculpture.add(new Placeholder(name.lexeme, type.lexeme));
 				
-				consume(GREATER, "Expect '>' after type in component.");
+				consume(GREATER, "Expect '>' after component type.");
 			}
 			
 			//take the delimiter token as given
 			else {
-				if(match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET)) {
+				if(match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET, ARROW)) {
 					Token token = previous();
 					sculpture.add(token);
 					
@@ -520,8 +555,7 @@ public class Parser {
 						internalBracesOpen--;
 					}
 				} else {
-					//TODO: better expect
-					consume(COMMA, "Expect ':' ';' '(' ')' '[' ']' '{' '}' ',' or '<'");
+					consume(COMMA, "Expect ':' ';' '(' ')' '[' ']' '{' '}' ',' '->' or '<'. These are the only valid non-component symbols in a sculpture statement.");
 				}
 			}
 		}
@@ -531,14 +565,24 @@ public class Parser {
 		return new Sculpture(sculpture);
 	}
 
+	/**
+	 * Parses a forge statement
+	 * @return the Mould parsed from the forge statement
+	 */
 	private Mould forgeStatement(){
 		inMould = true;
 		
 		consume(FORGE, "Expect 'forge' after sculpt.");
-	
-		//TODO: Right now, the mould can consist of a single statement with no braces. I might want to change this in future.
 		
-		Block mould = block();
+		ArrayList<Stmt> statements = new ArrayList<Stmt>();
+		
+		consume(LEFT_BRACE, "Expect '{' after 'forge'.");
+		
+		while (!match(RIGHT_BRACE)) {
+			statements.add(statement());
+		}
+		
+		Block mould = new Block(statements);
 	
 		inMould = false;
 		return new Mould(null, mould);

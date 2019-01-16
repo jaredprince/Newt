@@ -811,7 +811,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 		while ((boolean) evaluate(stmt.condition)) {
 			execute(stmt.body);
-
+			
 			if (stmt.incrementor != null) {
 				evaluate(stmt.incrementor);
 			}
@@ -1138,11 +1138,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitStructStmt(Struct stmt) {
+		//struct statements should never be visited - they are only used by the parser
 		return null;
 	}
 
 	@Override
 	public Void visitSculptureStmt(Sculpture stmt) {
+		//sculpture statements should never be visited - they are only used by the parser
 		return null;
 	}
 	
@@ -1159,6 +1161,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		return null;
 	}
 	
+	/**
+	 * Replaces the placeholders of a Mould with the appropriate elements
+	 * @param mouldElement the mould to be filled
+	 * @param placeholders the elements with which to fill the mould
+	 */
 	public void fillMould(Object mouldElement, ArrayList<Placeholder> placeholders){
 		//for each of the object's fields (without knowing the class)
 		for (Field field : mouldElement.getClass().getDeclaredFields()) {
@@ -1223,7 +1230,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 						}
 					}
 				}
-				
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {

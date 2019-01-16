@@ -160,6 +160,8 @@ public class Editor extends Application {
 	                try {
 	                    FileWriter fw = new FileWriter(file);
 	                    //TODO: finish
+	                    
+	                    fw.close();
 	                } catch (IOException ex) {
 	                    System.out.println(ex.getMessage());
 	                }
