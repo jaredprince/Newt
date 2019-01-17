@@ -1,4 +1,4 @@
-package interpreter;
+package newt_metatypes;
 
 public class NewtObject {
 	/**

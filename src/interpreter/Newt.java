@@ -11,14 +11,24 @@ import java.util.List;
 
 import parser.Parser;
 
+
 public class Newt {
 
 	//TODO: Just a general note: I need to be able to evaluate code from a string.
+	//TODO: I want visibility groups. ie, set the visibilty of a method to public for all members of groups A and C.
+	//TODO: Determine basic structure of a program - ie. package -> imports -> class for java
+	//TODO: Also determine the main method or similar construct. 
+	//TODO: Add classes.
+	//TODO: Can I make classes extend multiple superclasses? I would need to handle overlapping method/variable names
+	//TODO: Metaclasses, non-subclassables (final), uninstantiatable (static)
+	//TODO: solve the closure problem
 	
+	/**
+	 */
 	private static final Interpreter interpreter = new Interpreter();
 
 	/**
-	 * Alerts the interpreter if an error was found in the code.
+	 * Alerts the interpreter if an error was found during parsing.
 	 */
 	public static boolean hadError = false;
 

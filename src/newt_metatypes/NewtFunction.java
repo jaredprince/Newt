@@ -1,6 +1,12 @@
-package interpreter;
+package newt_metatypes;
 
 import java.util.ArrayList;
+
+import interpreter.Environment;
+import interpreter.Interpreter;
+import interpreter.Stmt;
+import interpreter.Token;
+import interpreter.Stmt.Function;
 
 class NewtFunction implements NewtCallable {
 	private int arity;

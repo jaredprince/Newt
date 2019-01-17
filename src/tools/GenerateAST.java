@@ -47,6 +47,7 @@ public class GenerateAST {
 			    "For        : Declare declaration, Expr condition, Expr incrementor, Block body",
 			    "Switch     : ArrayList<Expr> controls, ArrayList<Case> cases, Block defaultBody",
 			    "Case       : ArrayList<Expr> tests, Block body",
+			    "Class		: Token name, ArrayList<Function> methods",
 			    "If         : Expr condition, Block ifBody, Block elseBody",
 			    "Undec      : ArrayList<Expr.Variable> variables",
 			    "Struct     : Sculpture sculpture, Mould mould",

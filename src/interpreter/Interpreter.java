@@ -24,6 +24,7 @@ import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
 import interpreter.Stmt.Block;
 import interpreter.Stmt.Case;
+import interpreter.Stmt.Class;
 import interpreter.Stmt.Declare;
 import interpreter.Stmt.Do;
 import interpreter.Stmt.ExPrint;
@@ -40,6 +41,9 @@ import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
 import interpreter.Stmt.Undec;
 import interpreter.Stmt.While;
+import newt_metatypes.NewtCallable;
+import newt_metatypes.NewtClass;
+import newt_metatypes.NewtFunction;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -1002,9 +1006,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionStmt(Function stmt) {
-		
 		environment.define(stmt.name, new NewtFunction(stmt));
-		
 		return null;
 	}
 
@@ -1248,6 +1250,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_RETURN);
 		globals.assign(new Token(null, "$return_val", 0, 0, 0), evaluate(stmt.value));
 		return null;
+	}
+
+	@Override
+	public Void visitClassStmt(Class stmt) {
+		environment.define(stmt.name.lexeme, null);     
+	    NewtClass newtClass = new NewtClass(stmt.name.lexeme, stmt.methods);
+	    environment.assign(stmt.name, newtClass);           
+	    return null;
 	}
 	
 }

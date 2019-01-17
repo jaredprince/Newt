@@ -16,6 +16,7 @@ public abstract class Stmt implements Cloneable {
 		T visitForStmt(For stmt);
 		T visitSwitchStmt(Switch stmt);
 		T visitCaseStmt(Case stmt);
+		T visitClassStmt(Class stmt);
 		T visitIfStmt(If stmt);
 		T visitUndecStmt(Undec stmt);
 		T visitStructStmt(Struct stmt);
@@ -342,6 +343,33 @@ public abstract class Stmt implements Cloneable {
 
 		public final ArrayList<Expr> tests;
 		public final Block body;
+	}
+
+	public static class Class extends Stmt {
+		public Class(Token name, ArrayList<Function> methods) {
+			this.name = name;
+			this.methods = methods;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + name.lexeme + "\n" + arrayListToString(methods);
+		}
+
+		public Class mouldClone() {
+			return new Class(name, arrayListClone(methods));
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitClassStmt(this);
+		}
+
+		public final Token name;
+		public final ArrayList<Function> methods;
 	}
 
 	public static class If extends Stmt {

@@ -1,0 +1,16 @@
+var a = "global";
+do {
+  func showA() {
+  
+  	//i need a way to specify that the 'a' below is meant to be a substitute for "global"
+  	//in other words, when we first declare this function, a should be evaluated and the resulting value should replace a in the parse tree
+    print("\n" + a);
+  }
+
+  showA();
+  a = "internal_now";
+  showA();
+  var a = "block";
+  showA();
+  
+} while(false)
