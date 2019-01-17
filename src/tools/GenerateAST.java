@@ -36,6 +36,7 @@ public class GenerateAST {
 
 		defineAst(outputDir, "Stmt", Arrays.asList(
 				"Keyword    : Token word",
+				"Return		: Expr value",
 				"Expression : Expr expression",
 				"ExPrint    : Expr expression",
 			    "Print      : Expr expression",

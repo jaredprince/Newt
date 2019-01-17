@@ -28,6 +28,7 @@ public class Environment {
 	public Environment() {
 		enclosing = null;
 		define(new Token(TokenType.IDENTIFIER, "$exit_flag", 0, 0, 0), 0);
+		define(new Token(TokenType.IDENTIFIER, "$return_val", 0, 0, 0), null);
 	}
 
 	/**

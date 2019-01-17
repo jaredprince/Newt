@@ -1,4 +1,4 @@
-import testimport;
+/*import testimport;
 
 struct {
 
@@ -229,6 +229,8 @@ case(2, 1){ print("failure");}
 default{ print("failure ");}
 }
 println("");
+
+*/
 
 //function tests
 

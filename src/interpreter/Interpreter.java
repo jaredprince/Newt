@@ -34,6 +34,7 @@ import interpreter.Stmt.If;
 import interpreter.Stmt.Keyword;
 import interpreter.Stmt.Mould;
 import interpreter.Stmt.Print;
+import interpreter.Stmt.Return;
 import interpreter.Stmt.Sculpture;
 import interpreter.Stmt.Struct;
 import interpreter.Stmt.Switch;
@@ -57,6 +58,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
+	}
+	
+	public void setReturnValue(Object value) {
+		globals.assign(new Token(null, "$return_val", 0, 0, 0), value);
+	}
+	
+	public Object getReturnValue() {
+		return globals.get(new Token(null, "$return_val", 0, 0, 0));
 	}
 
 	public Interpreter() {
@@ -262,11 +271,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			}
 		case PLUS:
 			/* special case, check for numbers or strings */
-			//TODO: fix
 			if (left instanceof String) {
-				return (String) left + "" + right;
+				return left + "" + right;
 			} else if (right instanceof String) {
-				return "" + left + (String) right;
+				return left + "" + right;
 			} if (left instanceof Double) {
 				if (right instanceof Double)
 					return (double) left + (double) right;
@@ -953,9 +961,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		case CONTINUE:
 			globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_CONTINUE);
 			break;
-		case RETURN:
-			globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_RETURN);
-			break;
 		case EXIT:
 			globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_EXIT);
 			break;
@@ -1236,6 +1241,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				e.printStackTrace();
 			} 
 		}
+	}
+
+	@Override
+	public Void visitReturnStmt(Return stmt) {
+		globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_RETURN);
+		globals.assign(new Token(null, "$return_val", 0, 0, 0), evaluate(stmt.value));
+		return null;
 	}
 	
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public abstract class Stmt implements Cloneable {
 	interface Visitor<T> {
 		T visitKeywordStmt(Keyword stmt);
+		T visitReturnStmt(Return stmt);
 		T visitExpressionStmt(Expression stmt);
 		T visitExPrintStmt(ExPrint stmt);
 		T visitPrintStmt(Print stmt);
@@ -46,6 +47,31 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Token word;
+	}
+
+	public static class Return extends Stmt {
+		public Return(Expr value) {
+			this.value = value;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + value.toString(depth + 1);
+		}
+
+		public Return mouldClone() {
+			return new Return(value.mouldClone());
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitReturnStmt(this);
+		}
+
+		public final Expr value;
 	}
 
 	public static class Expression extends Stmt {

@@ -15,6 +15,7 @@ class NewtFunction implements NewtCallable {
 
 	@Override
 	public Object call(Interpreter interpreter, ArrayList<Object> arguments) {
+		
 		//create a new environment scope
 		Environment previous = interpreter.getEnvironment();
 		interpreter.setEnvironment(new Environment(previous));
@@ -31,9 +32,10 @@ class NewtFunction implements NewtCallable {
 		//reset the scope
 		interpreter.setEnvironment(previous);
 		
-		//TODO: Handle return parameters. This will be tricky since the interpret function returns void. That may need to be changed. We could maybe get around that by declaring the return param as a special variable, only accessed when the function is called.
-		
-		return null;
+		Object returnValue = interpreter.getReturnValue();
+		interpreter.setReturnValue(null);
+	
+		return returnValue;
 	}
 
 	@Override
