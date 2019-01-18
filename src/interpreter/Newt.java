@@ -22,6 +22,7 @@ public class Newt {
 	//TODO: Can I make classes extend multiple superclasses? I would need to handle overlapping method/variable names
 	//TODO: Metaclasses, non-subclassables (final), uninstantiatable (static)
 	//TODO: solve the closure problem
+	//TODO: allow use of a varibale by it's type and declaration time (ie. latest(String) would be the most recently declared string)
 	
 	/**
 	 */
@@ -127,9 +128,14 @@ public class Newt {
 			
 			List<Stmt> statements = parser.parse();
 
-			if (hadError) {
+			if (hadError)
 				return;
-			}
+			
+			Resolver resolver = new Resolver(interpreter);
+		    resolver.resolve(statements);
+		    
+		    if (hadError) 
+		    	return;
 
 			interpreter.interpret(statements);
 		}

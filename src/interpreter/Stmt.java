@@ -346,9 +346,10 @@ public abstract class Stmt implements Cloneable {
 	}
 
 	public static class Class extends Stmt {
-		public Class(Token name, ArrayList<Function> methods) {
+		public Class(Token name, ArrayList<Function> methods, ArrayList<Declare> fields) {
 			this.name = name;
 			this.methods = methods;
+			this.fields = fields;
 		}
 
 		public String toString(int depth) {
@@ -357,11 +358,11 @@ public abstract class Stmt implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + name.lexeme + "\n" + arrayListToString(methods);
+			return str + name.lexeme + "\n" + arrayListToString(methods) + arrayListToString(fields);
 		}
 
 		public Class mouldClone() {
-			return new Class(name, arrayListClone(methods));
+			return new Class(name, arrayListClone(methods), arrayListClone(fields));
 		}
 
 		<T> T accept(Visitor<T> visitor) {
@@ -370,6 +371,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final Token name;
 		public final ArrayList<Function> methods;
+		public final ArrayList<Declare> fields;
 	}
 
 	public static class If extends Stmt {

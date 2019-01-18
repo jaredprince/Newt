@@ -3,7 +3,9 @@ package interpreter;
 import interpreter.Expr.Assign;
 import interpreter.Expr.Call;
 import interpreter.Expr.Conditional;
+import interpreter.Expr.Get;
 import interpreter.Expr.Logical;
+import interpreter.Expr.Set;
 import interpreter.Expr.Sharp;
 import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
@@ -98,12 +100,6 @@ public class ASTPrinter implements Expr.Visitor<String> {
 	}
 
 	@Override
-	public String visitCallExpr(Call expr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String visitUnaryAssignExpr(UnaryAssign expr) {
 		return "(" + expr.operator.lexeme + " " + expr.name.lexeme + ")";
 	}
@@ -113,4 +109,8 @@ public class ASTPrinter implements Expr.Visitor<String> {
 		return "(# " + print(expr.name) + ")";
 	}
 
+	@Override
+	public String visitGetExpr(Get expr) {
+		return "(. " + expr.name + " " + print(expr.object) + ")";
+	}
 }

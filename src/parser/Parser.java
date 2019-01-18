@@ -604,14 +604,25 @@ public class Parser {
 		consume(LEFT_BRACE, "Expect '{' to start class body.");
 
 		ArrayList<Function> methods = new ArrayList<Function>();
+		ArrayList<Declare> fields = new ArrayList<Declare>();
 
-		while (!check(RIGHT_BRACE) && !isAtEnd()) {			
-			methods.add(functionStatement("method"));
+		while (!check(RIGHT_BRACE) && !isAtEnd()) {
+			if(match(FUNC))
+				methods.add(functionStatement("method"));
+			
+			else {
+				Stmt statement = statement();
+				
+				//only declarations are allowed outside functions
+				if(statement instanceof Declare) {
+					fields.add((Declare) statement);
+				}
+			}
 		}
 
-		consume(LEFT_BRACE, "Expect '}' to start class body.");
+		consume(RIGHT_BRACE, "Expect '}' to end class body.");
 
-		return new Stmt.Class(name, methods);
+		return new Stmt.Class(name, methods, fields);
 	}
 
 	/**
@@ -671,8 +682,11 @@ public class Parser {
 			if (expr instanceof Variable) {
 				Token name = ((Variable) expr).name;
 				return new Assign(name, equals, value);
+			} else if (expr instanceof Expr.Get) {             
+		        Expr.Get get = (Expr.Get) expr;                   
+		        return new Expr.Set(get.object, get.name, value);
 			}
-
+			
 			error(equals, "Invalid assignment target.");
 		}
 
@@ -894,8 +908,13 @@ public class Parser {
 		Expr expr = primary();
 
 		while (true) {
+			//name()
 			if (match(LEFT_PAREN)) {
 				expr = finishCall(expr);
+			} else if (match(DOT)) {
+				//object.name()
+		        Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+		        expr = new Expr.Get(expr, name);
 			} else {
 				break;
 			}

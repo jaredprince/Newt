@@ -1,0 +1,26 @@
+class TestClass {
+
+	int count = 0;
+
+	func test1(){
+		print("test1 success");
+	}
+	
+	func test2(){
+		return "test2 success";
+	}
+	
+	func test3(){
+		test1();
+		print(test2());
+	}
+	
+	func test4(){
+		print(count);
+	}
+
+}
+
+var testClass = TestClass();
+print(testClass + "\n");
+testClass.test4();

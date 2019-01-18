@@ -9,6 +9,8 @@ public abstract class Expr implements Cloneable {
 		T visitLogicalExpr(Logical expr);
 		T visitGroupingExpr(Grouping expr);
 		T visitLiteralExpr(Literal expr);
+		T visitGetExpr(Get expr);
+		T visitSetExpr(Set expr);
 		T visitUnaryExpr(Unary expr);
 		T visitVariableExpr(Variable expr);
 		T visitAssignExpr(Assign expr);
@@ -156,6 +158,62 @@ public abstract class Expr implements Cloneable {
 		}
 
 		public final Object value;
+	}
+
+	public static class Get extends Expr {
+		public Get(Expr object, Token name) {
+			this.object = object;
+			this.name = name;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + name.lexeme + "\n" + object.toString(depth + 1);
+		}
+
+		public Get mouldClone() {
+			return new Get(object.mouldClone(), name);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitGetExpr(this);
+		}
+
+		public final Expr object;
+		public final Token name;
+	}
+
+	public static class Set extends Expr {
+		public Set(Expr object, Token name, Expr value) {
+			this.object = object;
+			this.name = name;
+			this.value = value;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + name.lexeme + "\n" + object.toString(depth + 1) + "\n" + value.toString(depth + 1);
+		}
+
+		public Set mouldClone() {
+			return new Set(object.mouldClone(), name, value.mouldClone());
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitSetExpr(this);
+		}
+
+		public final Expr object;
+		public final Token name;
+		public final Expr value;
 	}
 
 	public static class Unary extends Expr {

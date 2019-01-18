@@ -35,8 +35,7 @@ public class Environment {
 	 * Used by internal scopes (such as a block statement) to create an environment
 	 * nested within the enclosing scope.
 	 * 
-	 * @param enclosing
-	 *            the enclosing Environment
+	 * @param enclosing the enclosing Environment
 	 */
 	public Environment(Environment enclosing) {
 		this.enclosing = enclosing;
@@ -45,19 +44,17 @@ public class Environment {
 	/**
 	 * Adds a new variable to this environment.
 	 * 
-	 * @param name
-	 *            The name of the variable to declare
-	 * @param value
-	 *            the value to assign to the new variable
+	 * @param name  The name of the variable to declare
+	 * @param value the value to assign to the new variable
 	 * 
-	 *            TODO: Currently, null values are assigned to the object. Thus,
-	 *            declaring a variable without initializing it and then printing the
-	 *            variable will produce "null". Instead, trying to print a variable
-	 *            which was not initialized should produce an error. I need to find
-	 *            a way to distinguish between declarations (int i;) and
-	 *            declaration/assignment to null (int i = null;).
-	 *            
-	 *            Additionally, I need to add a type parameter for type checking.
+	 *              TODO: Currently, null values are assigned to the object. Thus,
+	 *              declaring a variable without initializing it and then printing
+	 *              the variable will produce "null". Instead, trying to print a
+	 *              variable which was not initialized should produce an error. I
+	 *              need to find a way to distinguish between declarations (int i;)
+	 *              and declaration/assignment to null (int i = null;).
+	 * 
+	 *              Additionally, I need to add a type parameter for type checking.
 	 */
 	public void define(Token name, Object value) {
 
@@ -68,7 +65,7 @@ public class Environment {
 
 		values.put(name.lexeme, value);
 	}
-	
+
 	public void define(String name, Object value) {
 
 		/* throws an error if the name is used */
@@ -78,18 +75,19 @@ public class Environment {
 
 		values.put(name, value);
 	}
-	
+
 	public void undefine(Token name) {
 		values.remove(name.lexeme);
 	}
-	
+
 	public void undefine(String name) {
 		values.remove(name);
 	}
 
 	/**
 	 * Assigns a value to a pre-defined variable.
-	 * @param name the name of the variable
+	 * 
+	 * @param name  the name of the variable
 	 * @param value the value to be assigned
 	 */
 	public void assign(Token name, Object value) {
@@ -100,7 +98,7 @@ public class Environment {
 			return;
 		}
 
-		/* try to assign the variable in the enclosing environment (recursively)*/
+		/* try to assign the variable in the enclosing environment (recursively) */
 		if (hasEnclosing()) {
 			enclosing.assign(name, value);
 			return;
@@ -109,7 +107,7 @@ public class Environment {
 		/* the variable was not declared */
 		throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 	}
-	
+
 	public void assign(String name, Object value) {
 
 		/* update the value if the variable was found */
@@ -118,7 +116,7 @@ public class Environment {
 			return;
 		}
 
-		/* try to assign the variable in the enclosing environment (recursively)*/
+		/* try to assign the variable in the enclosing environment (recursively) */
 		if (hasEnclosing()) {
 			enclosing.assign(name, value);
 			return;
@@ -129,8 +127,8 @@ public class Environment {
 	}
 
 	/**
-	 * Retrieves the value of a variable.
-	 * TODO: check if the variable was defined but not initialized (error)
+	 * Retrieves the value of a variable. TODO: check if the variable was defined
+	 * but not initialized (error)
 	 * 
 	 * @param name the name of the variable
 	 * @return the value of the variable
@@ -150,7 +148,11 @@ public class Environment {
 		/* the variable was not declared */
 		throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 	}
-	
+
+	void assignAt(int distance, Token name, Object value) {
+		ancestor(distance).values.put(name.lexeme, value);
+	}
+
 //	public Object getGlobal(Token name) {
 //
 //		if (hasEnclosing()) {
@@ -183,8 +185,22 @@ public class Environment {
 //		throw new RuntimeError(name, "Cannot assign undefined variable '" + name.lexeme + "'.");
 //	}
 
+	public Object getAt(int distance, String name) {
+		return ancestor(distance).values.get(name);
+	}
+
+	public Environment ancestor(int distance) {
+		Environment environment = this;
+		for (int i = 0; i < distance; i++) {
+			environment = environment.enclosing;
+		}
+
+		return environment;
+	}
+
 	/**
 	 * Checks if the environment has an enclosing environment.
+	 * 
 	 * @return true if there is an enclosing environment, false otherwise
 	 */
 	public boolean hasEnclosing() {

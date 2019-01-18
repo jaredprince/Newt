@@ -1,13 +1,13 @@
 package interpreter;
 
-class RuntimeError extends RuntimeException {
+public class RuntimeError extends RuntimeException {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	final Token token;
 
-	RuntimeError(Token token, String message) {
+	public RuntimeError(Token token, String message) {
 		super(message);
 		this.token = token;
 	}

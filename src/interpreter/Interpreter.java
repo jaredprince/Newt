@@ -11,13 +11,17 @@ import static interpreter.TokenType.STAR;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import interpreter.Expr.Binary;
 import interpreter.Expr.Conditional;
+import interpreter.Expr.Get;
 import interpreter.Expr.Grouping;
 import interpreter.Expr.Literal;
 import interpreter.Expr.Logical;
+import interpreter.Expr.Set;
 import interpreter.Expr.Sharp;
 import interpreter.Expr.Unary;
 import interpreter.Expr.UnaryAssign;
@@ -44,6 +48,7 @@ import interpreter.Stmt.While;
 import newt_metatypes.NewtCallable;
 import newt_metatypes.NewtClass;
 import newt_metatypes.NewtFunction;
+import newt_metatypes.NewtInstance;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -53,21 +58,22 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	private final int EXIT_RETURN = 3;
 	private final int EXIT_EXIT = 4;
 
+	private final Map<Expr, Integer> locals = new HashMap<>();
 	private final Environment globals = new Environment();
 	private Environment environment = globals;
-	
+
 	public Environment getEnvironment() {
 		return environment;
 	}
-	
+
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
-	
+
 	public void setReturnValue(Object value) {
 		globals.assign(new Token(null, "$return_val", 0, 0, 0), value);
 	}
-	
+
 	public Object getReturnValue() {
 		return globals.get(new Token(null, "$return_val", 0, 0, 0));
 	}
@@ -79,8 +85,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * This method executes a list of statements.
 	 * 
-	 * @param statements
-	 *            the list of statements to execute
+	 * @param statements the list of statements to execute
 	 */
 	public void interpret(List<Stmt> statements) {
 
@@ -134,7 +139,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				return "<native fn>";
 			}
 		});
-		
+
 		/* prints an expression to standard output, followed by a new line */
 		globals.define("println", new NewtCallable() {
 			@Override
@@ -158,8 +163,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Executes a statement.
 	 * 
-	 * @param stmt
-	 *            the statement to be executed
+	 * @param stmt the statement to be executed
 	 */
 	private void execute(Stmt stmt) {
 		stmt.accept(this);
@@ -168,10 +172,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Executes a block of statements.
 	 * 
-	 * @param statements
-	 *            the list of statements to execute
-	 * @param environment
-	 *            the environment in which to execute the statements
+	 * @param statements  the list of statements to execute
+	 * @param environment the environment in which to execute the statements
 	 */
 	private void executeBlock(List<Stmt> statements, Environment environment) {
 		Environment previous = this.environment;
@@ -199,14 +201,22 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Turns an object into a string to be printed by the interpreter.
 	 * 
-	 * @param object
-	 *            the object
+	 * @param object the object
 	 * @return the string representation
 	 */
 	private String stringify(Object object) {
 		if (object == null)
 			return "null";
 		return object.toString();
+	}
+
+	private Object lookUpVariable(Token name, Expr expr) {
+		Integer distance = locals.get(expr);
+		if (distance != null) {
+			return environment.getAt(distance, name.lexeme);
+		} else {
+			return globals.get(name);
+		}
 	}
 
 	/*
@@ -279,7 +289,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				return left + "" + right;
 			} else if (right instanceof String) {
 				return left + "" + right;
-			} if (left instanceof Double) {
+			}
+			if (left instanceof Double) {
 				if (right instanceof Double)
 					return (double) left + (double) right;
 				else
@@ -374,10 +385,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * Validates that an object is not a numeric 0. Assumes that the object given is
 	 * of a numeric type (Integer or Double).
 	 * 
-	 * @param operator
-	 *            the operator which is using the object (/ or %)
-	 * @param divisor
-	 *            the object to be validated
+	 * @param operator the operator which is using the object (/ or %)
+	 * @param divisor  the object to be validated
 	 */
 	private void checkNonZeroDivisor(Token operator, Object divisor) {
 		if (divisor instanceof Integer && ((Integer) divisor).intValue() != 0) {
@@ -394,10 +403,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Validates that an object is a boolean type.
 	 * 
-	 * @param operator
-	 *            the operator which is using the object
-	 * @param operand
-	 *            the object to be validated
+	 * @param operator the operator which is using the object
+	 * @param operand  the object to be validated
 	 */
 	@SuppressWarnings("unused")
 	private void checkBooleanOperand(Token operator, Object operand) {
@@ -409,10 +416,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Validates that an object is of a numeric type (Integer or double).
 	 * 
-	 * @param operator
-	 *            the operator which is using the object
-	 * @param operand
-	 *            the object to be validated
+	 * @param operator the operator which is using the object
+	 * @param operand  the object to be validated
 	 */
 	private void checkNumericOperand(Token operator, Object operand) {
 		if (operand instanceof Double || operand instanceof Integer)
@@ -423,12 +428,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Validates that two operands are of a numeric type (Integer or double).
 	 * 
-	 * @param operator
-	 *            the operator which is using the object
-	 * @param left
-	 *            the left operand of the expression
-	 * @param right
-	 *            the right operand of the expression
+	 * @param operator the operator which is using the object
+	 * @param left     the left operand of the expression
+	 * @param right    the right operand of the expression
 	 */
 	private void checkNumericOperands(Token operator, Object left, Object right) {
 		if ((left instanceof Double || left instanceof Integer)
@@ -442,10 +444,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * Determines if one object is greater than another, according to the Newt rules
 	 * of comparison.
 	 * 
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param obj1 the first object
+	 * @param obj2 the second object
 	 * @return true if the first object is greater, false otherwise
 	 */
 	public boolean isGreater(Object obj1, Object obj2) {
@@ -552,12 +552,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Validated that both objects given are primitive types.
 	 * 
-	 * @param operator
-	 *            the operator which is evaluating the objects
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param operator the operator which is evaluating the objects
+	 * @param obj1     the first object
+	 * @param obj2     the second object
 	 */
 	private void checkPrimitiveTypes(Token operator, Object obj1, Object obj2) {
 		if (obj1 == null || obj1 instanceof Boolean || obj1 instanceof Character || obj1 instanceof Integer
@@ -575,10 +572,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * Determines if one object is greater than or equal to another, according to
 	 * the Newt rules of comparison.
 	 * 
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param obj1 the first object
+	 * @param obj2 the second object
 	 * @return true if the first object is greater or equal to the second, false
 	 *         otherwise
 	 */
@@ -590,10 +585,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * Determines if one object is less than another, according to the Newt rules of
 	 * comparison.
 	 * 
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param obj1 the first object
+	 * @param obj2 the second object
 	 * @return true if the first object is less, false otherwise
 	 */
 	public boolean isLess(Object obj1, Object obj2) {
@@ -604,10 +597,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * Determines if one object is less than or equal to another, according to the
 	 * Newt rules of comparison.
 	 * 
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param obj1 the first object
+	 * @param obj2 the second object
 	 * @return true if the first object is less of equal, false otherwise
 	 */
 	public boolean isLessEqual(Object obj1, Object obj2) {
@@ -623,8 +614,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 * truthiness, but later I can add a checkLogicalOperators method, like
 	 * checkNumericOperators.
 	 * 
-	 * @param obj
-	 *            the literal to evaluate
+	 * @param obj the literal to evaluate
 	 * @return a boolean representing it's truth value
 	 */
 	public boolean isTrue(Object obj) {
@@ -655,10 +645,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Determines if two objects are equal.
 	 * 
-	 * @param obj1
-	 *            the first object
-	 * @param obj2
-	 *            the second object
+	 * @param obj1 the first object
+	 * @param obj2 the second object
 	 * 
 	 * @return the equality of the objects
 	 */
@@ -698,21 +686,22 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	/**
 	 * Evaluates an expression.
 	 * 
-	 * @param expr
-	 *            the expression to evaluate
+	 * @param expr the expression to evaluate
 	 * @return the result of the evaluation
 	 */
-	private Object evaluate(Expr expr) {
+	public Object evaluate(Expr expr) {
 		return expr.accept(this);
+	}
+
+	void resolve(Expr expr, int depth) {
+		locals.put(expr, depth);
 	}
 
 	/**
 	 * Compares two characters and determines which is greater.
 	 * 
-	 * @param char1
-	 *            the first character
-	 * @param char2
-	 *            the second character
+	 * @param char1 the first character
+	 * @param char2 the second character
 	 * @return a positive number if the first character is greater, a negative if
 	 *         the second is, 0 if they are equal
 	 */
@@ -812,10 +801,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitForStmt(For stmt) {
 
 		Environment previous = environment;
-		
-		//a wrapper environment for the declaration variable
+
+		// a wrapper environment for the declaration variable
 		environment = new Environment(environment);
-		
+
 		// this declaration needs to be scoped
 		if (stmt.declaration != null) {
 			execute(stmt.declaration);
@@ -823,7 +812,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 		while ((boolean) evaluate(stmt.condition)) {
 			execute(stmt.body);
-			
+
 			if (stmt.incrementor != null) {
 				evaluate(stmt.incrementor);
 			}
@@ -851,8 +840,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				break;
 			}
 		}
-		
-		//reset the environment
+
+		// reset the environment
 		environment = previous;
 
 		return null;
@@ -860,13 +849,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Object visitVariableExpr(Variable expr) {
-		return environment.get(expr.name);
+		return lookUpVariable(expr.name, expr);
 	}
 
 	@Override
 	public Object visitAssignExpr(Expr.Assign expr) {
+
+		Integer distance = locals.get(expr);
+
 		if (expr.operator.type == EQUAL) {
-			environment.assign(expr.name, evaluate(expr.value));
+			Object value = evaluate(expr.value);
+			if (distance != null) {
+				environment.assignAt(distance, expr.name, value);
+			} else {
+				globals.assign(expr.name, value);
+			}
 		} else {
 
 			/* make a duplicate with the same lexeme and location for error reporting */
@@ -899,8 +896,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				break;
 			}
 
-			environment.assign(expr.name,
-					evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, expr.value)));
+			Object value = evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, expr.value));
+			if (distance != null) {
+				environment.assignAt(distance, expr.name, value);
+			} else {
+				globals.assign(expr.name, value);
+			}
 		}
 
 		return null;
@@ -1006,7 +1007,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionStmt(Function stmt) {
-		environment.define(stmt.name, new NewtFunction(stmt));
+		environment.define(stmt.name, new NewtFunction(stmt, environment));
 		return null;
 	}
 
@@ -1014,29 +1015,30 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitSwitchStmt(Switch stmt) {
 
 		boolean caseFound = false;
-		
-		//for each case
+
+		// for each case
 		for (int i = 0; i < stmt.cases.size(); i++) {
-			//get the case
+			// get the case
 			Stmt.Case caseStmt = stmt.cases.get(i);
-			
+
 			boolean validCase = true;
-			
-			//for each value
-			for(int j = 0; j < stmt.controls.size(); j++) {
-				//create expression comparing control and test values
-				Expr.Binary expr = new Expr.Binary(stmt.controls.get(j), new Token(TokenType.EQUAL_EQUAL, "==", null, 0, 0), caseStmt.tests.get(j));
-				
+
+			// for each value
+			for (int j = 0; j < stmt.controls.size(); j++) {
+				// create expression comparing control and test values
+				Expr.Binary expr = new Expr.Binary(stmt.controls.get(j),
+						new Token(TokenType.EQUAL_EQUAL, "==", null, 0, 0), caseStmt.tests.get(j));
+
 				Boolean bool = (Boolean) evaluate(expr);
-				
-				if(!bool) {
+
+				if (!bool) {
 					validCase = false;
 					break;
 				}
 			}
-			
-			//execute the case
-			if(validCase) {
+
+			// execute the case
+			if (validCase) {
 				caseFound = true;
 				visitCaseStmt(caseStmt);
 
@@ -1059,9 +1061,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				}
 			}
 		}
-		
-		//execute default
-		if(!caseFound && stmt.defaultBody != null) {
+
+		// execute default
+		if (!caseFound && stmt.defaultBody != null) {
 			visitBlockStmt((Stmt.Block) stmt.defaultBody);
 		}
 
@@ -1070,16 +1072,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitCaseStmt(Case stmt) {
-		//for now, all the work is done in the switch statement
-		//In later versions, I may change the parsing such that each case gets a copy of the control value.
-		//At that point the work will need to shift to the case.
+		// for now, all the work is done in the switch statement
+		// In later versions, I may change the parsing such that each case gets a copy
+		// of the control value.
+		// At that point the work will need to shift to the case.
 		visitBlockStmt((Stmt.Block) stmt.body);
 		return null;
 	}
 
 	@Override
 	public Void visitDoStmt(Do stmt) {
-		
+
 		do {
 			visitBlockStmt((Stmt.Block) stmt.body);
 
@@ -1106,17 +1109,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				break;
 			}
 		} while ((boolean) evaluate(stmt.condition));
-		
+
 		return null;
 	}
 
 	@Override
 	public Void visitUndecStmt(Undec stmt) {
 
-		for(Expr expr : stmt.variables) {
-			environment.undefine(((Expr.Variable)expr).name);
+		for (Expr expr : stmt.variables) {
+			environment.undefine(((Expr.Variable) expr).name);
 		}
-		
+
 		return null;
 	}
 
@@ -1138,26 +1141,28 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			break;
 		}
 
-		environment.assign(expr.name, evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, new Expr.Literal(new Integer(1)))));
+		environment.assign(expr.name,
+				evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, new Expr.Literal(new Integer(1)))));
 
 		return null;
 	}
 
 	@Override
 	public Void visitStructStmt(Struct stmt) {
-		//struct statements should never be visited - they are only used by the parser
+		// struct statements should never be visited - they are only used by the parser
 		return null;
 	}
 
 	@Override
 	public Void visitSculptureStmt(Sculpture stmt) {
-		//sculpture statements should never be visited - they are only used by the parser
+		// sculpture statements should never be visited - they are only used by the
+		// parser
 		return null;
 	}
-	
+
 	@Override
 	public Object visitSharpExpr(Sharp expr) {
-		//sharp expressions should never be visited - they are only placeholders
+		// sharp expressions should never be visited - they are only placeholders
 		return null;
 	}
 
@@ -1167,72 +1172,79 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		execute(stmt.body);
 		return null;
 	}
-	
+
 	/**
 	 * Replaces the placeholders of a Mould with the appropriate elements
+	 * 
 	 * @param mouldElement the mould to be filled
 	 * @param placeholders the elements with which to fill the mould
 	 */
-	public void fillMould(Object mouldElement, ArrayList<Placeholder> placeholders){
-		//for each of the object's fields (without knowing the class)
+	public void fillMould(Object mouldElement, ArrayList<Placeholder> placeholders) {
+		// for each of the object's fields (without knowing the class)
 		for (Field field : mouldElement.getClass().getDeclaredFields()) {
-		    field.setAccessible(true); // You might want to set modifier to public first.
-		    
-		    try {
+			field.setAccessible(true); // You might want to set modifier to public first.
+
+			try {
 				Object value = field.get(mouldElement);
-				
-				//replace a sharp with the appropriate component
-				if(value instanceof Expr.Sharp) {
-					
-					//evaluate the expression of the sharp to get the name of the placeholder
+
+				// replace a sharp with the appropriate component
+				if (value instanceof Expr.Sharp) {
+
+					// evaluate the expression of the sharp to get the name of the placeholder
 					String name = (String) evaluate(((Expr.Sharp) value).name);
-					
-					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+
+					// find the placeholder and with the given name and replace the field with it's
+					// value (an Expr or Stmt)
 					int index = placeholders.indexOf(new Placeholder(name, null));
 					field.set(mouldElement, placeholders.get(index).value);
 				}
-				
-				else if (value instanceof Stmt.Expression && ((Stmt.Expression) value).expression instanceof Expr.Sharp) {
+
+				else if (value instanceof Stmt.Expression
+						&& ((Stmt.Expression) value).expression instanceof Expr.Sharp) {
 					Expr.Sharp expression = (Sharp) ((Stmt.Expression) value).expression;
 					String name = (String) evaluate(expression.name);
-					
-					//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+
+					// find the placeholder and with the given name and replace the field with it's
+					// value (an Expr or Stmt)
 					int index = placeholders.indexOf(new Placeholder(name, null));
 					field.set(mouldElement, placeholders.get(index).value);
 				}
-				
-				//only expressions and statements can hold a sharp
+
+				// only expressions and statements can hold a sharp
 				else if (value instanceof Expr || value instanceof Stmt) {
 					fillMould(value, placeholders);
 				}
-				
+
 				else if (value instanceof ArrayList) {
-					for(int i = 0; i < ((ArrayList) value).size(); i++) {
+					for (int i = 0; i < ((ArrayList) value).size(); i++) {
 						Object element = ((ArrayList) value).get(i);
-						
-						if(element instanceof Expr.Sharp) {
-							//evaluate the expression of the sharp to get the name of the placeholder
+
+						if (element instanceof Expr.Sharp) {
+							// evaluate the expression of the sharp to get the name of the placeholder
 							String name = (String) evaluate(((Expr.Sharp) element).name);
-							
-							//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+
+							// find the placeholder and with the given name and replace the field with it's
+							// value (an Expr or Stmt)
 							int index = placeholders.indexOf(new Placeholder(name, null));
-							
+
 							((ArrayList) value).remove(i);
 							((ArrayList) value).add(i, placeholders.get(index).value);
 						}
-						
-						else if (element instanceof Stmt.Expression && ((Stmt.Expression) element).expression instanceof Expr.Sharp) {
+
+						else if (element instanceof Stmt.Expression
+								&& ((Stmt.Expression) element).expression instanceof Expr.Sharp) {
 							Expr.Sharp expression = (Sharp) ((Stmt.Expression) element).expression;
 							String name = (String) evaluate(expression.name);
-							
-							//find the placeholder and with the given name and replace the field with it's value (an Expr or Stmt)
+
+							// find the placeholder and with the given name and replace the field with it's
+							// value (an Expr or Stmt)
 							int index = placeholders.indexOf(new Placeholder(name, null));
-							
+
 							((ArrayList) value).remove(i);
 							((ArrayList) value).add(i, placeholders.get(index).value);
 						}
-						
-						else if(element instanceof ArrayList || element instanceof Expr || element instanceof Stmt) {
+
+						else if (element instanceof ArrayList || element instanceof Expr || element instanceof Stmt) {
 							fillMould(element, placeholders);
 						}
 					}
@@ -1241,7 +1253,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
-			} 
+			}
 		}
 	}
 
@@ -1254,10 +1266,41 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitClassStmt(Class stmt) {
-		environment.define(stmt.name.lexeme, null);     
-	    NewtClass newtClass = new NewtClass(stmt.name.lexeme, stmt.methods);
-	    environment.assign(stmt.name, newtClass);           
-	    return null;
+		environment.define(stmt.name.lexeme, null);
+
+		Map<String, NewtFunction> methods = new HashMap<>();
+		
+		for (Function method : stmt.methods) {
+			NewtFunction function = new NewtFunction(method, environment);
+			methods.put(method.name.lexeme, function);
+		}
+
+		NewtClass newtClass = new NewtClass(stmt.name.lexeme, stmt.methods, stmt.fields);
+
+		environment.assign(stmt.name, newtClass);
+		return null;
 	}
-	
+
+	@Override
+	public Object visitGetExpr(Get expr) {
+		Object object = evaluate(expr.object);
+		if (object instanceof NewtInstance) {
+			return ((NewtInstance) object).get(expr.name);
+		}
+
+		throw new RuntimeError(expr.name, "Only instances have properties.");
+	}
+
+	@Override
+	public Object visitSetExpr(Set expr) {
+		Object object = evaluate(expr.object);
+
+		if (object instanceof NewtInstance) {
+			((NewtInstance) object).set(expr.name, evaluate(expr.value));
+			return null;
+		}
+
+		throw new RuntimeError(expr.name, "Only instances have properties.");
+	}
+
 }

@@ -8,12 +8,12 @@ import interpreter.Stmt;
 import interpreter.Token;
 import interpreter.Stmt.Function;
 
-class NewtFunction implements NewtCallable {
+public class NewtFunction implements NewtCallable {
 	private int arity;
 	private ArrayList<Stmt> statements;
 	private ArrayList<Token> params;
 
-	NewtFunction(Stmt.Function func) {
+	public NewtFunction(Stmt.Function func, Environment environment) {
 		this.arity = func.parameters.size();
 		this.statements = func.body.statements;
 		this.params = func.parameters;
