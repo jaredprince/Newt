@@ -42,7 +42,7 @@ public class Token {
 	
 	public boolean equals(Object t) {
 		if(t instanceof Token) {
-			return ((Token) t).lexeme.equals(lexeme);
+			return ((Token) t).lexeme.equals(lexeme) && ((Token) t).line == line;
 		}
 		
 		return false;
@@ -51,6 +51,7 @@ public class Token {
 	public int hashCode() { 
 		int hash = 1;
 		hash = hash * 31 + lexeme.hashCode();
+		hash = hash * 31 + line;
 		return hash;
 	}
 }

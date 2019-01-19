@@ -81,6 +81,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Interpreter() {
 		defineNatives();
 	}
+	
+	//TODO: Somehow I need to catch when the user declares a variable in a for loop body that was declared in the header. The header has it's own scope (otherwise the variable would disappear), but it needs to be part of the inner scope as well?
 
 	/**
 	 * This method executes a list of statements.
