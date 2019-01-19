@@ -691,10 +691,8 @@ public class Parser {
 		}
 
 		if (match(PLUS_PLUS, MINUS_MINUS)) {
-			Token equals = previous();
-
-			Token name = ((Variable) expr).name;
-			return new UnaryAssign(name, equals);
+			Token operator = previous();
+			return new UnaryAssign((Variable) expr, operator);
 		}
 
 		return expr;

@@ -40,7 +40,17 @@ public class Token {
 		return "Type: " + type + " Value: " + (literal == null ? lexeme : literal) + " Location: " + line + "-" + character;
 	}
 	
-	public boolean equals(Token t) {
-		return t.lexeme.equals(lexeme) && t.type == type;
+	public boolean equals(Object t) {
+		if(t instanceof Token) {
+			return ((Token) t).lexeme.equals(lexeme);
+		}
+		
+		return false;
+	}
+	
+	public int hashCode() { 
+		int hash = 1;
+		hash = hash * 31 + lexeme.hashCode();
+		return hash;
 	}
 }

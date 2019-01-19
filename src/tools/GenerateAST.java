@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import interpreter.Expr.Variable;
+
 /**
  * The GenerateAST class is used to automatically generate the Expr and Stmt files, given only
  * a list of the subclasses and their fields.
@@ -32,7 +34,7 @@ public class GenerateAST {
 				"Unary       : Token operator, Expr right",
 				"Variable    : Token name",
 				"Assign      : Token name, Token operator, Expr value",
-				"UnaryAssign : Token name, Token operator",
+				"UnaryAssign : Variable name, Token operator",
 				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments",
 				"Sharp       : Expr name"));
 
@@ -189,6 +191,26 @@ public class GenerateAST {
 		for (String field : fields) {
 			writer.println("\t\tpublic final " + field + ";");
 		}
+		
+		writer.println();
+		
+		if(className.equals("Variable")) {
+			writer.println("\t\t@Override");
+			writer.println("\t\tpublic boolean equals(Object o) {");
+			writer.println("\t\t\tif (o instanceof Variable) {");
+			writer.println("\t\t\t\tif (((Variable) o).name.equals(this.name)) {");
+			writer.println("\t\t\t\t\treturn true;");
+			writer.println("\t\t\t\t}");
+			writer.println("\t\t\t}");
+			writer.println();
+			writer.println("\t\t\treturn false;");
+			writer.println("\t\t}");
+
+			writer.println("\t\tpublic int hashCode() {");
+			writer.println("\t\t\treturn name.hashCode();");
+			writer.println("\t\t}");
+		}
+		
 
 		writer.println("\t}");
 		writer.println();

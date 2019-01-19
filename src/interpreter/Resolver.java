@@ -59,9 +59,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	}
 
 	private void resolve(Stmt stmt) {
-		if(stmt == null)
+		if (stmt == null)
 			return;
-		
+
 		stmt.accept(this);
 	}
 
@@ -72,9 +72,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	}
 
 	private void resolve(Expr expr) {
-		if(expr == null)
+		if (expr == null)
 			return;
-		
+
 		expr.accept(this);
 	}
 
@@ -201,10 +201,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitForStmt(For stmt) {
-		resolve(stmt.condition);
-		resolve(stmt.body);
+		beginScope();
 		resolve(stmt.declaration);
+		resolve(stmt.condition);
 		resolve(stmt.incrementor);
+		resolve(stmt.body);
+		endScope();
 		return null;
 	}
 
@@ -226,12 +228,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitClassStmt(Class stmt) {
 		declare(stmt.name);
-		
+
 		for (Stmt.Function method : stmt.methods) {
 			FunctionType declaration = FunctionType.METHOD;
 			resolveFunction(method, declaration);
 		}
-		
+
 		define(stmt.name);
 		return null;
 	}
@@ -253,19 +255,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitStructStmt(Struct stmt) {
-		// TODO Auto-generated method stub
+		resolve(stmt.mould);
+		resolve(stmt.sculpture);
 		return null;
 	}
 
 	@Override
 	public Void visitSculptureStmt(Sculpture stmt) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Void visitMouldStmt(Mould stmt) {
-		// TODO Auto-generated method stub
+		resolve(stmt.body);
 		return null;
 	}
 
@@ -326,7 +328,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitUnaryExpr(Unary expr) {
-		// TODO Auto-generated method stub
+		resolve(expr.right);
 		return null;
 	}
 
@@ -349,19 +351,24 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitUnaryAssignExpr(UnaryAssign expr) {
-		// TODO Auto-generated method stub
+		resolve(expr.name);
 		return null;
 	}
 
 	@Override
 	public Void visitCallExpr(Call expr) {
-		// TODO Auto-generated method stub
+		resolve(expr.callee);
+
+		for (Expr argument : expr.arguments) {
+			resolve(argument);
+		}
+
 		return null;
 	}
 
 	@Override
 	public Void visitSharpExpr(Sharp expr) {
-		// TODO Auto-generated method stub
+		resolve(expr.name);
 		return null;
 	}
 }

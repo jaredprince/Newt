@@ -693,7 +693,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		return expr.accept(this);
 	}
 
-	void resolve(Expr expr, int depth) {
+	public void resolve(Expr expr, int depth) {
 		locals.put(expr, depth);
 	}
 
@@ -1141,8 +1141,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			break;
 		}
 
-		environment.assign(expr.name,
-				evaluate(new Expr.Binary(new Expr.Variable(expr.name), operator, new Expr.Literal(new Integer(1)))));
+		environment.assign(expr.name.name, evaluate(new Expr.Binary(expr.name, operator, new Expr.Literal(new Integer(1)))));
 
 		return null;
 	}

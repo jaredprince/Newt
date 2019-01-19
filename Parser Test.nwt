@@ -1,4 +1,4 @@
-import testimport;
+/*import testimport;
 
 struct {
 
@@ -84,13 +84,25 @@ int carlan = 0;
 for(; carlan < 10; carlan++){
 	print(carlan + " ");
 }
+
 println("");
-println("For loop test without incrementation (0 - 10):");
-for(int carlat = 0; carlat < 10;){
-	print(carlat + " ");
-	carlat++;
+for(int caprat = 0; caprat < 3; caprat++){
+	print(caprat + " ");
 }
 println("");
+
+*/
+
+
+println("For loop test without incrementation (0 - 10):");
+for(int carlat = 0; carlat < 10; carlat++){
+	print(carlat + " ");
+	//carlat++;
+}
+println("");
+
+
+/*
 
 println("For loop test without declaration or incrementation (0 - 10):");
 int carlar = 0;
@@ -247,7 +259,7 @@ func fTest2(){
 }
 
 println(fTest2());
-
+*/
 //class tests
 /*
 class cTest {

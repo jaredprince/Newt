@@ -48,6 +48,7 @@ public abstract class Expr implements Cloneable {
 		public final Token operator;
 		public final Expr first;
 		public final Expr second;
+
 	}
 
 	public static class Binary extends Expr {
@@ -77,6 +78,7 @@ public abstract class Expr implements Cloneable {
 		public final Expr left;
 		public final Token operator;
 		public final Expr right;
+
 	}
 
 	public static class Logical extends Expr {
@@ -106,6 +108,7 @@ public abstract class Expr implements Cloneable {
 		public final Expr left;
 		public final Token operator;
 		public final Expr right;
+
 	}
 
 	public static class Grouping extends Expr {
@@ -133,6 +136,7 @@ public abstract class Expr implements Cloneable {
 
 		public final Token grouping;
 		public final Expr expression;
+
 	}
 
 	public static class Literal extends Expr {
@@ -158,6 +162,7 @@ public abstract class Expr implements Cloneable {
 		}
 
 		public final Object value;
+
 	}
 
 	public static class Get extends Expr {
@@ -185,6 +190,7 @@ public abstract class Expr implements Cloneable {
 
 		public final Expr object;
 		public final Token name;
+
 	}
 
 	public static class Set extends Expr {
@@ -214,6 +220,7 @@ public abstract class Expr implements Cloneable {
 		public final Expr object;
 		public final Token name;
 		public final Expr value;
+
 	}
 
 	public static class Unary extends Expr {
@@ -241,6 +248,7 @@ public abstract class Expr implements Cloneable {
 
 		public final Token operator;
 		public final Expr right;
+
 	}
 
 	public static class Variable extends Expr {
@@ -266,6 +274,20 @@ public abstract class Expr implements Cloneable {
 		}
 
 		public final Token name;
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof Variable) {
+				if (((Variable) o).name.equals(this.name)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+		public int hashCode() {
+			return name.hashCode();
+		}
 	}
 
 	public static class Assign extends Expr {
@@ -295,10 +317,11 @@ public abstract class Expr implements Cloneable {
 		public final Token name;
 		public final Token operator;
 		public final Expr value;
+
 	}
 
 	public static class UnaryAssign extends Expr {
-		public UnaryAssign(Token name, Token operator) {
+		public UnaryAssign(Variable name, Token operator) {
 			this.name = name;
 			this.operator = operator;
 		}
@@ -309,7 +332,7 @@ public abstract class Expr implements Cloneable {
 				str = str + "   ";
 			}
 
-			return str + operator.lexeme + "\n" + name.lexeme;
+			return str + operator.lexeme + "\n" + name.toString(depth + 1);
 		}
 
 		public UnaryAssign mouldClone() {
@@ -320,8 +343,9 @@ public abstract class Expr implements Cloneable {
 			return visitor.visitUnaryAssignExpr(this);
 		}
 
-		public final Token name;
+		public final Variable name;
 		public final Token operator;
+
 	}
 
 	public static class Call extends Expr {
@@ -351,6 +375,7 @@ public abstract class Expr implements Cloneable {
 		public final Expr callee;
 		public final Token parenthesis;
 		public final ArrayList<Expr> arguments;
+
 	}
 
 	public static class Sharp extends Expr {
@@ -376,6 +401,7 @@ public abstract class Expr implements Cloneable {
 		}
 
 		public final Expr name;
+
 	}
 
 

@@ -48,6 +48,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Token word;
+
 	}
 
 	public static class Return extends Stmt {
@@ -73,6 +74,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr value;
+
 	}
 
 	public static class Expression extends Stmt {
@@ -98,6 +100,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr expression;
+
 	}
 
 	public static class ExPrint extends Stmt {
@@ -123,6 +126,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr expression;
+
 	}
 
 	public static class Print extends Stmt {
@@ -148,6 +152,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final Expr expression;
+
 	}
 
 	public static class Declare extends Stmt {
@@ -177,6 +182,7 @@ public abstract class Stmt implements Cloneable {
 		public final Token type;
 		public final Token name;
 		public final Expr value;
+
 	}
 
 	public static class Block extends Stmt {
@@ -202,6 +208,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Stmt> statements;
+
 	}
 
 	public static class While extends Stmt {
@@ -229,6 +236,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final Expr condition;
 		public final Block body;
+
 	}
 
 	public static class Do extends Stmt {
@@ -256,6 +264,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final Expr condition;
 		public final Block body;
+
 	}
 
 	public static class For extends Stmt {
@@ -287,6 +296,7 @@ public abstract class Stmt implements Cloneable {
 		public final Expr condition;
 		public final Expr incrementor;
 		public final Block body;
+
 	}
 
 	public static class Switch extends Stmt {
@@ -316,6 +326,7 @@ public abstract class Stmt implements Cloneable {
 		public final ArrayList<Expr> controls;
 		public final ArrayList<Case> cases;
 		public final Block defaultBody;
+
 	}
 
 	public static class Case extends Stmt {
@@ -343,6 +354,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final ArrayList<Expr> tests;
 		public final Block body;
+
 	}
 
 	public static class Class extends Stmt {
@@ -372,6 +384,7 @@ public abstract class Stmt implements Cloneable {
 		public final Token name;
 		public final ArrayList<Function> methods;
 		public final ArrayList<Declare> fields;
+
 	}
 
 	public static class If extends Stmt {
@@ -401,6 +414,7 @@ public abstract class Stmt implements Cloneable {
 		public final Expr condition;
 		public final Block ifBody;
 		public final Block elseBody;
+
 	}
 
 	public static class Undec extends Stmt {
@@ -426,6 +440,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Expr.Variable> variables;
+
 	}
 
 	public static class Struct extends Stmt {
@@ -453,6 +468,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final Sculpture sculpture;
 		public final Mould mould;
+
 	}
 
 	public static class Sculpture extends Stmt {
@@ -478,6 +494,7 @@ public abstract class Stmt implements Cloneable {
 		}
 
 		public final ArrayList<Object> sculpture;
+
 	}
 
 	public static class Mould extends Stmt {
@@ -505,6 +522,7 @@ public abstract class Stmt implements Cloneable {
 
 		public final ArrayList<Placeholder> placeholders;
 		public final Block body;
+
 	}
 
 	public static class Function extends Stmt {
@@ -536,6 +554,7 @@ public abstract class Stmt implements Cloneable {
 		public final ArrayList<Token> types;
 		public final ArrayList<Token> parameters;
 		public final Block body;
+
 	}
 
 
