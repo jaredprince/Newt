@@ -254,14 +254,17 @@ println("");
 
 //function tests
 
+
 string cat = "cat";
+
 func fTest(int i, var j){
 	println(i + j + cat);
 }
 
-println("Function test (no return):");
+//println("Function test (no return):");
 fTest(2, 3);
-println("Function test (return):");
+//println("Function test (return):");
+
 
 func fTest2(){
 	return "success";

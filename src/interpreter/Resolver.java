@@ -117,7 +117,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 			declare(param);
 			define(param);
 		}
-		resolve(function.body);
+		
+		//the body expression is skipped over because it would create a second scope for the function
+		resolve(function.body.statements);
 		endScope();
 
 		currentFunction = enclosingFunction;
