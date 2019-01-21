@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import interpreter.Expr.Variable;
+import interpreter.Stmt.Function;
 
 /**
  * The GenerateAST class is used to automatically generate the Expr and Stmt files, given only
@@ -33,7 +34,7 @@ public class GenerateAST {
 				"Set         : Expr object, Token name, Expr value",
 				"This        : Token keyword",
 				"Unary       : Token operator, Expr right",
-				"Variable    : Token name",
+				"Variable    : Token name : name",
 				"Assign      : Token name, Token operator, Expr value",
 				"UnaryAssign : Variable name, Token operator",
 				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments",
@@ -58,7 +59,7 @@ public class GenerateAST {
 			    "Struct     : Sculpture sculpture, Mould mould",
 			    "Sculpture  : ArrayList<Object> sculpture",
 			    "Mould      : ArrayList<Placeholder> placeholders, Block body",
-			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body"));
+			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body : name.lexeme, [types].lexeme"));
 	}
 
 	/**
@@ -81,9 +82,11 @@ public class GenerateAST {
 		defineVisitor(writer, baseName, types);
 
 		for (String type : types) {
-			String className = type.split(":")[0].trim();
-			String fields = type.split(":")[1].trim();
-			defineType(writer, baseName, className, fields);
+			String[] elements = type.split(":");
+			String className = elements[0].trim();
+			String fields = elements[1].trim();
+			String equalsFields = elements.length < 3 ? null : elements[2];
+			defineType(writer, baseName, className, fields, equalsFields);
 		}
 
 		writer.println();
@@ -143,8 +146,9 @@ public class GenerateAST {
 	 * @param baseName the name of the class
 	 * @param className the name of the subclass
 	 * @param fieldList the fields of the subclass
+	 * @param equalsFieldList the fields of the subclass to be used for the equals method
 	 */
-	private static void defineType(PrintWriter writer, String baseName, String className, String fieldList) {
+	private static void defineType(PrintWriter writer, String baseName, String className, String fieldList, String equalsFieldList) {
 		writer.println("\tpublic static class " + className + " extends " + baseName + " {");
 
 		// Constructor.
@@ -199,19 +203,43 @@ public class GenerateAST {
 			writer.println("\t\t@Override");
 			writer.println("\t\tpublic boolean equals(Object o) {");
 			writer.println("\t\t\tif (o instanceof Variable) {");
-			writer.println("\t\t\t\tif (((Variable) o).name.equals(this.name)) {");
+			writer.println("\t\t\t\tif (((Variable) o).name.equals(name)) {");
 			writer.println("\t\t\t\t\treturn true;");
 			writer.println("\t\t\t\t}");
 			writer.println("\t\t\t}");
 			writer.println();
 			writer.println("\t\t\treturn false;");
 			writer.println("\t\t}");
-
+			writer.println();
 			writer.println("\t\tpublic int hashCode() {");
 			writer.println("\t\t\treturn name.hashCode();");
 			writer.println("\t\t}");
 		}
 		
+		if(className.equals("Function")) {
+			writer.println("\t\t@Override");
+			writer.println("\t\tpublic boolean equals(Object o) {");
+			writer.println("\t\t\tif(o instanceof Function) {");
+			writer.println("\t\t\t\tFunction f = (Function) o;");
+			writer.println("\t\t\t\tif(f.name.lexeme.equals(name.lexeme)) {");
+			writer.println("\t\t\t\t\tif(types.size() != f.types.size())");
+			writer.println("\t\t\t\t\t\treturn false;");
+			writer.println("\t\t\t\t\tfor(int i = 0; i < types.size(); i++) {");
+			writer.println("\t\t\t\t\t\tif(!types.get(i).lexeme.equals(f.types.get(i).lexeme))");
+			writer.println("\t\t\t\t\t\t\treturn false;");
+			writer.println("\t\t\t\t\t}");
+			writer.println();
+			writer.println("\t\t\t\t\treturn true;");
+			writer.println("\t\t\t\t}");
+			writer.println("\t\t\t}");
+			writer.println();
+			writer.println("\t\t\treturn false;");
+			writer.println("\t\t}");
+			writer.println();
+			writer.println("\t\tpublic int hashCode() {");
+			writer.println("\t\t\treturn name.lexeme.hashCode();");
+			writer.println("\t\t}");
+		}
 
 		writer.println("\t}");
 		writer.println();
@@ -264,6 +292,25 @@ public class GenerateAST {
 		listString = listString.replace("+", " + ");
 		
 		writer.println("\t\t\treturn str" + returnVal + listString + ";");
+		writer.println("\t\t}");
+	}
+	
+	private static void defineEquals(PrintWriter writer, String className, String fields) {
+		
+		String[] fieldsArr = fields.split(" ");
+		
+		writer.println("\t\t@Override");
+		writer.println("\t\tpublic boolean equals(Object o) {");
+		writer.println("\t\t\tif(o instanceof " + className + ") {");
+		writer.println("\t\t\t\t" + className + " var = (" + className + ") o;");
+		
+		for(String field : fieldsArr) {
+			writer.println("if(var");
+		}
+		
+		writer.println("\t\t\t}");
+		writer.println();
+		writer.println("\t\t\treturn false;");
 		writer.println("\t\t}");
 	}
 

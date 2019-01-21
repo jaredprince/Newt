@@ -19,6 +19,9 @@ class TestClass {
 		print(this.count);
 	}
 
+	func test4(int i){
+		print("second");
+	}
 }
 
 var testClass = TestClass();

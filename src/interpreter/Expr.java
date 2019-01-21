@@ -305,13 +305,14 @@ public abstract class Expr implements Cloneable {
 		@Override
 		public boolean equals(Object o) {
 			if (o instanceof Variable) {
-				if (((Variable) o).name.equals(this.name)) {
+				if (((Variable) o).name.equals(name)) {
 					return true;
 				}
 			}
 
 			return false;
 		}
+
 		public int hashCode() {
 			return name.hashCode();
 		}

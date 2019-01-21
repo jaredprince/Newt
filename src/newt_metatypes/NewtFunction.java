@@ -58,4 +58,8 @@ public class NewtFunction implements NewtCallable {
 	public int arity() {
 		return arity;
 	}
+	
+	public ArrayList<Token> getParams(){
+		return params;
+	}
 }

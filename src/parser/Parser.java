@@ -18,7 +18,7 @@ import interpreter.Stmt;
 import interpreter.Lexer;
 import interpreter.Newt;
 import interpreter.Placeholder;
-
+import interpreter.RuntimeError;
 import interpreter.Token;
 import interpreter.TokenType;
 
@@ -607,8 +607,13 @@ public class Parser {
 		ArrayList<Declare> fields = new ArrayList<Declare>();
 
 		while (!check(RIGHT_BRACE) && !isAtEnd()) {
-			if(match(FUNC))
-				methods.add(functionStatement("method"));
+			if(match(FUNC)) {
+				Function method = functionStatement("method");
+				if(methods.contains(method))
+					throw error(method.name, "A method with this signature already exists in class '" + name.lexeme + "'.");
+				else 
+					methods.add(method);
+			}
 			
 			else {
 				Stmt statement = statement();
@@ -616,6 +621,8 @@ public class Parser {
 				//only declarations are allowed outside functions
 				if(statement instanceof Declare) {
 					fields.add((Declare) statement);
+				} else {
+					
 				}
 			}
 		}

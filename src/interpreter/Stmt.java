@@ -555,6 +555,28 @@ public abstract class Stmt implements Cloneable {
 		public final ArrayList<Token> parameters;
 		public final Block body;
 
+		@Override
+		public boolean equals(Object o) {
+			if(o instanceof Function) {
+				Function f = (Function) o;
+				if(f.name.lexeme.equals(name.lexeme)) {
+					if(types.size() != f.types.size())
+						return false;
+					for(int i = 0; i < types.size(); i++) {
+						if(!types.get(i).lexeme.equals(f.types.get(i).lexeme))
+							return false;
+					}
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public int hashCode() {
+			return name.lexeme.hashCode();
+		}
 	}
 
 
