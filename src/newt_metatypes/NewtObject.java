@@ -17,10 +17,20 @@ public class NewtObject {
 	 * 
 	 * This allows an object of type 'a' to be assigned to a variable of type 'b'.
 	 */
-	boolean dynamic;
+	public boolean dynamic;
+	public boolean initialized;
 
 	public NewtObject(String t, Object o) {
 		type = t;
 		object = o;
+		dynamic = false;
+		initialized = true;
+	}
+	
+	public NewtObject(String t, Object o, boolean d, boolean i) {
+		type = t;
+		object = o;
+		dynamic = d;
+		initialized = i;
 	}
 }

@@ -12,6 +12,7 @@ public class NewtFunction implements NewtCallable {
 	private int arity;
 	private ArrayList<Stmt> statements;
 	private ArrayList<Token> params;
+	private ArrayList<Token> types;
 	private Function func;
 
 	private final Environment closure;
@@ -20,13 +21,14 @@ public class NewtFunction implements NewtCallable {
 		this.arity = func.parameters.size();
 		this.statements = func.body.statements;
 		this.params = func.parameters;
+		this.types = func.types;
 		this.func = func;
 		this.closure = closure;
 	}
 
 	public NewtFunction bind(NewtInstance instance) {
 		Environment environment = new Environment(closure);
-		environment.define("this", instance);
+		environment.define("this", instance.getClassName(), instance);
 		return new NewtFunction(func, environment);
 	}
 
@@ -39,7 +41,7 @@ public class NewtFunction implements NewtCallable {
 
 		// define the arguments within the scope
 		for (int i = 0; i < params.size(); i++) {
-			current.define(params.get(i), arguments.get(i));
+			current.define(params.get(i), types.get(i).lexeme, arguments.get(i));
 		}
 
 		Object returnVal = null;
@@ -47,10 +49,10 @@ public class NewtFunction implements NewtCallable {
 		try {
 			// interpret the function statements
 			interpreter.interpret(statements);
-		} catch (NewtReturn value) {
-			returnVal = value.value;
+		} catch (NewtReturn obj) {
+			returnVal = obj.value;
 		}
-
+		
 		// reset the scope
 		interpreter.setEnvironment(closure);
 

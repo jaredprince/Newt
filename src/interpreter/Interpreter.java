@@ -102,7 +102,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	 */
 	private void defineNatives() {
 		/* returns the current system time in seconds */
-		globals.define("clock", new NewtCallable() {
+		globals.define("clock", "function", new NewtCallable() {
 			@Override
 			public int arity() {
 				return 0;
@@ -120,7 +120,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		});
 
 		/* prints an expression to standard output */
-		globals.define("print", new NewtCallable() {
+		globals.define("print", "function", new NewtCallable() {
 			@Override
 			public int arity() {
 				return 1;
@@ -139,7 +139,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		});
 
 		/* prints an expression to standard output, followed by a new line */
-		globals.define("println", new NewtCallable() {
+		globals.define("println", "function", new NewtCallable() {
 			@Override
 			public int arity() {
 				return 1;
@@ -791,7 +791,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitDeclareStmt(Declare stmt) {
-		environment.define(stmt.name, stmt.value == null ? null : evaluate(stmt.value));
+		environment.define(stmt.name, stmt.type.lexeme, stmt.value == null ? null : evaluate(stmt.value));
 		return null;
 	}
 
@@ -1005,7 +1005,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionStmt(Function stmt) {
-		environment.define(stmt.name, new NewtFunction(stmt, environment));
+		environment.define(stmt.name, "function", new NewtFunction(stmt, environment));
 		return null;
 	}
 
@@ -1264,7 +1264,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitClassStmt(Class stmt) {
-		environment.define(stmt.name.lexeme, null);
+		environment.define(stmt.name.lexeme, "class", null);
 
 		Map<String, NewtFunction> methods = new HashMap<>();
 
