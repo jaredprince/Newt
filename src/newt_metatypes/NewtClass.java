@@ -1,17 +1,17 @@
 package newt_metatypes;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import interpreter.Interpreter;
 import interpreter.Stmt.Declare;
-import interpreter.Stmt.Function;
 
 public class NewtClass implements NewtCallable {
 	final String name;
-	ArrayList<Function> methods;
+	Map<String, NewtFunction> methods;
 	ArrayList<Declare> fields;
 
-	public NewtClass(String name, ArrayList<Function> methods, ArrayList<Declare> fields) {
+	public NewtClass(String name, Map<String, NewtFunction> methods, ArrayList<Declare> fields) {
 		this.name = name;
 		this.methods = methods;
 		this.fields = fields;
@@ -35,9 +35,9 @@ public class NewtClass implements NewtCallable {
 	}
 
 	public NewtFunction findMethod(NewtInstance instance, String name) {
-//		if (methods.containsKey(name)) {
-//			return methods.get(name);
-//		}
+		if (methods.containsKey(name)) {
+			return methods.get(name).bind(instance);
+		}
 
 		return null;
 	}

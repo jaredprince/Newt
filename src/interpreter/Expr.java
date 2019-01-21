@@ -11,6 +11,7 @@ public abstract class Expr implements Cloneable {
 		T visitLiteralExpr(Literal expr);
 		T visitGetExpr(Get expr);
 		T visitSetExpr(Set expr);
+		T visitThisExpr(This expr);
 		T visitUnaryExpr(Unary expr);
 		T visitVariableExpr(Variable expr);
 		T visitAssignExpr(Assign expr);
@@ -220,6 +221,32 @@ public abstract class Expr implements Cloneable {
 		public final Expr object;
 		public final Token name;
 		public final Expr value;
+
+	}
+
+	public static class This extends Expr {
+		public This(Token keyword) {
+			this.keyword = keyword;
+		}
+
+		public String toString(int depth) {
+			String str = "";
+			for(int i = 0; i < depth; i++) {
+				str = str + "   ";
+			}
+
+			return str + keyword.lexeme;
+		}
+
+		public This mouldClone() {
+			return new This(keyword);
+		}
+
+		<T> T accept(Visitor<T> visitor) {
+			return visitor.visitThisExpr(this);
+		}
+
+		public final Token keyword;
 
 	}
 

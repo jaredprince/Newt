@@ -16,11 +16,13 @@ class TestClass {
 	}
 	
 	func test4(){
-		print(count);
+		print(this.count);
 	}
 
 }
 
 var testClass = TestClass();
 print(testClass + "\n");
+testClass.count = 32;
+print(testClass.count);
 testClass.test4();

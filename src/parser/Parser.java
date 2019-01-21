@@ -951,6 +951,8 @@ public class Parser {
 			return new Literal(false);
 		if (match(TRUE))
 			return new Literal(true);
+		if (match(THIS))
+			return new Expr.This(previous());
 		if (match(NULL))
 			return new Literal(null);
 		if (match(INTEGER, DOUBLE, STRING, CHARACTER))

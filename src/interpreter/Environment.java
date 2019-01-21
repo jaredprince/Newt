@@ -149,41 +149,9 @@ public class Environment {
 		throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 	}
 
-	void assignAt(int distance, Token name, Object value) {
+	public void assignAt(int distance, Token name, Object value) {
 		ancestor(distance).values.put(name.lexeme, value);
 	}
-
-//	public Object getGlobal(Token name) {
-//
-//		if (hasEnclosing()) {
-//			return enclosing.get(name);
-//		}
-//		
-//		/* return the value if the variable was found */
-//		if (values.containsKey(name.lexeme)) {
-//			return values.get(name.lexeme);
-//		}
-//
-//		/* the variable was not declared */
-//		throw new RuntimeError(name, "Cannot retrieve undefined variable '" + name.lexeme + "'.");
-//	}
-//	
-//	public void assignGlobal(Token name, Object value) {
-//
-//		if (hasEnclosing()) {
-//			enclosing.assign(name, value);
-//			return;
-//		}
-//		
-//		/* update the value if the variable was found */
-//		if (values.containsKey(name.lexeme)) {
-//			values.put(name.lexeme, value);
-//			return;
-//		}
-//
-//		/* the variable was not declared */
-//		throw new RuntimeError(name, "Cannot assign undefined variable '" + name.lexeme + "'.");
-//	}
 
 	public Object getAt(int distance, String name) {
 		return ancestor(distance).values.get(name);

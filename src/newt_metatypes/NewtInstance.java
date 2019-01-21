@@ -42,11 +42,6 @@ public class NewtInstance {
 	}
 	
 	public void set(Token name, Object value) {
-		if (fields.containsKey(name.lexeme)) {
-			fields.put(name.lexeme, value);
-			return;
-		}
-		
-		throw new RuntimeError(name, "Undefined property '" + name.lexeme + "'.");
+		fields.put(name.lexeme, value);
 	}
 }

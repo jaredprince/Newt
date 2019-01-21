@@ -81,8 +81,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Interpreter() {
 		defineNatives();
 	}
-	
-	//TODO: Somehow I need to catch when the user declares a variable in a for loop body that was declared in the header. The header has it's own scope (otherwise the variable would disappear), but it needs to be part of the inner scope as well?
+
+	// TODO: Somehow I need to catch when the user declares a variable in a for loop
+	// body that was declared in the header. The header has it's own scope
+	// (otherwise the variable would disappear), but it needs to be part of the
+	// inner scope as well?
 
 	/**
 	 * This method executes a list of statements.
@@ -1143,7 +1146,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			break;
 		}
 
-		environment.assign(expr.name.name, evaluate(new Expr.Binary(expr.name, operator, new Expr.Literal(new Integer(1)))));
+		environment.assign(expr.name.name,
+				evaluate(new Expr.Binary(expr.name, operator, new Expr.Literal(new Integer(1)))));
 
 		return null;
 	}
@@ -1270,13 +1274,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		environment.define(stmt.name.lexeme, null);
 
 		Map<String, NewtFunction> methods = new HashMap<>();
-		
+
 		for (Function method : stmt.methods) {
 			NewtFunction function = new NewtFunction(method, environment);
 			methods.put(method.name.lexeme, function);
 		}
 
-		NewtClass newtClass = new NewtClass(stmt.name.lexeme, stmt.methods, stmt.fields);
+		NewtClass newtClass = new NewtClass(stmt.name.lexeme, methods, stmt.fields);
 
 		environment.assign(stmt.name, newtClass);
 		return null;
@@ -1296,12 +1300,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Object visitSetExpr(Set expr) {
 		Object object = evaluate(expr.object);
 
-		if (object instanceof NewtInstance) {
-			((NewtInstance) object).set(expr.name, evaluate(expr.value));
-			return null;
+		if (!(object instanceof NewtInstance)) {
+			throw new RuntimeError(expr.name, "Only instances have fields.");
 		}
 
-		throw new RuntimeError(expr.name, "Only instances have properties.");
+		Object value = evaluate(expr.value);
+		((NewtInstance) object).set(expr.name, value);
+		return value;
 	}
 
+	@Override
+	public Object visitThisExpr(Expr.This expr) {
+		return lookUpVariable(expr.keyword, expr);
+	}
 }

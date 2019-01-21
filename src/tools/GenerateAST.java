@@ -31,6 +31,7 @@ public class GenerateAST {
 				"Literal     : Object value",
 				"Get         : Expr object, Token name",
 				"Set         : Expr object, Token name, Expr value",
+				"This        : Token keyword",
 				"Unary       : Token operator, Expr right",
 				"Variable    : Token name",
 				"Assign      : Token name, Token operator, Expr value",
