@@ -2,7 +2,6 @@ package newt_metatypes;
 
 import java.util.ArrayList;
 
-import interpreter.Stmt.Function;
 import interpreter.Token;
 import parser.ParseError;
 
@@ -51,5 +50,15 @@ public class NewtFunctionGroup {
 		}
 		
 		return false;
+	}
+	
+	public NewtFunctionGroup bind(NewtInstance instance) {
+		NewtFunctionGroup group = new NewtFunctionGroup(null);
+		
+		for(NewtFunction function : functions) {
+			group.overload(function.bind(instance));
+		}
+		
+		return group;
 	}
 }
