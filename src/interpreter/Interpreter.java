@@ -49,6 +49,7 @@ import newt_metatypes.NewtCallable;
 import newt_metatypes.NewtClass;
 import newt_metatypes.NewtFunction;
 import newt_metatypes.NewtInstance;
+import newt_metatypes.NewtReturn;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -68,14 +69,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
-	}
-
-	public void setReturnValue(Object value) {
-		globals.assign(new Token(null, "$return_val", 0, 0, 0), value);
-	}
-
-	public Object getReturnValue() {
-		return globals.get(new Token(null, "$return_val", 0, 0, 0));
 	}
 
 	public Interpreter() {
@@ -1265,8 +1258,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitReturnStmt(Return stmt) {
 		globals.assign(new Token(null, "$exit_flag", 0, 0, 0), EXIT_RETURN);
-		globals.assign(new Token(null, "$return_val", 0, 0, 0), evaluate(stmt.value));
-		return null;
+		throw new NewtReturn(evaluate(stmt.value));
+//		globals.assign(new Token(null, "$return_val", 0, 0, 0), evaluate(stmt.value));
 	}
 
 	@Override

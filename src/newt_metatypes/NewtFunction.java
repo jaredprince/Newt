@@ -42,16 +42,19 @@ public class NewtFunction implements NewtCallable {
 			current.define(params.get(i), arguments.get(i));
 		}
 
-		// interpret the function statements
-		interpreter.interpret(statements);
+		Object returnVal = null;
+		
+		try {
+			// interpret the function statements
+			interpreter.interpret(statements);
+		} catch (NewtReturn value) {
+			returnVal = value.value;
+		}
 
 		// reset the scope
 		interpreter.setEnvironment(closure);
 
-		Object returnValue = interpreter.getReturnValue();
-		interpreter.setReturnValue(null);
-
-		return returnValue;
+		return returnVal;
 	}
 
 	@Override
