@@ -48,16 +48,18 @@ public class Newt {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		if (args.length > 1) {
-			System.out.println("Usage: newt [script]");
+		if (args.length < 1) {
+			System.out.println("Usage: newt [script] ... [script]");
 			System.exit(1);
-		} else if (args.length == 1) {
-			/* runs the given source file */
-			runFile(args[0]);
-
-			if (hadError) {
-				System.exit(10);
+		} else if (args.length >= 1) {
+			
+			for(int i = 0; i < args.length; i++) {
+				/* runs the given source file */
+				runFile(args[i]);
 			}
+
+			if (hadError)
+				System.exit(10);
 
 			if (hadRuntimeError)
 				System.exit(11);

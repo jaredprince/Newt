@@ -159,11 +159,11 @@ public class Environment {
 			if(var.dynamic) {
 				var.object = value;
 				var.type = valType;
-			}
-			
-			else if(valType.equals(var.type))
+				var.initialized = true;
+			} else if(valType.equals(var.type)) {
 				var.object = value;
-			else
+				var.initialized = true;
+			} else
 				throw new RuntimeError(name, "Incompatible types '" + var.type + "' and '" + valType + "'.");
 			return;
 		}
@@ -188,9 +188,11 @@ public class Environment {
 			if(var.dynamic) {
 				var.object = value;
 				var.type = valType;
-			} else if(valType.equals(var.type))
+				var.initialized = true;
+			} else if(valType.equals(var.type)) {
 				var.object = value;
-			else
+				var.initialized = true;
+			} else
 				throw new RuntimeError(null, "Incompatible types '" + var.type + "' and '" + valType + "'.");
 			
 			return;
@@ -217,7 +219,12 @@ public class Environment {
 
 		/* return the value if the variable was found */
 		if (values.containsKey(name.lexeme)) {
-			return values.get(name.lexeme).object;
+			NewtObject obj = values.get(name.lexeme);
+			
+			if(obj.initialized)
+				return obj.object;
+			else
+				throw new RuntimeError(name, "Variable '" + name.lexeme + "' has not been initialized.");
 		}
 
 		/* search for the variable in the enclosing environment (recursively) */
@@ -240,7 +247,12 @@ public class Environment {
 
 		/* return the value if the variable was found */
 		if (values.containsKey(name)) {
-			return values.get(name).object;
+			NewtObject obj = values.get(name);
+			
+			if(obj.initialized)
+				return obj.object;
+			else
+				throw new RuntimeError(null, "Variable '" + name + "' has not been initialized.");
 		}
 
 		/* search for the variable in the enclosing environment (recursively) */
