@@ -7,5 +7,5 @@ Features of Newt:
 
 Typing - Variables are declared using a 'type name;' statement. However, a 'var' type can be used to declare a variable without giving it a type. In it's current iteration, Newt is dynamically typed. The final version, however, will be statically typed (although weakly, since variable can be given no type).
 
-Complex Switch Statements:
+User-defined control structures - Users can declare thier own control structures which will thereafter be parsed like any other.
 
