@@ -38,6 +38,8 @@ public class Parser {
 
 	private List<Stmt> statements = new ArrayList<>();
 
+	private List<String> classes = new ArrayList<>();
+	
 	/**
 	 * The Parser constructor.
 	 * 
@@ -73,6 +75,11 @@ public class Parser {
 
 		// attempt to parse a structure
 		try {
+			
+			//allow a visibility modifier
+			if(match(PUBLIC, PRIVATE, GROUP)) {
+				visibilityStatement();
+			}
 
 			if (match(BREAK, CONTINUE, EXIT)) {
 				Keyword word = new Keyword(previous());
@@ -139,13 +146,19 @@ public class Parser {
 				return stmt;
 			}
 
-			if (match(CLASS)) {
+			if (match(CLASS))
 				return classStatement();
-			}
 
 			// if an identifier, check for user defined structures
 			if (peek().type == IDENTIFIER) {
 				Token next = peek();
+				
+				if(classes.contains(next.lexeme)) {
+					if(peek(1).type == IDENTIFIER) {
+						advance();
+						return declaration();
+					}
+				}
 
 				for (Struct stmt : moulds) {
 					// check if the identifier matches the struct
@@ -154,12 +167,6 @@ public class Parser {
 					}
 				}
 			}
-
-//			if (match(PRINT))
-//				return printStatement();
-//
-//			if (match(EXPRINT))
-//				return exPrintStatement();
 
 			if (match(COMMA, COLON, SEMICOLON, LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET,
 					RIGHT_BRACKET, ARROW, GREATER, LESS))
@@ -171,6 +178,22 @@ public class Parser {
 		}
 
 		return expressionStatement();
+	}
+	
+	private Stmt visibilityStatement() {
+		Token visibility = previous();
+		Token staticity = match(STATIC) ? previous() : null;
+		
+		if(match(FUNC))
+			return functionStatement("function");
+		
+		if (match(CLASS))
+			return classStatement();
+		
+		if (match(VAR_TYPE, INT_TYPE, STRING_TYPE, DOUBLE_TYPE, CHAR_TYPE, BOOL_TYPE))
+			return declaration();
+		
+		throw error(visibility, "Expect a declaration, function, or class after visibility modifer.");
 	}
 
 	private Stmt importStatement() {
@@ -602,27 +625,40 @@ public class Parser {
 	private Stmt classStatement() {
 		Token name = consume(IDENTIFIER, "Expect identifier after 'class'");
 		consume(LEFT_BRACE, "Expect '{' to start class body.");
+		
+		classes.add(name.lexeme);
 
 		ArrayList<Function> methods = new ArrayList<Function>();
 		ArrayList<Declare> fields = new ArrayList<Declare>();
 
 		while (!check(RIGHT_BRACE) && !isAtEnd()) {
+			boolean isStatic = false;
+			
+			if(match(STATIC)) {
+				isStatic = true;
+			}
+			
 			if(match(FUNC)) {
 				Function method = functionStatement("method");
 				if(methods.contains(method))
 					throw error(method.name, "A method with this signature already exists in class '" + name.lexeme + "'.");
-				else 
-					methods.add(method);
+				else {
+					if(isStatic)
+						methods.add(method);
+					else
+						methods.add(method);
+				}
 			}
 			
 			else {
+				Token peek = peek();
 				Stmt statement = statement();
 				
 				//only declarations are allowed outside functions
 				if(statement instanceof Declare) {
 					fields.add((Declare) statement);
 				} else {
-					
+					throw error(peek, "Only declarations can exist outside a constructor or method.");
 				}
 			}
 		}
@@ -1046,6 +1082,13 @@ public class Parser {
 	 */
 	private Token peek() {
 		return tokens.get(current);
+	}
+	
+	/**
+	 * @return the ith next token
+	 */
+	private Token peek(int i) {
+		return tokens.get(current + i);
 	}
 
 	/**

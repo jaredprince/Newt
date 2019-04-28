@@ -18,13 +18,19 @@ class TestClass {
 	func test4(){
 		print(this.count);
 	}
+	
+	static func test5(int i, int j){
+		print(i + j);
+	}
 
 	//func test4(int i){
 		//print("second");
 	//}
 }
 
-var testClass = TestClass();
+println(TestClass);
+
+TestClass testClass = TestClass();
 print(testClass + "\n");
 testClass.count = 32;
 print(testClass.count);

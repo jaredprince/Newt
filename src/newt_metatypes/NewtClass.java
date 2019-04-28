@@ -15,6 +15,8 @@ public class NewtClass implements NewtCallable {
 		this.name = name;
 		this.methods = methods;
 		this.fields = fields;
+		
+		
 	}
 
 	@Override

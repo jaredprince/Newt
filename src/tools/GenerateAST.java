@@ -34,7 +34,7 @@ public class GenerateAST {
 				"Set         : Expr object, Token name, Expr value",
 				"This        : Token keyword",
 				"Unary       : Token operator, Expr right",
-				"Variable    : Token name : name",
+				"Variable    : Token name",
 				"Assign      : Token name, Token operator, Expr value",
 				"UnaryAssign : Variable name, Token operator",
 				"Call        : Expr callee, Token parenthesis, ArrayList<Expr> arguments",
@@ -59,7 +59,7 @@ public class GenerateAST {
 			    "Struct     : Sculpture sculpture, Mould mould",
 			    "Sculpture  : ArrayList<Object> sculpture",
 			    "Mould      : ArrayList<Placeholder> placeholders, Block body",
-			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body : name.lexeme, [types].lexeme"));
+			    "Function   : Token name, ArrayList<Token> types, ArrayList<Token> parameters, Block body"));
 	}
 
 	/**
