@@ -7,6 +7,7 @@ import interpreter.Expr.Get;
 import interpreter.Expr.Logical;
 import interpreter.Expr.Set;
 import interpreter.Expr.Sharp;
+import interpreter.Expr.This;
 import interpreter.Expr.UnaryAssign;
 import interpreter.Expr.Variable;
 
@@ -21,7 +22,7 @@ public class ASTPrinter implements Expr.Visitor<String> {
 	public static void main(String[] args) {
 		
 		Expr expression = new Expr.Binary(
-				new Expr.UnaryAssign(new Token(TokenType.IDENTIFIER, "Cat", null, 1, 0), new Token(TokenType.MINUS, "-", null, 1, 0)),
+				null,
 				new Token(TokenType.STAR, "*", null, 1, 0),
 				new Expr.Grouping(new Token(TokenType.LEFT_PAREN, "(", null, 1, 0), new Expr.Literal(45.67)));
 
@@ -101,7 +102,7 @@ public class ASTPrinter implements Expr.Visitor<String> {
 
 	@Override
 	public String visitUnaryAssignExpr(UnaryAssign expr) {
-		return "(" + expr.operator.lexeme + " " + expr.name.lexeme + ")";
+		return "(" + expr.operator.lexeme + " " + expr.name + ")";
 	}
 
 	@Override
@@ -112,5 +113,23 @@ public class ASTPrinter implements Expr.Visitor<String> {
 	@Override
 	public String visitGetExpr(Get expr) {
 		return "(. " + expr.name + " " + print(expr.object) + ")";
+	}
+
+	@Override
+	public String visitSetExpr(Set expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitThisExpr(This expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitCallExpr(Call expr) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

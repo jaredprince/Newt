@@ -162,7 +162,7 @@ public class Parser {
 
 				for (Struct stmt : moulds) {
 					// check if the identifier matches the struct
-					if (((Token) ((Sculpture) stmt.sculpture).sculpture.get(0)).equals(next)) {
+					if (((Token) ((Sculpture) stmt.sculpture).sculpture.get(0)).lexeme.equals(next.lexeme)) {
 						return userStructStatement(stmt);
 					}
 				}

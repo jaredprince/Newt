@@ -1,0 +1,23 @@
+struct {
+
+	//TODO: allow user-defined components (ie. <name : assignment_statement> or <name : boolean_expression>)
+	sculpt {
+		fort(<dec : statement> <cond : expression>; <inc : statement>){
+			<statement : statement>
+			<statement2 : statement>
+		}
+	}
+	
+	forge {
+		#["dec"]
+		while(#["cond"]){
+			#["statement"]
+			#["statement2"]
+		}
+	}
+}
+
+fort(int ipcat = 0; ipcat < 5; ipcat++;){
+	println("Success");
+	int woiwje =0;
+}

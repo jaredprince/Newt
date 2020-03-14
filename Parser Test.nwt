@@ -91,9 +91,6 @@ for(int caprat = 0; caprat < 3; caprat++){
 }
 println("");
 
-
-
-
 println("For loop test without incrementation (0 - 10):");
 for(int carlat = 0; carlat < 10; carlat++){
 	print(carlat + " ");
